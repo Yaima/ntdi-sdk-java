@@ -88,7 +88,7 @@ public class DataStoreFacetTest {
   @Test(expected = ExecutionException.class)
   public void testCreateStoreInvalidStoreName() throws InterruptedException, ExecutionException {
 
-    String storeName = "!@#$%^&*()_+=--`><.,";
+    String storeName = "!@#$%^&*()_+=--`><.,/";
 
     Map<String, Object> mapValue = new HashMap<>();
     mapValue.put("key1", "Test value1");
@@ -235,7 +235,7 @@ public class DataStoreFacetTest {
 
   @Test(expected = ExecutionException.class)
   public void testSetInvalidKey() throws InterruptedException, ExecutionException {
-    String storeName = "!@#$%^&**()_+=-.,<>:;'";
+    String storeName = "!@#$%^&**()_+=-.,<>:;'/";
     String key = "NewKey1";
     Object value = "Test New 1";
     CompletableFuture<Void> future = dataStoreFacetObj.set(storeName, key, value);
