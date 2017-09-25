@@ -2,7 +2,7 @@
 
 # java-ntdi
 
-This is Neustar's Trusted Device Identity (TDI) implemention in Java.
+This is Neustar's Trusted Device Identity (TDI) implementation in Java 8.
 
 
 ### Build:
