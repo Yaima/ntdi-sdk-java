@@ -33,14 +33,16 @@ public abstract class TdiPluginBase implements TdiPluginBaseFactory {
   /**
    * Implementation associated with the plugin.
    */
-  private TdiImplementationShape impl;
+  protected TdiImplementationShape impl;
 
   /**
    * Datastore delegate associated with the plugin.
    */
-  private DatastoreDelegate dataStore;
+  protected DatastoreDelegate dataStore;
 
-  private TdiSdkWrapperShape sdkWrapper;
+  protected TdiSdkWrapperShape sdkWrapper;
+
+  private String pluginName;
 
   /**
    * Default constructor requiring {@link TdiImplementationShape} and
@@ -55,10 +57,13 @@ public abstract class TdiPluginBase implements TdiPluginBaseFactory {
    *           if the implementation is invalid or if is null.
    * 
    */
-  public TdiPluginBase(TdiImplementationShape impl, TdiSdkWrapperShape sdkWrapper) {
-    if (StringUtils.isEmpty(this.getName())) {
+  public TdiPluginBase(String pluginName, TdiImplementationShape impl,
+      TdiSdkWrapperShape sdkWrapper) {
+    if (StringUtils.isEmpty(pluginName)) {
       throw new FrameworkRuntimeException("TdiPluginBase name cannot be null");
     }
+
+    this.pluginName = pluginName;
 
     if (impl == null) {
       throw new ImplementationRequiredException();
@@ -87,7 +92,11 @@ public abstract class TdiPluginBase implements TdiPluginBaseFactory {
    * the plugin and complete the {@link CompletableFuture} upon successfull
    * initialization.
    * 
-   * @return {@link CompletableFuture} with Boolean argument.
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link Boolean} with true on
+   *         success. false otherwise. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of
+   *         failure.
    */
   public abstract CompletableFuture<Boolean> init();
 
@@ -96,7 +105,9 @@ public abstract class TdiPluginBase implements TdiPluginBaseFactory {
    * 
    * @return TdiPluginBase name.
    */
-  public abstract String getName();
+  public String getName() {
+    return this.pluginName;
+  }
 
   /**
    * Method to validate the data store.
@@ -105,8 +116,11 @@ public abstract class TdiPluginBase implements TdiPluginBaseFactory {
    *          : List of String objects to check if available in the
    *          configurations.
    * 
-   * @return CompletableFuture object with Boolean return indicating if the
-   *         checks were successfully validated.
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link Boolean} with true on
+   *         successful validation. false otherwise. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of
+   *         failure.
    */
   public CompletableFuture<Boolean> validatePluginDataStore(List<String> checks) {
     return this.impl.validateDataStore(this.getName(), checks);

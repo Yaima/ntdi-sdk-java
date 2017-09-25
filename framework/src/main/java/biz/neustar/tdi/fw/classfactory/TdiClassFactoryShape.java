@@ -34,8 +34,10 @@ public interface TdiClassFactoryShape {
    * @param pfFactory
    *          {@link TdiPlatformShapeFactory} instance
    * 
-   * @return {@link CompletableFuture} of type {@link TdiImplementationShape}
-   * 
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link TdiImplementationShape} <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} if error
+   *         encountered while initializing {@link TdiPlatformShapeFactory}.
    */
   public CompletableFuture<TdiImplementationShape> create(TdiPlatformShapeFactory pfFactory);
 

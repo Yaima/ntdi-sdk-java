@@ -176,12 +176,7 @@ public class TdiCanonicalMessage implements TdiCanonicalMessageShape {
     return this.currentProject;
   }
 
-  /**
-   * Sets the current project
-   * 
-   * @param currentProject
-   *          : ID of the project this message is associated with.
-   */
+  @Override
   public void setCurrentProject(String currentProject) {
     this.currentProject = currentProject;
   }

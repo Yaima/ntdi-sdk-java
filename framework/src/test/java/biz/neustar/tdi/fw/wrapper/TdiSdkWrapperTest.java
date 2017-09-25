@@ -19,6 +19,7 @@ package biz.neustar.tdi.fw.wrapper;
 import static org.junit.Assert.assertEquals;
 
 import biz.neustar.tdi.fw.TestData;
+import biz.neustar.tdi.fw.implementation.TdiFlowArguments;
 import biz.neustar.tdi.fw.implementation.TdiImplementation;
 import biz.neustar.tdi.fw.implementation.TdiImplementationShape;
 import biz.neustar.tdi.fw.plugin.TdiPluginBase;
@@ -26,6 +27,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
@@ -37,6 +39,14 @@ public class TdiSdkWrapperTest {
     sdkWrapper = new TdiSdkWrapper();
   }
 
+  @Test
+  public void testDefaultFlowsGettersAndSetters() {
+    Map<String, TdiFlowArguments> defaultFlow = new HashMap<>();
+    
+    sdkWrapper.setDefaultFlows(defaultFlow);
+    assertEquals(defaultFlow, sdkWrapper.getDefaultFlows());
+  }
+  
   @Test
   public void testApisGettersAndSetters() {
     Function<Object, CompletableFuture<Object>> func = 
@@ -72,16 +82,11 @@ public class TdiSdkWrapperTest {
   public void testPluginsGettersAndSetters() {
     TdiImplementationShape impl = new TdiImplementation(new HashMap<>(),
         TestData.DummyPlatform::new);
-    TdiPluginBase plugin = new TdiPluginBase(impl, sdkWrapper) {
+    TdiPluginBase plugin = new TdiPluginBase("pluginName", impl, sdkWrapper) {
 
       @Override
       public CompletableFuture<Boolean> init() {
         return null;
-      }
-
-      @Override
-      public String getName() {
-        return "pluginName";
       }
     };
 

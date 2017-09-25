@@ -57,7 +57,9 @@ public class Sign extends BaseApi {
    * @param clientData
    *          : data to be sent as payload
    * 
-   * @return {@link TdiCanonicalMessageShape} instance
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link TdiCanonicalMessageShape}. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> handleInit(Object clientData) {
     LOG.trace("Invoking Sign:handleInit");
@@ -73,7 +75,9 @@ public class Sign extends BaseApi {
    * @param msg
    *          : received {@link TdiCanonicalMessageShape} instance
    * 
-   * @return {@link TdiCanonicalMessageShape} instance
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link TdiCanonicalMessageShape}. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> parseRaw(Object msg) {
     /*
@@ -89,7 +93,9 @@ public class Sign extends BaseApi {
    * @param msg
    *          : received {@link TdiCanonicalMessageShape} instance
    * 
-   * @return {@link TdiCanonicalMessageShape} instance
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link TdiCanonicalMessageShape}. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> setClaims(Object msg) {
 
@@ -117,7 +123,9 @@ public class Sign extends BaseApi {
    * @param msg
    *          : received {@link TdiCanonicalMessageShape} instance
    * 
-   * @return {@link TdiCanonicalMessageShape} instance
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link TdiCanonicalMessageShape}. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> packClaims(Object msg) {
 
@@ -132,7 +140,9 @@ public class Sign extends BaseApi {
    * @param msg
    *          : received {@link TdiCanonicalMessageShape} instance
    * 
-   * @return {@link TdiCanonicalMessageShape} instance
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link TdiCanonicalMessageShape}. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> setSigners(Object msg) {
 
@@ -154,7 +164,9 @@ public class Sign extends BaseApi {
    * @param msg
    *          : received {@link TdiCanonicalMessageShape} instance
    * 
-   * @return {@link TdiCanonicalMessageShape} instance
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link TdiCanonicalMessageShape}. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> sign(Object msg) {
 
@@ -169,7 +181,9 @@ public class Sign extends BaseApi {
    * @param msg
    *          : received {@link TdiCanonicalMessageShape} instance
    * 
-   * @return {@link TdiCanonicalMessageShape} instance
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link TdiCanonicalMessageShape}. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> handleReturn(Object msg) {
 

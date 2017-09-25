@@ -19,6 +19,7 @@ package biz.neustar.tdi.sdk.component;
 import biz.neustar.tdi.fw.component.TdiComponent;
 import biz.neustar.tdi.fw.implementation.TdiImplementationShape;
 import biz.neustar.tdi.sdk.Constants.NonceConfig;
+import biz.neustar.tdi.sdk.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +61,7 @@ public class TdiSdkNonceComponent extends TdiComponent {
    */
   public TdiSdkNonceComponent(String componentName, TdiImplementationShape impl) {
     super(componentName, impl);
+    burnList = new HashMap<>();
   }
 
   /*
@@ -77,17 +79,17 @@ public class TdiSdkNonceComponent extends TdiComponent {
 
           // Exp Duration check.
           if (storeMap.containsKey(NonceConfig.EXP_DURATION)) {
-            this.localExpDuration = (Long) storeMap.get(NonceConfig.EXP_DURATION);
+            this.localExpDuration = Utils.getLong(storeMap.get(NonceConfig.EXP_DURATION));
           } else {
-            this.localExpDuration = Integer.toUnsignedLong(
-                (int) ((Map<String, Object>) this.getPlatform().getConfig().get(NonceConfig.STORE))
+            this.localExpDuration = Utils.getLong(
+                (int) ((Map<String, Object>) this.getConfig().get(NonceConfig.STORE))
                     .get(NonceConfig.EXP_DURATION));
             queue.add(this.getDataStore().set(NonceConfig.EXP_DURATION, this.localExpDuration));
           }
 
           // NBF Minimum
           if (storeMap.containsKey(NonceConfig.NBF_MINIMUM)) {
-            this.localNbfMinimum = (Long) storeMap.get(NonceConfig.NBF_MINIMUM);
+            this.localNbfMinimum = Utils.getLong(storeMap.get(NonceConfig.NBF_MINIMUM));
           } else {
             this.localNbfMinimum = this.getPlatform().getTime().timestamp(null);
             queue.add(this.getDataStore().set(NonceConfig.NBF_MINIMUM, this.localNbfMinimum));
@@ -98,8 +100,6 @@ public class TdiSdkNonceComponent extends TdiComponent {
                 if (storeMap.containsKey(NonceConfig.BURNT)) {
                   burnList.putAll(
                       (Map<? extends String, ? extends Long>) storeMap.get(NonceConfig.BURNT));
-                } else {
-                  burnList = new HashMap<>();
                 }
                 return null;
               });
@@ -133,8 +133,11 @@ public class TdiSdkNonceComponent extends TdiComponent {
    * @param nonceStr
    *          : The JTI claim from an incoming message.
    * 
-   * @return {@link CompletableFuture}&lt;Boolean&gt;. True as valid, False
-   *         otherwise.
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link Boolean} with true if valid.
+   *         false otherwise. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of
+   *         failure.
    */
   public CompletableFuture<Boolean> check(String nonceStr) {
 
@@ -149,7 +152,7 @@ public class TdiSdkNonceComponent extends TdiComponent {
           return false;
         }
 
-        if (expiration < (Long) minimum) {
+        if (expiration < Utils.getLong(minimum)) {
           LOG.debug("Nonce: Exp (" + expiration + ") > Minimum (" + minimum + ")");
           return false;
         }
@@ -175,7 +178,9 @@ public class TdiSdkNonceComponent extends TdiComponent {
    * @param nonceStr
    *          : nonce that we are marking as received.
    * 
-   * @return {@link CompletableFuture}
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: Void. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<Void> burn(String nonceStr) {
     cleanCache();
@@ -195,9 +200,10 @@ public class TdiSdkNonceComponent extends TdiComponent {
     Map<String, Long> newList = new HashMap<>();
     Long currentTimestamp = this.getPlatform().getTime().timestamp(null);
     Long newNbfMinimum = this.localNbfMinimum;
+    Long nonce = null;
 
     for (String key : burnList.keySet()) {
-      Long nonce = burnList.get(key);
+      nonce = Utils.getLong(burnList.get(key));
       if (nonce > currentTimestamp) {
         newList.put(key, nonce);
       } else if (nonce > newNbfMinimum) {

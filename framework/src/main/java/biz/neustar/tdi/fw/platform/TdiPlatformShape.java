@@ -95,7 +95,9 @@ public interface TdiPlatformShape extends TdiPlatformShapeFactory {
    * Method to perform initialization tasks and complete the CompletableFuture
    * object upon successful initialization.
    * 
-   * @return {@link CompletableFuture} object.
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: Void. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<Void> init();
 }

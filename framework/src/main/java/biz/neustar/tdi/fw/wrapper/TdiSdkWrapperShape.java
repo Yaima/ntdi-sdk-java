@@ -16,6 +16,7 @@
 
 package biz.neustar.tdi.fw.wrapper;
 
+import biz.neustar.tdi.fw.implementation.TdiFlowArguments;
 import biz.neustar.tdi.fw.implementation.TdiImplementationShape;
 import biz.neustar.tdi.fw.plugin.TdiPluginBase;
 
@@ -28,10 +29,29 @@ import java.util.function.Function;
  */
 public interface TdiSdkWrapperShape {
   /**
+   * Returns the default flows of this Wrapper.
+   * 
+   * @return {@link Map}&lt;String, {@link TdiFlowArguments}&gt;
+   */
+  public Map<String, TdiFlowArguments> getDefaultFlows();
+
+  /**
+   * Sets the default flows of this wrapper.
+   * 
+   * @param flows
+   *          : {@link Map}&lt;String, {@link TdiFlowArguments}&gt; 
+   */
+  public void setDefaultFlows(Map<String, TdiFlowArguments> flows);
+
+  /**
    * Returns the instance of the API associated with the apiName.
    * 
    * @param apiName
    *          : Name of API to be retrieved.
+   * @param <T>
+   *          : Class type template
+   * @param <R>
+   *          : Class type template
    * 
    * @return Instance of the API as Object. Needs type-casting.
    */
@@ -44,6 +64,11 @@ public interface TdiSdkWrapperShape {
    *          : Name of the sdkWrapper.
    * @param api
    *          : API Object.
+   * @param <T>
+   *          : Class type template
+   * @param <R>
+   *          : Class type template
+   * 
    */
   public <T, R> void api(String apiName, Function<T, CompletableFuture<R>> api);
 
@@ -81,9 +106,10 @@ public interface TdiSdkWrapperShape {
   public TdiImplementationShape getImpl();
 
   /**
-   * Sets the {@link TdiImplementationShape} instance. 
+   * Sets the {@link TdiImplementationShape} instance.
    * 
-   * @param impl : {@link TdiImplementationShape}
+   * @param impl
+   *          : {@link TdiImplementationShape}
    */
   void setImpl(TdiImplementationShape impl);
 }

@@ -75,7 +75,9 @@ public class TdiSdkJsonWebSignature extends TdiComponent {
    *          : The {@link TdiCanonicalMessage} containing the payload to
    *          verify.
    * 
-   * @return {@link CompletableFuture}&lt;{@link TdiCanonicalMessage}&gt;
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link TdiCanonicalMessageShape}. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> sign(TdiCanonicalMessageShape message) {
     try {
@@ -134,7 +136,9 @@ public class TdiSdkJsonWebSignature extends TdiComponent {
    *          : The {@link TdiCanonicalMessage} containing the payload to
    *          deserialize.
    * 
-   * @return {@link CompletableFuture}&lt;{@link TdiCanonicalMessage}&gt;
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link TdiCanonicalMessageShape}. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    * 
    * @throws FrameworkRuntimeException
    *           if the message is either empty or is not in the required format.
@@ -191,7 +195,9 @@ public class TdiSdkJsonWebSignature extends TdiComponent {
    * @param message
    *          : The TdiCanonicalMessage containing the payload to verify.
    * 
-   * @return {@link CompletableFuture}&lt;{@link TdiCanonicalMessage}&gt;
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link TdiCanonicalMessageShape}. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> verify(TdiCanonicalMessageShape message) {
     List<CompletableFuture<?>> queue = new ArrayList<>();

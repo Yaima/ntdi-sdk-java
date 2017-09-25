@@ -70,6 +70,6 @@ public class TdiSdkNotBeforeComponent extends TdiComponent {
    * @return true if date is in past. false otherwise. 
    */
   public boolean check(Long date) {
-    return this.getPlatform().getTime().timestamp(null) > date;
+    return this.getPlatform().getTime().timestamp(null) >= date;
   }
 }

@@ -16,6 +16,7 @@
 
 package biz.neustar.tdi.fw.wrapper;
 
+import biz.neustar.tdi.fw.implementation.TdiFlowArguments;
 import biz.neustar.tdi.fw.implementation.TdiImplementationShape;
 import biz.neustar.tdi.fw.plugin.TdiPluginBase;
 import org.apache.commons.lang3.StringUtils;
@@ -35,10 +36,27 @@ import java.util.function.Function;
  */
 public class TdiSdkWrapper implements TdiSdkWrapperShape {
 
+  Map<String, TdiFlowArguments> defaultFlows;
   Map<String, Object> apis = new LinkedHashMap<>();
   Map<String, TdiPluginBase> plugins = new LinkedHashMap<>();
   TdiImplementationShape impl = null;
 
+  /* (non-Javadoc)
+   * @see biz.neustar.tdi.fw.wrapper.TdiSdkWrapperShape#setDefaultFlows(java.util.Map)
+   */
+  @Override
+  public Map<String, TdiFlowArguments> getDefaultFlows() {
+    return defaultFlows;
+  }
+  
+  /* (non-Javadoc)
+   * @see biz.neustar.tdi.fw.wrapper.TdiSdkWrapperShape#setDefaultFlows(java.util.Map)
+   */
+  @Override
+  public void setDefaultFlows(Map<String, TdiFlowArguments> flows) {
+    this.defaultFlows = flows;
+  }
+  
   @SuppressWarnings("unchecked")
   @Override
   public <T, R> Function<T, CompletableFuture<R>> api(String apiName) {

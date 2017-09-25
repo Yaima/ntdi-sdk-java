@@ -58,7 +58,7 @@ public class TdiSdkExpiresComponent extends TdiComponent {
    */
   public Long create() {
     @SuppressWarnings("unchecked")
-    Map<String, Object> nonceConfig = (Map<String, Object>) this.getPlatform().getConfig()
+    Map<String, Object> nonceConfig = (Map<String, Object>) this.getConfig()
         .get(NonceConfig.STORE);
     Long expirationDuration = Integer
         .toUnsignedLong((int) nonceConfig.get(NonceConfig.EXP_DURATION));

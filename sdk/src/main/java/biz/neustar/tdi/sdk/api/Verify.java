@@ -67,7 +67,9 @@ public class Verify extends BaseApi {
    * @param signaturePayload
    *          : raw message string for verification
    * 
-   * @return {@link TdiCanonicalMessageShape} instance
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link TdiCanonicalMessageShape}. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> handleInit(Object signaturePayload) {
     LOG.trace("Invoking Verify:handleInit");
@@ -83,7 +85,9 @@ public class Verify extends BaseApi {
    * @param msg
    *          : received {@link TdiCanonicalMessageShape} instance
    * 
-   * @return {@link TdiCanonicalMessageShape} instance
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link TdiCanonicalMessageShape}. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> unpackEnvelope(Object msg) {
 
@@ -99,7 +103,9 @@ public class Verify extends BaseApi {
    * @param msg
    *          : received {@link TdiCanonicalMessageShape} instance
    * 
-   * @return {@link TdiCanonicalMessageShape} instance
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link TdiCanonicalMessageShape}. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> unpackClaims(Object msg) {
 
@@ -115,7 +121,9 @@ public class Verify extends BaseApi {
    * @param msg
    *          : received {@link TdiCanonicalMessageShape} instance
    * 
-   * @return {@link TdiCanonicalMessageShape} instance
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link TdiCanonicalMessageShape}. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> validateClaims(Object msg) {
 
@@ -163,7 +171,9 @@ public class Verify extends BaseApi {
    * @param msg
    *          : received {@link TdiCanonicalMessageShape} instance
    * 
-   * @return {@link TdiCanonicalMessageShape} instance
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link TdiCanonicalMessageShape}. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> prepSignatures(Object msg) {
     
@@ -241,7 +251,9 @@ public class Verify extends BaseApi {
    * @param msg
    *          : received {@link TdiCanonicalMessageShape} instance
    * 
-   * @return {@link TdiCanonicalMessageShape} instance
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link TdiCanonicalMessageShape}. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> verifySignatures(Object msg) {
 
@@ -256,7 +268,9 @@ public class Verify extends BaseApi {
    * @param msg
    *          : received {@link TdiCanonicalMessageShape} instance
    * 
-   * @return {@link TdiCanonicalMessageShape} instance
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link TdiCanonicalMessageShape}. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> afterVerify(Object msg) {
     TdiCanonicalMessage tdiMsg = (TdiCanonicalMessage) msg;
@@ -274,7 +288,9 @@ public class Verify extends BaseApi {
    * @param msg
    *          received {@link TdiCanonicalMessageShape} instance
    * 
-   * @return authenticated payload
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link String}. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<String> handleReturn(Object msg) {
     

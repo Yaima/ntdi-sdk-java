@@ -71,8 +71,9 @@ public class TdiSdk {
   /**
    * Initializes the sdk. It spins up the implementation asynchronously
    * 
-   * @return {@link CompletableFuture} of type {@link TdiSdkWrapperShape}
-   * 
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link TdiSdkWrapperShape}. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiSdkWrapperShape> init() {
 
@@ -88,13 +89,14 @@ public class TdiSdk {
           ((TdiSdkWrapper) sdkWrapper).setImpl(impl);
         }
 
+        sdkWrapper.setDefaultFlows(TdiSdkApiFactory.buildArgs(impl));
         return sdkWrapper;
       }).thenApply((TdiSdkWrapperShape wrapper) -> {
 
         /*
          * build the default api flows
          */
-        for (Entry<String, TdiFlowArguments> entry : TdiSdkApiFactory.buildArgs(impl).entrySet()) {
+        for (Entry<String, TdiFlowArguments> entry : wrapper.getDefaultFlows().entrySet()) {
           wrapper.api(entry.getKey(), impl.buildApiFlow(entry.getValue(), null));
         }
         return wrapper;

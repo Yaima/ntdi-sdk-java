@@ -33,8 +33,11 @@ public interface TdiPlatformKeysShape extends TdiPlatformFacetShape {
    * @param kid
    *          : Id of the key to be returned.
    * 
-   * @return {@link CompletableFuture} with initialized
-   *         {@link TdiKeyStructureShape} object.
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link TdiKeyStructureShape}
+   *         instance with key data. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of
+   *         failure.
    */
   public CompletableFuture<TdiKeyStructureShape> getKey(String kid);
 
@@ -42,7 +45,12 @@ public interface TdiPlatformKeysShape extends TdiPlatformFacetShape {
    * Returns a list of {@link TdiKeyStructureShape} stored on the platform
    * keystore, based on the platform implementation.
    * 
-   * @return {@link CompletableFuture} with list of {@link TdiKeyStructureShape}
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>:
+   *         {@link List}&lt;{@link TdiKeyStructureShape}&gt; all the keys in
+   *         the keystore. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of
+   *         failure.
    */
   public CompletableFuture<List<TdiKeyStructureShape>> getKeys();
 
@@ -50,8 +58,11 @@ public interface TdiPlatformKeysShape extends TdiPlatformFacetShape {
    * Returns the self {@link TdiKeyStructureShape} (Identity credentials), based
    * on the platform implementation.
    * 
-   * @return {@link CompletableFuture} with {@link TdiKeyStructureShape}
-   *         instance of the self key.
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link TdiKeyStructureShape}
+   *         instance with SELF key data. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of
+   *         failure.
    */
   public CompletableFuture<TdiKeyStructureShape> getSelfKey();
 
@@ -64,8 +75,9 @@ public interface TdiPlatformKeysShape extends TdiPlatformFacetShape {
    * @param fleetId
    *          : Fleet ID.
    * 
-   * @return {@link CompletableFuture} with {@link TdiKeyStructureShape}
-   *         instance of the key.
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link TdiKeyStructureShape} <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiKeyStructureShape> getKeyByRole(Integer role, String fleetId);
 
@@ -90,8 +102,9 @@ public interface TdiPlatformKeysShape extends TdiPlatformFacetShape {
    * @param fleetId
    *          : Fleet ID.
    * 
-   * @return {@link CompletableFuture} with initialized
-   *         {@link TdiKeyStructureShape} object.
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: new {@link TdiKeyStructureShape} <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiKeyStructureShape> generateKey(Integer flags, String kid,
       String fleetId);
@@ -107,8 +120,9 @@ public interface TdiPlatformKeysShape extends TdiPlatformFacetShape {
    * @param fleetId
    *          : Fleet ID.
    * 
-   * @return {@link CompletableFuture} with stored {@link TdiKeyStructureShape}
-   *         instance initialized with key.
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link TdiKeyStructureShape}. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiKeyStructureShape> setKey(Object key, Integer flags, String fleetId);
 
@@ -118,8 +132,9 @@ public interface TdiPlatformKeysShape extends TdiPlatformFacetShape {
    * @param key
    *          : Provisioned key to be stored.
    * 
-   * @return {@link CompletableFuture} with stored {@link TdiKeyStructureShape}
-   *         instance initialized with key.
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link TdiKeyStructureShape}. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiKeyStructureShape> setKeyFromProvision(Object key);
 
@@ -130,14 +145,18 @@ public interface TdiPlatformKeysShape extends TdiPlatformFacetShape {
    * @param kid
    *          : Id of the key to be forgotten.
    * 
-   * @return {@link CompletableFuture} indicating completion of the action.
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: Void. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<Void> forgetKey(String kid);
 
   /**
    * Method to persist the store, based on the platform implementation.
    * 
-   * @return {@link CompletableFuture} indicating completion of the action.
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: Void. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<Void> saveStore();
 }

@@ -102,9 +102,6 @@ public class TdiSdkTest {
 
     TdiCanonicalMessage cosignedMsg = cosignedMessage.get();
 
-    // required so that nbf issue doesn't kicks in.
-    Thread.sleep(1000);
-
     // verify the payload
     CompletableFuture<String> result = verifySdkWrapper.thenCompose((verifyWrapper) -> {
       Function<String, CompletableFuture<String>> verifyApi = verifyWrapper
