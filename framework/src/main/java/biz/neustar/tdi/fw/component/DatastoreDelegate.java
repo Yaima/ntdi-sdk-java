@@ -42,7 +42,9 @@ public class DatastoreDelegate {
    * @param key
    *          : Key
    * 
-   * @return {@link CompletableFuture} with return value as argument.
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: Data corresponding to key. (Type casting required). <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<?> get(String key) {
     return this.platform.getDataStore().get(this.storeName, key);
@@ -57,7 +59,9 @@ public class DatastoreDelegate {
    * @param value
    *          : value to be set
    * 
-   * @return {@link CompletableFuture}
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: Void. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<Void> set(String key, Object value) {
     return this.platform.getDataStore().set(this.storeName, key, value);
@@ -67,7 +71,9 @@ public class DatastoreDelegate {
    * Method to delegate call to {@link TdiPlatformShape}'s {@link TdiPlatformDataShape} to retrieve
    * all keys using this store name.
    * 
-   * @return {@link CompletableFuture} with list of keys.
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link List} or keys. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<List<String>> keys() {
     return this.platform.getDataStore().keys(this.storeName);
@@ -80,7 +86,9 @@ public class DatastoreDelegate {
    * @param key
    *          : Key to drop
    * 
-   * @return {@link CompletableFuture}
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: Void. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<Void> drop(String key) {
     return this.platform.getDataStore().drop(this.storeName, key);

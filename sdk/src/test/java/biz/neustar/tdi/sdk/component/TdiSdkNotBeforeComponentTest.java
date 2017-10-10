@@ -48,9 +48,13 @@ public class TdiSdkNotBeforeComponentTest {
   @Test
   public void testCheck() {
     Long timestamp = component.create();
-    assertFalse(component.check(timestamp));
+    assertTrue(component.check(timestamp));
+    
     timestamp = System.currentTimeMillis() / 1000 - 300;
     assertTrue(component.check(timestamp));
+    
+    timestamp = System.currentTimeMillis() / 1000 + 300;
+    assertFalse(component.check(timestamp));
   }
   
   @Test

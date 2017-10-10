@@ -84,6 +84,14 @@ public interface TdiCanonicalMessageShape {
   public String getCurrentProject();
 
   /**
+   * Sets the current project
+   * 
+   * @param currentProject
+   *          : ID of the project this message is associated with.
+   */
+  public void setCurrentProject(String currentProject);
+  
+  /**
    * Method to add the claim to the claims list.
    * 
    * @param key

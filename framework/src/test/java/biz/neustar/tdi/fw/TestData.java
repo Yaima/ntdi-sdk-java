@@ -33,6 +33,7 @@ import biz.neustar.tdi.fw.plugin.TdiPluginBase;
 import biz.neustar.tdi.fw.wrapper.TdiSdkWrapperShape;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -147,7 +148,7 @@ public class TestData {
 
       @Override
       public CompletableFuture<?> createStore(String storeName, Map<String, Object> value) {
-        return CompletableFuture.completedFuture("created");
+        return CompletableFuture.completedFuture(new HashMap<String, Object>());
       }
     };
   }
@@ -325,7 +326,7 @@ public class TestData {
   public static class PluginImpl extends TdiPluginBase {
 
     public PluginImpl(TdiImplementationShape impl, TdiSdkWrapperShape sdkWrapper) {
-      super(impl, sdkWrapper);
+      super("PluginImpl", impl, sdkWrapper);
     }
 
     @Override
@@ -333,11 +334,6 @@ public class TestData {
       return CompletableFuture.supplyAsync(() -> {
         return true;
       });
-    }
-
-    @Override
-    public String getName() {
-      return "PluginImpl";
     }
   }
 }

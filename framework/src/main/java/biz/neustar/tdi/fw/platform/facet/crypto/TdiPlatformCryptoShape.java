@@ -34,7 +34,9 @@ public interface TdiPlatformCryptoShape extends TdiPlatformFacetShape {
    * @param payload
    *          : Payload to be signed.
    * 
-   * @return CompletableFuture object with String argument as signature.
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: Computed signature of the sign action <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<String> sign(TdiKeyStructureShape key, String payload);
 
@@ -49,8 +51,9 @@ public interface TdiPlatformCryptoShape extends TdiPlatformFacetShape {
    * @param signature
    *          : Signature to be verified.
    * 
-   * @return CompletableFuture object with Boolean argument indicating success
-   *         or failure of the verification.
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link Boolean} true if verified. false otherwise. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<Boolean> verify(TdiKeyStructureShape key, String payload,
       String signature);
@@ -58,14 +61,14 @@ public interface TdiPlatformCryptoShape extends TdiPlatformFacetShape {
   /**
    * Method to encrypt
    * 
-   * @return Empty CompletableFuture object.
+   * @return Empty {@link CompletableFuture} object.
    */
   public CompletableFuture<Void> encrypt();
 
   /**
    * Method to decrypt.
    * 
-   * @return Empty CompletableFuture object.
+   * @return Empty {@link CompletableFuture} object.
    */
   public CompletableFuture<Void> decrypt();
 }

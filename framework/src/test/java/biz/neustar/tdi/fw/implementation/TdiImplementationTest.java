@@ -54,9 +54,12 @@ public class TdiImplementationTest {
   @BeforeClass
   public static void setup() {
     config = new HashMap<>();
-    config.put("key1", "value1");
-    config.put("key2", "value2");
-    config.put("key3", "value3");
+    Map<String, Object> testStoreConfig = new HashMap<>();
+    testStoreConfig.put("key1", "value1");
+    testStoreConfig.put("key2", "value2");
+    testStoreConfig.put("key3", "value3");
+    
+    config.put("testStore", testStoreConfig);
 
     impl = new TdiImplementation(config, TestData.DummyPlatform::new);
     impl1 = new TdiImplementation(config, TestData.DummyPlatform1::new);
@@ -195,13 +198,7 @@ public class TdiImplementationTest {
   
   @Test
   public void testSetupTdiStore() throws Exception {
-    CompletableFuture<Boolean> result =  impl.setupTdiStore("{}");
-    assertEquals(Boolean.TRUE, result.get());
-  }
-  
-  @Test
-  public void testSetupTdiStoreWithException() throws Exception {
-    CompletableFuture<Boolean> result =  impl.setupTdiStore("{");
+    CompletableFuture<Boolean> result =  impl.setupTdiStore(new HashMap<String, Object>());
     assertEquals(Boolean.TRUE, result.get());
   }
 }

@@ -50,7 +50,9 @@ public interface TdiComponentShape extends TdiComponentShapeFactory {
    * Method to perform initialization task and complete the
    * {@link CompletableFuture} upon successful initialization.
    * 
-   * @return {@link CompletableFuture}
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: Void. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<Void> init();
 }

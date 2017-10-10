@@ -61,7 +61,9 @@ public class CoSign extends BaseApi {
    * @param clientJwsString
    *          : received jws string
    * 
-   * @return {@link TdiCanonicalMessageShape} instance
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link TdiCanonicalMessageShape} <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> handleInit(Object clientJwsString) {
     
@@ -94,7 +96,9 @@ public class CoSign extends BaseApi {
    * @param msg
    *          : received {@link TdiCanonicalMessageShape} instance
    * 
-   * @return {@link TdiCanonicalMessageShape} instance
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link TdiCanonicalMessageShape}. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> setSigners(Object msg) {
 
@@ -116,7 +120,9 @@ public class CoSign extends BaseApi {
    * @param msg
    *          : received {@link TdiCanonicalMessageShape} instance
    * 
-   * @return {@link TdiCanonicalMessageShape} instance
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link TdiCanonicalMessageShape}. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> sign(Object msg) {
 
@@ -131,7 +137,9 @@ public class CoSign extends BaseApi {
    * @param msg
    *          : received {@link TdiCanonicalMessageShape} instance
    * 
-   * @return {@link TdiCanonicalMessageShape} instance
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link TdiCanonicalMessageShape}. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> handleReturn(Object msg) {
 

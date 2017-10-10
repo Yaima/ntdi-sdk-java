@@ -13,21 +13,16 @@
 
 	<name>platform</name>
 	<url>https://github.com/Neustar-TDI/java-ntdi/examples/platform</url>
-	
+
 	<properties>
-        <bouncycastle.version>1.57</bouncycastle.version>
-    </properties>
+		<bouncycastle.version>1.57</bouncycastle.version>
+	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>biz.neustar.tdi</groupId>
 			<artifactId>framework</artifactId>
 			<version>1.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>4.5.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.bouncycastle</groupId>

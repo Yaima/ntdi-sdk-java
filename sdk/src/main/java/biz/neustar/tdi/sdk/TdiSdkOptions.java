@@ -34,22 +34,22 @@ public class TdiSdkOptions {
    * Constructor/Method reference of the class extending {@link TdiPlatformBase}
    * to be initialized.
    */
-  TdiPlatformShapeFactory platform;
+  public TdiPlatformShapeFactory platform;
 
   /**
    * Map of System configurations.
    */
-  Map<String, Object> config;
+  public Map<String, Object> config;
 
   /**
    * List of Constructor/Method reference of the class extending
    * {@link TdiPluginBaseFactory}.
    */
-  List<TdiPluginBaseFactory> plugins;
+  public List<TdiPluginBaseFactory> plugins;
 
   /**
    * Flag option to expose the {@link TdiImplementationShape} via
    * {@link TdiSdkWrapperShape} if set to true.
    */
-  boolean exposeImpl = false;
+  public boolean exposeImpl = false;
 }

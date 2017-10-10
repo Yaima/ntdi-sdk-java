@@ -22,13 +22,11 @@ import biz.neustar.tdi.fw.classfactory.TdiClassFactory;
 import biz.neustar.tdi.fw.component.TdiComponentShape;
 import biz.neustar.tdi.fw.component.TdiComponentShapeFactory;
 import biz.neustar.tdi.fw.exception.FrameworkRuntimeException;
-import biz.neustar.tdi.fw.exception.InvalidFormatException;
 import biz.neustar.tdi.fw.keystructure.TdiKeyStructureShape;
 import biz.neustar.tdi.fw.platform.TdiPlatformShape;
 import biz.neustar.tdi.fw.platform.TdiPlatformShapeFactory;
 import biz.neustar.tdi.fw.plugin.TdiPluginBase;
 import biz.neustar.tdi.fw.plugin.TdiPluginBaseFactory;
-import biz.neustar.tdi.fw.utils.Utils;
 import biz.neustar.tdi.fw.wrapper.TdiSdkWrapperShape;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,32 +89,26 @@ public class TdiImplementation implements TdiImplementationShape {
   /**
    * Sets up the global datastore.
    * 
-   * @param store
-   *          : json string
+   * @param storeMap
+   *          : Store map.
    * 
-   * @return {@link CompletableFuture} of type boolean
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link Boolean} with true on
+   *         success. false otherwise. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of
+   *         failure.
    * 
    */
-  public CompletableFuture<Boolean> setupTdiStore(String store) {
+  public CompletableFuture<Boolean> setupTdiStore(Map<String, Object> storeMap) {
 
     LOG.debug("Loading NTDI datastore...");
 
-    Map<String, Object> storeMap;
     List<CompletableFuture<?>> queue = new ArrayList<>();
     List<String> fleets;
 
-    try {
-      storeMap = Utils.jsonToMap(store);
-      if (!storeMap.containsKey(FLEETS)) {
-        fleets = new ArrayList<>();
-        queue.add(platform.getDataStore().set(FWSTORE, FLEETS, fleets));
-      }
-    } catch (InvalidFormatException e) {
-      /*
-       * not throwing the exception further as this error should not abort
-       * process.
-       */
-      LOG.error(e.getMessage());
+    if (!storeMap.containsKey(FLEETS)) {
+      fleets = new ArrayList<>();
+      queue.add(platform.getDataStore().set(FWSTORE, FLEETS, fleets));
     }
 
     CompletableFuture<Void> allInQueue = CompletableFuture
@@ -130,7 +122,11 @@ public class TdiImplementation implements TdiImplementationShape {
   /**
    * Pass-through to platform for special-case key access.
    * 
-   * @return {@link CompletableFuture} of type {@link TdiKeyStructureShape}
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link TdiKeyStructureShape} with
+   *         SELF Key details. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of
+   *         failure.
    */
   public CompletableFuture<TdiKeyStructureShape> getSelfKey() {
     return platform.getKeystore().getSelfKey();
@@ -164,9 +160,10 @@ public class TdiImplementation implements TdiImplementationShape {
 
     List<CompletableFuture<?>> queue = new ArrayList<>();
 
+    @SuppressWarnings("unchecked")
     CompletableFuture<Object> dataPromise = platform.getDataStore().createStore(FWSTORE, null)
         .thenApply((arg) -> {
-          return setupTdiStore((String) arg);
+          return setupTdiStore((Map<String, Object>) arg);
         });
     queue.add(dataPromise);
 
@@ -206,19 +203,15 @@ public class TdiImplementation implements TdiImplementationShape {
     List<CompletableFuture<?>> queue = new ArrayList<>();
 
     for (String check : checks) {
-
       CompletableFuture<?> result = platform.getDataStore().get(storeName, check)
           .handle((arg, throwable) -> {
-
             if (arg != null) {
-
               return CompletableFuture.completedFuture(arg);
-
             } else {
-
-              if (config.containsKey(check) && (config.get(check) != null)) {
-
-                return platform.getDataStore().set(storeName, check, (String) config.get(check));
+              @SuppressWarnings("unchecked")
+              Map<String, Object> storeInConfig = (Map<String, Object>) config.get(storeName);
+              if (storeInConfig != null && storeInConfig.containsKey(check)) {
+                return platform.getDataStore().set(storeName, check, storeInConfig.get(check));
               }
 
               LOG.info(
@@ -230,7 +223,6 @@ public class TdiImplementation implements TdiImplementationShape {
           });
 
       queue.add(result);
-
     }
 
     return CompletableFuture.allOf(queue.toArray(new CompletableFuture<?>[0])).thenApply((arg) -> {

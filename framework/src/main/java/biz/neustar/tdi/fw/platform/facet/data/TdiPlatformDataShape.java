@@ -35,7 +35,11 @@ public interface TdiPlatformDataShape extends TdiPlatformFacetShape {
    * @param key
    *          : Key to be looked up.
    * 
-   * @return CompletableFuture object returning the retrieved value.
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: Data against key. (Type casting
+   *         required). <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of
+   *         failure.
    */
   public CompletableFuture<?> get(String storeName, String key);
 
@@ -50,7 +54,10 @@ public interface TdiPlatformDataShape extends TdiPlatformFacetShape {
    * @param value
    *          : Value to be set/updated.
    * 
-   * @return CompletableFuture indicating the completion of the action.
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: Void. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of
+   *         failure.
    */
   public CompletableFuture<Void> set(String storeName, String key, Object value);
 
@@ -61,7 +68,11 @@ public interface TdiPlatformDataShape extends TdiPlatformFacetShape {
    * @param storeName
    *          : Name of the store to be looked into.
    * 
-   * @return CompletableFuture object returning the keys for the storename.
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link List}&lt;{@link String}&gt;
+   *         with keys in the store. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of
+   *         failure.
    */
   public CompletableFuture<List<String>> keys(String storeName);
 
@@ -70,9 +81,12 @@ public interface TdiPlatformDataShape extends TdiPlatformFacetShape {
    * 
    * @param storeName
    *          : Store to be created.
-   * @param value : Initial value to be added to the store. 
-   *  
-   * @return CompletableFuture returning status of the store creation.
+   * @param value
+   *          : Initial value to be added to the store.
+   * 
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: Map of store if store already exists. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<?> createStore(String storeName, Map<String, Object> value);
 
@@ -82,7 +96,9 @@ public interface TdiPlatformDataShape extends TdiPlatformFacetShape {
    * @param storeName
    *          : Store to be deleted.
    * 
-   * @return CompletableFuture returning status of store deletion.
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: Void. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<Void> deleteStore(String storeName);
 
@@ -94,7 +110,9 @@ public interface TdiPlatformDataShape extends TdiPlatformFacetShape {
    * @param key
    *          : Key to be dropped.
    * 
-   * @return CompletableFuture returning status of the key drop.
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: Void. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<Void> drop(String storeName, String key);
 }

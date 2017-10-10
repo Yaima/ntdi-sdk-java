@@ -45,47 +45,32 @@ public class TdiPluginBaseTest {
   public static void setup() throws Exception {
     sdkWrapper = new TdiSdkWrapper();
     impl = new TdiImplementation(new HashMap<>(), TestData.DummyPlatform::new);
-    goodPlugin = new TdiPluginBase(impl, sdkWrapper) {
+    goodPlugin = new TdiPluginBase("plugin", impl, sdkWrapper) {
 
       @Override
       public CompletableFuture<Boolean> init() {
         return null;
-      }
-
-      @Override
-      public String getName() {
-        return "plugin";
       }
     };
   }
 
   @Test
   public void testInstanceCreation() throws Exception {
-    new TdiPluginBase(impl, sdkWrapper) {
+    new TdiPluginBase("plugin", impl, sdkWrapper) {
 
       @Override
       public CompletableFuture<Boolean> init() {
         return null;
-      }
-
-      @Override
-      public String getName() {
-        return "plugin";
       }
     };
   }
 
   @Test(expected = FrameworkRuntimeException.class)
   public void testInstanceExceptionOnNoName() throws Exception {
-    new TdiPluginBase(impl, sdkWrapper) {
+    new TdiPluginBase(null, impl, sdkWrapper) {
 
       @Override
       public CompletableFuture<Boolean> init() {
-        return null;
-      }
-
-      @Override
-      public String getName() {
         return null;
       }
     };
@@ -93,32 +78,22 @@ public class TdiPluginBaseTest {
 
   @Test(expected = FrameworkRuntimeException.class)
   public void testInstanceExceptionOnNoImpl() throws Exception {
-    new TdiPluginBase(null, sdkWrapper) {
+    new TdiPluginBase("plugin", null, sdkWrapper) {
 
       @Override
       public CompletableFuture<Boolean> init() {
         return null;
-      }
-
-      @Override
-      public String getName() {
-        return "plugin";
       }
     };
   }
 
   @Test(expected = FrameworkRuntimeException.class)
   public void testInstanceExceptionOnNoApi() throws Exception {
-    new TdiPluginBase(impl, null) {
+    new TdiPluginBase("plugin", impl, null) {
 
       @Override
       public CompletableFuture<Boolean> init() {
         return null;
-      }
-
-      @Override
-      public String getName() {
-        return "plugin";
       }
     };
   }

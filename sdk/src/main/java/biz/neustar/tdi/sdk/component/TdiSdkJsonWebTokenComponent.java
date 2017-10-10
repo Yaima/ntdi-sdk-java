@@ -63,7 +63,9 @@ public class TdiSdkJsonWebTokenComponent extends TdiComponent {
    * @param message
    *          : The TdiCanonicalMessage containing the claims.
    * 
-   * @return {@link CompletableFuture}&lt;{@link TdiCanonicalMessage}&gt;
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link TdiCanonicalMessageShape}. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> packClaims(TdiCanonicalMessageShape message) {
     CompletableFuture<TdiCanonicalMessageShape> result = new CompletableFuture<>();
@@ -86,7 +88,9 @@ public class TdiSdkJsonWebTokenComponent extends TdiComponent {
    * @param message
    *          : The TdiCanonicalMessage containing the serialized claims.
    * 
-   * @return {@link CompletableFuture}&lt;{@link TdiCanonicalMessage}&gt;
+   * @return {@link CompletableFuture} with either of the following states: <br>
+   *         <b>Completed Successfully</b>: {@link TdiCanonicalMessageShape}. <br>
+   *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> unpackClaims(
       TdiCanonicalMessageShape message) {
