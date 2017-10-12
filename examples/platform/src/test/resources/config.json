@@ -1,0 +1,10 @@
+{
+    "platform": {
+        "data": {
+            "basepath": "src/test/resources/"
+        },
+        "keys": {
+            "basepath": "src/test/resources/"
+        }
+    }
+}
