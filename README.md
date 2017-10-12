@@ -10,5 +10,10 @@ This is Neustar's Trusted Device Identity (TDI) implementation in Java 8.
 mvn clean package
 ```
 
+### Documentation:
+```bash
+mvn javadoc:javadoc
+```
+
 ### Logging:
 This project uses slf4j api for logging. So please drop a implementation of logger compatible with slf4j api in classpath of your application (where this project is being used) for the logs to get generated.
