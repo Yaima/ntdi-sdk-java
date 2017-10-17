@@ -28,6 +28,7 @@ import java.time.Instant;
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.concurrent.CompletableFuture;
+import java.lang.Math;
 
 /**
  * Implementation of TimeFacet class.
@@ -82,11 +83,11 @@ public class TimeFacet implements TdiPlatformTimeShape {
   public Long timestamp(String timeDateStr) {
     if (!StringUtils.isEmpty(timeDateStr)) {
       Instant instant = Instant.parse(timeDateStr);
-      Long timeInSec = instant.toEpochMilli() / 1000;
+      Long timeInSec = Math.floor(instant.toEpochMilli() / 1000);
       return timeInSec;
     } else {
       // As we don't have time stamp string, return current epoch time
-      return (Instant.now().toEpochMilli() / 1000);
+      return (Math.floor(Instant.now().toEpochMilli() / 1000));
     }
   }
 
