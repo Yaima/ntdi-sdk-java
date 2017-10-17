@@ -83,11 +83,11 @@ public class TimeFacet implements TdiPlatformTimeShape {
   public Long timestamp(String timeDateStr) {
     if (!StringUtils.isEmpty(timeDateStr)) {
       Instant instant = Instant.parse(timeDateStr);
-      Long timeInSec = Math.floor(instant.toEpochMilli() / 1000);
+      Long timeInSec = (Long) Math.floor(instant.toEpochMilli() / 1000);
       return timeInSec;
     } else {
       // As we don't have time stamp string, return current epoch time
-      return (Math.floor(Instant.now().toEpochMilli() / 1000));
+      return ((Long) Math.floor(Instant.now().toEpochMilli() / 1000));
     }
   }
 
