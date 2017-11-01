@@ -1,0 +1,7 @@
+.directory
+.project
+.settings
+.classpath
+
+# Test artifacts
+framework/testClaimsJsonFile.json
