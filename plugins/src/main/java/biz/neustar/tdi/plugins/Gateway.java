@@ -14,7 +14,7 @@
  *
  */
 
-package biz.neustar.tdi.sdk;
+package biz.neustar.tdi.plugins;
 
 import java.util.ArrayList;
 import java.util.Map.Entry;

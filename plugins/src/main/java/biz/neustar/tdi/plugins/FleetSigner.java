@@ -14,7 +14,7 @@
  *
  */
 
-package biz.neustar.tdi.sdk;
+package biz.neustar.tdi.plugins;
 
 import biz.neustar.tdi.fw.implementation.TdiImplementationShape;
 import biz.neustar.tdi.fw.keystructure.TdiKeyFlagsEnum;
@@ -28,17 +28,81 @@ import biz.neustar.tdi.fw.platform.facet.time.TdiPlatformTimeShape;
 import biz.neustar.tdi.fw.platform.facet.utils.TdiPlatformUtilsShape;
 import biz.neustar.tdi.fw.plugin.TdiPluginBase;
 import biz.neustar.tdi.fw.wrapper.TdiSdkWrapperShape;
+import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  *
  */
 public class FleetSigner extends TdiPluginBase {
-  public FleetSigner(String pluginName, TdiImplementationShape impl, TdiSdkWrapperShape sdkWrapper) {
-    super(pluginName, impl, sdkWrapper);
+  private static final Logger LOG = LoggerFactory.getLogger(FleetSigner.class);
+
+  /**
+   * This is populated by config and is the network location for our preferred cosigner.
+   */
+  private String baseURI = "";
+
+
+  public FleetSigner(TdiImplementationShape impl, TdiSdkWrapperShape sdkWrapper) {
+    super("FleetSigner", impl, sdkWrapper);
   }
 
 
   @Override
   public CompletableFuture<Boolean> init() {
+    LOG.trace("FleetSigner:init()");
+    // Need to have configuration describing the cosigner's network location.
+    return this.validatePluginDataStore(Arrays.asList("cosigner"))
+      .thenApply(arg -> {
+        LOG.trace("FleetSigner:init():thenApply()");
+        return arg;
+        //return this.datastore.get('cosigner');
+      });
+      //.thenCompose(cosignerValue -> {
+      //})
+
+
+      //.then(() => {
+      //  return this.datastore.get('cosigner');
+      //})
+      //.then((cc: any) => {
+      //  // Avoid many async conf fetches.
+      //  if (!cc.hasOwnProperty('baseURI')) {
+      //    return Promise.reject(
+      //      new Error('This plugin requires a cosigner.baseURI string.')
+      //    );
+      //  }
+      //  this.baseURI = cc.baseURI;
+      //  this.log('The selected cosigner is at ' + this.baseURI);
+      //  return Promise.resolve(true);
+      //});
+  }
+
+
+  /**
+   * TODO: Unsure if this is appropriate. Implies prior instantiation, which doesn't
+   *   match the behavior of the TypeScript package.
+   * Dummy implementation to avoid the classes extending {@link TdiPluginBase}
+   * to override or write this in their code. <br>
+   * {@inheritDoc}
+   */
+  @Override
+  public TdiPluginBaseFactory newInstance(TdiImplementationShape impl,
+      TdiSdkWrapperShape sdkWrapper) {
+    return this;
+  }
+
+
+
+  public void serverSign() {
+    LOG.trace("FleetSigner:serverSign()");
+  }
+
+  public void serverVerify() {
+    LOG.trace("FleetSigner:serverVerify()");
   }
 }
