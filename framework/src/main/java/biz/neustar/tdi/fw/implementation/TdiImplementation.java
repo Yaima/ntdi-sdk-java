@@ -156,7 +156,7 @@ public class TdiImplementation implements TdiImplementationShape {
 
   @Override
   public CompletableFuture<TdiSdkWrapperShape> loadPlugins(TdiSdkWrapperShape sdkWrapper, List<TdiPluginBaseFactory> plugins) {
-    LOG.trace("TdiImplementation::loadPlugins()");
+    LOG.trace("Loading plugins...");
     List<CompletableFuture<?>> queue = new ArrayList<>();
 
     @SuppressWarnings("unchecked")

@@ -11,10 +11,10 @@
   <url>https://github.com/Neustar-TDI/java-ndti</url>
 
   <modules>
+    <module>plugins</module>
     <module>framework</module>
     <module>sdk</module>
     <module>examples</module>
-    <module>plugins</module>
   </modules>
 
   <properties>
