@@ -27,6 +27,7 @@ import biz.neustar.tdi.fw.platform.facet.keys.TdiPlatformKeysShape;
 import biz.neustar.tdi.fw.platform.facet.time.TdiPlatformTimeShape;
 import biz.neustar.tdi.fw.platform.facet.utils.TdiPlatformUtilsShape;
 import biz.neustar.tdi.fw.plugin.TdiPluginBase;
+import biz.neustar.tdi.fw.plugin.TdiPluginBaseFactory;
 import biz.neustar.tdi.fw.wrapper.TdiSdkWrapperShape;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
@@ -49,6 +50,7 @@ public class FleetSigner extends TdiPluginBase {
 
   public FleetSigner(TdiImplementationShape impl, TdiSdkWrapperShape sdkWrapper) {
     super("FleetSigner", impl, sdkWrapper);
+    LOG.trace("FleetSigner:constructor()");
   }
 
 
@@ -91,9 +93,9 @@ public class FleetSigner extends TdiPluginBase {
    * {@inheritDoc}
    */
   @Override
-  public TdiPluginBaseFactory newInstance(TdiImplementationShape impl,
-      TdiSdkWrapperShape sdkWrapper) {
-    return this;
+  public TdiPluginBaseFactory newInstance(TdiImplementationShape impl, TdiSdkWrapperShape sdkWrapper) {
+    LOG.trace("FleetSigner:newInstance()");
+    return null;
   }
 
 
