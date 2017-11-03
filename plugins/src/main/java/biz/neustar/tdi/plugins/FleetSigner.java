@@ -148,62 +148,82 @@ public class FleetSigner extends TdiPluginBase {
 
   private TdiFlowArguments buildFlowFleetSign() {
     TdiFlowArguments flow = new TdiFlowArguments();
-      //{
-      //  // NOTE: If we want to cause the fleet server's SELF key to sign
-      //  //   messages, we would remove 'setSigners' from the array below.
-      //  _or: ['setSigners'],
-      //  setSigners: (msg: TdiCanonicalMessageShape) => {
-      //    return this.imp.pf.keys
-      //      .getKeyByRole(TdiKeyStructureFlags.ROLE_F_S, msg.currentProject)
-      //      .then(k_fs => {
-      //        let success = false;
-      //        if (k_fs && k_fs.canSign) {
-      //          msg.signers.push(k_fs);
-      //          success = true;
-      //        }
-      //        return success
-      //          ? Promise.resolve(msg)
-      //          : Promise.reject(
-      //              'setSigners() failed to find a signing key for either F_C or F_S.'
-      //            );
-      //      });
-      //  }
+    // TODO: Why is this replicated?
+    flow.addOverrideSteps(Arrays.asList("setSigners"));
+    flow.addMethod("setSigners", (data) -> {
+      TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
+      msgObj.setSignatureType("compact");
+      return this.impl.getPlatform().getKeystore().getKeyByRole(TdiKeyFlagsEnum.ROLE_F_S.getNumber(), msgObj.getCurrentProject())
+        .thenApply((TdiKeyStructureShape key) -> {
+          CompletableFuture<TdiCanonicalMessageShape> future = new CompletableFuture<>();
+          if ((null != key) && key.canSign()) {
+            msgObj.addSigner(key);
+            future.complete(msgObj);
+          }
+          else {
+            future.completeExceptionally(
+              new FrameworkRuntimeException("setSigners() failed to find a signing key for either F_C or F_S.")
+            );
+          }
+          return future;
+        })
+        .thenCompose(arg -> {
+          return arg;
+        })
+        .exceptionally(throwable -> {
+          String errMsg = "setSigners() failed.";
+          LOG.error(errMsg);
+          throw new FrameworkRuntimeException(errMsg);
+        });
+    });
     return flow;
   }
 
   private TdiFlowArguments buildFlowFleetCosign() {
+    // TODO: Why is this replicated?
+    //   I think it may be because of a composability mechanic that I don't yet
+    //   know how to translate...
+    //          this.currentApi.defApi['sign'].flow,
+    //          this.currentApi.defApi['cosign'].flow,
     TdiFlowArguments flow = new TdiFlowArguments();
-      //{
-      //  _or: ['setSigners'],
-      //  setSigners: (msg: TdiCanonicalMessageShape) => {
-      //    let success = false;
-      //    return this.imp.pf.keys
-      //      .getKeyByRole(TdiKeyStructureFlags.ROLE_F_S, msg.currentProject)
-      //      .then(k_fs => {
-      //        if (k_fs && k_fs.canSign) {
-      //          msg.signers.push(k_fs);
-      //          success = true;
-      //        } else {
-      //        }
-      //        return success
-      //          ? Promise.resolve(msg)
-      //          : Promise.reject(
-      //              'setSigners() failed to find a signing key for either F_C or F_S.'
-      //            );
-      //      });
-      //  }
-      //}
+    flow.addOverrideSteps(Arrays.asList("setSigners"));
+    flow.addMethod("setSigners", (data) -> {
+      TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
+      msgObj.setSignatureType("compact");
+      return this.impl.getPlatform().getKeystore().getKeyByRole(TdiKeyFlagsEnum.ROLE_F_S.getNumber(), msgObj.getCurrentProject())
+        .thenApply((TdiKeyStructureShape key) -> {
+          CompletableFuture<TdiCanonicalMessageShape> future = new CompletableFuture<>();
+          if ((null != key) && key.canSign()) {
+            msgObj.addSigner(key);
+            future.complete(msgObj);
+          }
+          else {
+            future.completeExceptionally(
+              new FrameworkRuntimeException("setSigners() failed to find a signing key for either F_C or F_S.")
+            );
+          }
+          return future;
+        })
+        .thenCompose(arg -> {
+          return arg;
+        })
+        .exceptionally(throwable -> {
+          String errMsg = "setSigners() failed.";
+          LOG.error(errMsg);
+          throw new FrameworkRuntimeException(errMsg);
+        });
+    });
     return flow;
   }
 
   private TdiFlowArguments buildFlowFleetVerify() {
     TdiFlowArguments flow = new TdiFlowArguments();
-      //{
-      //  // Prevent the default behavior from taking place for these phases.
-      //  _or: ['prepSignatures', 'handleReturn'],
-      //  prepSignatures: (msg: TdiCanonicalMessageShape) => {
-      //    // get kid values for signatures (prune signatures and check project keystore scope?)
-      //    let verify_count = 0;
+    // Prevent the default behavior from taking place for these phases.
+    flow.addOverrideSteps(Arrays.asList("prepSignatures", "handleReturn"));
+    flow.addMethod("prepSignatures", (data) -> {
+      TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
+      // get kid values for signatures (prune signatures and check project keystore scope?)
+      int verify_count = 0;
       //    const promise_queue = [];
       //    for (const i of msg.signaturesToVerify) {
       //      const t_kid: string = i['parsedHeader']['kid'];
@@ -229,7 +249,6 @@ public class FleetSigner extends TdiPluginBase {
       //          })
       //      );
       //    }
-
       //    return Promise.all(promise_queue).then(() => {
       //      if (msg.currentProject === '') {
       //        this.log('fleetVerify(): WARNING: No currentProject set');
@@ -244,60 +263,103 @@ public class FleetSigner extends TdiPluginBase {
       //      }
       //    });
       //  },
-      //  handleReturn: (msg: TdiCanonicalMessageShape) => {
-      //    return msg;
-      //  }
-      //}
+      return CompletableFuture.allOf()
+        .thenApply((arg) -> {
+          CompletableFuture<TdiCanonicalMessageShape> future = new CompletableFuture<>();
+          if (0 == msgObj.getCurrentProject().length()) {
+            LOG.warn("fleetVerify(): WARNING: No currentProject set");
+          }
+          if (0 != verify_count) {
+            return future.complete(msgObj);
+          }
+          else {
+            future.completeExceptionally(
+              new FrameworkRuntimeException("prepSignatures(): No known keys to verify against.")
+            );
+          }
+          return future;
+        })
+        .exceptionally(throwable -> {
+          String errMsg = "sendToCosigner() failed.";
+          LOG.error(errMsg);
+          throw new FrameworkRuntimeException(errMsg);
+        });
+    });
+    flow.addMethod("handleReturn", (data) -> {
+      TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
+      return CompletableFuture.completedFuture(msgObj.getRawPayload());
+    });
     return flow;
   }
 
   private TdiFlowArguments buildFlowFleetToDev() {
     TdiFlowArguments flow = new TdiFlowArguments();
-      //{
-      //  sign: (dataIn: any) => {
-      //    return this.currentApi.sign(dataIn);
-      //  },
-      //  sendToCosigner: (jwsPayload: string) => {
-      //    return this.imp.pf.keys.getSelf().then((self: TdiKeyStructure) => {
-      //      const fleet = self.fleet;
-      //      const kid = self.kid;
-      //      return rp({
-      //        method: 'POST',
-      //        uri: `${this.baseURI}/projects/${fleet}/cosign_for_server/${kid}`,
-      //        body: jwsPayload,
-      //        headers: {
-      //          'content-type': 'application/JOSE+JSON',
-      //          Accept: 'application/JOSE+JSON',
-      //          encoding: 'utf8'
-      //          // Bearer: 'jwt '
-      //        }
-      //      });
-      //    });
-      //  },
-      //  validateCosigner: (requestBody: string) => {
-      //    if (requestBody) {
-      //      return this.fleetVerify(
-      //        requestBody
-      //      ).then((vCanon: TdiCanonicalMessageShape) => {
-      //        return requestBody;
-      //      });
-      //    } else {
-      //      return Promise.reject('No response body in cosigner reply');
-      //    }
-      //  },
-      //  fleetSign: (verifiedJWS: TdiCanonicalMessageShape) => {
-      //    return this.fleetCosign(verifiedJWS);
-      //  }
-      //}
+    // TODO: These were NOT in an array named _or[]. Just an array.
+    //flow.addOverrideSteps(Arrays.asList("sign", "sendToCosigner", "validateCosigner", "fleetSign"));
+    flow.addMethod("sign", (data) -> {
+      return this.sdkWrapper.api("sign").apply(data);
+    });
+    flow.addMethod("sendToCosigner", (data) -> {
+      String jwsPayload = (String) data;
+      return this.impl.getPlatform().getKeystore().getSelfKey()
+        .thenApply((TdiKeyStructureShape self) -> {
+          CompletableFuture<TdiCanonicalMessageShape> future = new CompletableFuture<>();
+          self.getFleetId();
+          self.getKeyId();
+          //      return rp({
+          //        method: 'POST',
+          //        uri: `${this.baseURI}/projects/${fleet}/cosign_for_server/${kid}`,
+          //        body: jwsPayload,
+          //        headers: {
+          //          'content-type': 'application/JOSE+JSON',
+          //          Accept: 'application/JOSE+JSON',
+          //          encoding: 'utf8'
+          //          // Bearer: 'jwt '
+          //        }
+          //      });
+          return future;
+        })
+        .thenCompose(arg -> {
+          return arg;
+        })
+        .exceptionally(throwable -> {
+          String errMsg = "sendToCosigner() failed.";
+          LOG.error(errMsg);
+          throw new FrameworkRuntimeException(errMsg);
+        });
+    });
+    flow.addMethod("validateCosigner", (data) -> {
+      CompletableFuture<TdiCanonicalMessageShape> future = new CompletableFuture<>();
+      String requestBody = (String) data;
+      if ((null != requestBody) && (0 < requestBody.length())) {
+        // TODO: Might-should have better check?
+        //      return this.fleetVerify(
+        //        requestBody
+        //      ).then((vCanon: TdiCanonicalMessageShape) => {
+        //        return requestBody;
+        //      });
+        return this.fleetVerify.apply(requestBody);
+      }
+      else {
+        future.completeExceptionally(
+          new FrameworkRuntimeException("No response body in cosigner reply.")
+        );
+      }
+      return future;
+    });
+    flow.addMethod("fleetSign", (data) -> {
+      TdiCanonicalMessageShape verifiedJWS = (TdiCanonicalMessageShape) data;
+      return this.fleetCosign.apply(verifiedJWS);
+    });
     return flow;
   }
 
+
   private TdiFlowArguments buildFlowFleetFromDev() {
     TdiFlowArguments flow = new TdiFlowArguments();
-      //{
-      //  // sign: (dataIn: any) => {
-      //  //   return this.currentApi.sign(dataIn)
-      //  // },
+    // TODO: These were NOT in an array named _or[]. Just an array.
+    //flow.addOverrideSteps(Arrays.asList("sendToCosigner", "validateCosigner", "fleetSign"));
+    flow.addMethod("sendToCosigner", (data) -> {
       //  sendToCosigner: (jwsPayload: string) => {
       //    return this.imp.pf.keys.getSelf().then((self: TdiKeyStructure) => {
       //      const fleet = self.fleet;
@@ -319,6 +381,10 @@ public class FleetSigner extends TdiPluginBase {
       //      });
       //    });
       //  },
+      TdiCanonicalMessageShape verifiedJWS = (TdiCanonicalMessageShape) data;
+      return this.fleetCosign.apply(verifiedJWS);
+    });
+    flow.addMethod("validateCosigner", (data) -> {
       //  validateCosigner: (requestBody: string) => {
       //    if (requestBody) {
       //      return this.fleetVerify(
@@ -332,22 +398,28 @@ public class FleetSigner extends TdiPluginBase {
       //      );
       //    }
       //  },
-      //  fleetSign: (msg: TdiCanonicalMessageShape) => {
-      //    return this.fleetCosign(msg);
-      //  }
-      //}
+      TdiCanonicalMessageShape verifiedJWS = (TdiCanonicalMessageShape) data;
+      return this.fleetCosign.apply(verifiedJWS);
+    });
+    flow.addMethod("fleetSign", (data) -> {
+      TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
+      return this.fleetCosign.apply(msgObj);
+    });
     return flow;
   }
 
-  private TdiFlowArguments buildFlowSignToken() {
+/**
+ * Signs a token if a ROLE_EXTERN key is found in the keystore relevent to the project
+ */
+private TdiFlowArguments buildFlowSignToken() {
     TdiFlowArguments flow = new TdiFlowArguments();
     // NOTE: If we want to cause the fleet server's SELF key to sign
     //   messages, we would remove 'setSigners' from the array below.
+    // TODO: Why is this replicated?
     flow.addOverrideSteps(Arrays.asList("setSigners"));
     flow.addMethod("setSigners", (data) -> {
       TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
       msgObj.setSignatureType("compact");
-      // TODO: Shouldn't this role be FS?
       return this.impl.getPlatform().getKeystore().getKeyByRole(TdiKeyFlagsEnum.ROLE_EXTERN.getNumber(), msgObj.getCurrentProject())
         .thenApply((TdiKeyStructureShape key) -> {
           CompletableFuture<TdiCanonicalMessageShape> future = new CompletableFuture<>();
