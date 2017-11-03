@@ -90,11 +90,11 @@ public class FleetSigner extends TdiPluginBase {
     // Now that we have refs to implementation and SDK, build up our API methods...
     // NOTE: Since these functions mutually reference, this setup order might be
     //   important. TODO: Determine this.
-    this.fleetSign = this.impl.buildApiFlow(this.buildFlowFleetSign(), null);
-    this.signToken = this.impl.buildApiFlow(this.buildFlowSignToken(), null);
-    this.fleetCosign = this.impl.buildApiFlow(this.buildFlowFleetCosign(), null);
-    this.fleetVerify = this.impl.buildApiFlow(this.buildFlowFleetVerify(), null);
-    this.fleetToDevice = this.impl.buildApiFlow(this.buildFlowFleetToDev(), null);
+    this.fleetSign       = this.impl.buildApiFlow(this.buildFlowFleetSign(),    null);
+    this.signToken       = this.impl.buildApiFlow(this.buildFlowSignToken(),    null);  // <--- No deferral to orginal flow.
+    this.fleetCosign     = this.impl.buildApiFlow(this.buildFlowFleetCosign(),  null);  // _or: ['setSigners'],
+    this.fleetVerify     = this.impl.buildApiFlow(this.buildFlowFleetVerify(),  null);  // _or: ['prepSignatures', 'handleReturn'],
+    this.fleetToDevice   = this.impl.buildApiFlow(this.buildFlowFleetToDev(),   null);
     this.fleetFromDevice = this.impl.buildApiFlow(this.buildFlowFleetFromDev(), null);
 
 //    this.fleetSign = this.impl.buildApiFlow(
@@ -341,28 +341,36 @@ public class FleetSigner extends TdiPluginBase {
 
   private TdiFlowArguments buildFlowSignToken() {
     TdiFlowArguments flow = new TdiFlowArguments();
-      //{
-      //  // NOTE: If we want to cause the fleet server's SELF key to sign
-      //  //   messages, we would remove 'setSigners' from the array below.
-      //  _or: ['setSigners'],
-      //  setSigners: (msg: TdiCanonicalMessageShape) => {
-      //    msg.signatureType = 'compact';
-      //    return this.imp.pf.keys
-      //      .getKeyByRole(TdiKeyStructureFlags.ROLE_EXTERN, msg.currentProject)
-      //      .then(k_fs => {
-      //        let success = false;
-      //        if (k_fs && k_fs.canSign) {
-      //          msg.signers.push(k_fs);
-      //          success = true;
-      //        }
-      //        return success
-      //          ? Promise.resolve(msg)
-      //          : Promise.reject(
-      //              'setSigners() failed to find a signing key for either F_C or F_S.'
-      //            );
-      //      });
-      //  }
-      //}
+    // NOTE: If we want to cause the fleet server's SELF key to sign
+    //   messages, we would remove 'setSigners' from the array below.
+    flow.addOverrideSteps(Arrays.asList("setSigners"));
+    flow.addMethod("setSigners", (data) -> {
+      TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
+      msgObj.setSignatureType("compact");
+      // TODO: Shouldn't this role be FS?
+      return this.impl.getPlatform().getKeystore().getKeyByRole(TdiKeyFlagsEnum.ROLE_EXTERN.getNumber(), msgObj.getCurrentProject())
+        .thenApply((TdiKeyStructureShape key) -> {
+          CompletableFuture<TdiCanonicalMessageShape> future = new CompletableFuture<>();
+          if ((null != key) && key.canSign()) {
+            msgObj.addSigner(key);
+            future.complete(msgObj);
+          }
+          else {
+            future.completeExceptionally(
+              new FrameworkRuntimeException("setSigners() failed to find a signing key for either F_C or F_S.")
+            );
+          }
+          return future;
+        })
+        .thenCompose(arg -> {
+          return arg;
+        })
+        .exceptionally(throwable -> {
+          String errMsg = "setSigners() failed.";
+          LOG.error(errMsg);
+          throw new FrameworkRuntimeException(errMsg);
+        });
+    });
     return flow;
   }
 }
