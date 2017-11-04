@@ -32,6 +32,12 @@ import biz.neustar.tdi.fw.plugin.TdiPluginBase;
 import biz.neustar.tdi.fw.plugin.TdiPluginBaseFactory;
 import biz.neustar.tdi.fw.wrapper.TdiSdkWrapperShape;
 import biz.neustar.tdi.fw.exception.FrameworkRuntimeException;
+import java.net.URL;
+import java.net.HttpURLConnection;
+import java.io.DataOutputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,6 +45,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 /**
@@ -303,20 +313,17 @@ public class FleetSigner extends TdiPluginBase {
       String jwsPayload = (String) data;
       return this.impl.getPlatform().getKeystore().getSelfKey()
         .thenApply((TdiKeyStructureShape self) -> {
-          CompletableFuture<TdiCanonicalMessageShape> future = new CompletableFuture<>();
-          self.getFleetId();
-          self.getKeyId();
-          //      return rp({
-          //        method: 'POST',
-          //        uri: `${this.baseURI}/projects/${fleet}/cosign_for_server/${kid}`,
-          //        body: jwsPayload,
-          //        headers: {
-          //          'content-type': 'application/JOSE+JSON',
-          //          Accept: 'application/JOSE+JSON',
-          //          encoding: 'utf8'
-          //          // Bearer: 'jwt '
-          //        }
-          //      });
+          CompletableFuture<String> future = new CompletableFuture<>();
+          String fleet = self.getFleetId();
+          String kid = self.getKeyId();
+          try {
+            future.complete(this.httpPostToCosigner("cosign_for_server", fleet, kid, jwsPayload));
+          }
+          catch(Exception e) {
+            future.completeExceptionally(
+              new FrameworkRuntimeException(e.toString())
+            );
+          }
           return future;
         })
         .thenCompose(arg -> {
@@ -357,32 +364,35 @@ public class FleetSigner extends TdiPluginBase {
 
   private TdiFlowArguments buildFlowFleetFromDev() {
     TdiFlowArguments flow = new TdiFlowArguments();
-    // TODO: These were NOT in an array named _or[]. Just an array.
-    //flow.addOverrideSteps(Arrays.asList("sendToCosigner", "validateCosigner", "fleetSign"));
+    // TODO: These were NOT in an array named _or[].
+    flow.addOverrideSteps(Arrays.asList("sendToCosigner", "validateCosigner", "fleetSign"));
     flow.addMethod("sendToCosigner", (data) -> {
-      //  sendToCosigner: (jwsPayload: string) => {
-      //    return this.imp.pf.keys.getSelf().then((self: TdiKeyStructure) => {
-      //      const fleet = self.fleet;
-      //      const kid = JSON.parse(
-      //        this.imp.pf.util.b64URLDecode(JSON.parse(jwsPayload).payload)
-      //      ).iss;
-      //      return rp({
-      //        method: 'POST',
-      //        uri: `${this
-      //          .baseURI}/projects/${fleet}/cosign_for_edge_device/${kid}`,
-      //        body: jwsPayload,
-      //        // json: true,
-      //        headers: {
-      //          'content-type': 'application/JOSE+JSON',
-      //          Accept: 'application/JOSE+JSON',
-      //          encoding: 'utf8'
-      //          // Bearer: 'jwt '
-      //        }
-      //      });
-      //    });
-      //  },
-      TdiCanonicalMessageShape verifiedJWS = (TdiCanonicalMessageShape) data;
-      return this.fleetCosign.apply(verifiedJWS);
+      String outboundJWS = (String) data;
+      return this.impl.getPlatform().getKeystore().getSelfKey()
+        .thenApply((TdiKeyStructureShape self) -> {
+          CompletableFuture<String> future = new CompletableFuture<>();
+          String fleet = self.getFleetId();
+          try {
+            String kid = this.fetchIssFromJwsString(outboundJWS);
+            future.complete(this.httpPostToCosigner("cosign_for_edge_device", fleet, kid, outboundJWS));
+          }
+          catch (IOException e) {
+            future.completeExceptionally(
+              new FrameworkRuntimeException(e.toString())
+            );
+          }
+          catch(Exception e) {
+            future.completeExceptionally(
+              new FrameworkRuntimeException(e.toString())
+            );
+          }
+          return future;
+        })
+        .exceptionally(throwable -> {
+          String errMsg = "sendToCosigner() failed.";
+          LOG.error(errMsg);
+          throw new FrameworkRuntimeException(errMsg);
+        });
     });
     flow.addMethod("validateCosigner", (data) -> {
       //  validateCosigner: (requestBody: string) => {
@@ -408,10 +418,10 @@ public class FleetSigner extends TdiPluginBase {
     return flow;
   }
 
-/**
- * Signs a token if a ROLE_EXTERN key is found in the keystore relevent to the project
- */
-private TdiFlowArguments buildFlowSignToken() {
+  /**
+  * Signs a token if a ROLE_EXTERN key is found in the keystore relevent to the project
+  */
+  private TdiFlowArguments buildFlowSignToken() {
     TdiFlowArguments flow = new TdiFlowArguments();
     // NOTE: If we want to cause the fleet server's SELF key to sign
     //   messages, we would remove 'setSigners' from the array below.
@@ -444,5 +454,63 @@ private TdiFlowArguments buildFlowSignToken() {
         });
     });
     return flow;
+  }
+
+
+  /*
+  * Blocks until a response is received.
+  */
+  private String httpPostToCosigner(String method, String fleet, String kid, String payload) {
+    HttpURLConnection con = null;
+    StringBuffer resp = new StringBuffer();
+    int payload_len = payload.getBytes().length;
+    LOG.info("Sending a "+payload_len + " byte payload for cosigning.");
+    try {
+      URL url = new URL(this.baseURI+"/projects/"+fleet+"/"+method+"/"+kid);
+      con = (HttpURLConnection) url.openConnection();
+      con.setRequestMethod("POST");
+      con.setRequestProperty("Content-Type",     "application/JOSE+JSON");
+      con.setRequestProperty("Accept",           "application/JOSE+JSON");
+      con.setRequestProperty("encoding",         "utf8");
+      //con.setRequestProperty("Bearer",           "jwt");
+      con.setRequestProperty("Content-Length",   Integer.toString(payload_len));
+      con.setRequestProperty("Content-Language", "en-US");
+      con.setUseCaches(false);
+      con.setDoInput(true);
+      con.setDoOutput(true);
+      DataOutputStream tx = new DataOutputStream(con.getOutputStream());
+      tx.writeBytes(payload);
+      tx.flush();
+      tx.close();
+      BufferedReader rx = new BufferedReader(new InputStreamReader(con.getInputStream()));
+      String line;
+      while((line = rx.readLine()) != null) {
+        resp.append(line);
+        resp.append('\r');
+      }
+      rx.close();
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+    }
+    if(con != null) {
+      con.disconnect();
+    }
+    return resp.toString();
+  }
+
+
+  /*
+  * TODO: Yuck. Why aren't we passing a CanonicalMsg through this pathway?
+  * Awful. No safety.
+  */
+  private String fetchIssFromJwsString(String jwsString) throws IOException, JsonParseException, JsonMappingException  {
+    String ret = null;
+    Map<String, Object> jws = new ObjectMapper().readValue(jwsString, new TypeReference<Map<String, Object>>() {});
+    String serialized_inner_payload = (String) jws.get("payload");
+    String decoded = this.impl.getPlatform().getUtils().b64UrlDecode(serialized_inner_payload);
+    Map<String, Object> inner_jws = new ObjectMapper().readValue(decoded, new TypeReference<Map<String, Object>>() {});
+    ret = (String) inner_jws.get("iss");
+    return ret;
   }
 }
