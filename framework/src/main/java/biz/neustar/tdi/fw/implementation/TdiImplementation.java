@@ -86,6 +86,10 @@ public class TdiImplementation implements TdiImplementationShape {
     modules = new HashMap<>();
   }
 
+  public void dumpDebug() {
+  }
+
+
   /**
    * Sets up the global datastore.
    *

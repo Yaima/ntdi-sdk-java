@@ -41,6 +41,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import org.slf4j.Logger;
@@ -233,53 +236,47 @@ public class FleetSigner extends TdiPluginBase {
     flow.addMethod("prepSignatures", (data) -> {
       TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
       // get kid values for signatures (prune signatures and check project keystore scope?)
-      int verify_count = 0;
-      //    const promise_queue = [];
-      //    for (const i of msg.signaturesToVerify) {
-      //      const t_kid: string = i['parsedHeader']['kid'];
-      //      promise_queue.push(
-      //        this.imp.pf.keys
-      //          .getKey(t_kid)
-      //          .then((t_key: TdiKeyStructure) => {
-      //            // We have knowledge of the key.
-      //            if (t_key.fleet !== '') {
-      //              msg.currentProject = t_key.fleet;
-      //            }
-      //            if (t_key.invalid) {
-      //              msg.verifiers = []; // No point to verifying.
-      //              return Promise.reject(
-      //                `prepSignatures(): Key ${t_key.kid} was marked invalid.`
-      //              );
-      //            }
-      //            msg.verifiers.push(t_key);
-      //            verify_count++;
-      //          })
-      //          .catch((err: string) => {
-      //            return false;
-      //          })
-      //      );
-      //    }
-      //    return Promise.all(promise_queue).then(() => {
-      //      if (msg.currentProject === '') {
-      //        this.log('fleetVerify(): WARNING: No currentProject set');
-      //      }
-      //      if (verify_count !== 0) {
-      //        // NOTE: We are not checking for roles here.
-      //        return Promise.resolve(msg);
-      //      } else {
-      //        return Promise.reject(
-      //          'prepSignatures(): No known keys to verify against.'
-      //        );
-      //      }
-      //    });
-      //  },
-      return CompletableFuture.allOf()
+      List<CompletableFuture<TdiKeyStructureShape>> promise_queue = new ArrayList<>();
+      for (Object k : msgObj.getSignaturesToVerify().toArray()) {
+        // TODO: Ugly. Clean later.
+        Map<String, Map<String, String>> sig_map = (Map<String, Map<String, String>>) k;
+        if (sig_map.containsKey("parsedHeader")) {
+          Map<String, String> parsedHeader = sig_map.get("parsedHeader");
+          if (parsedHeader.containsKey("kid")) {
+            promise_queue.add(
+              this.impl.getPlatform().getKeystore().getKey(parsedHeader.get("kid"))
+                .thenApply((TdiKeyStructureShape t_key) -> {
+                  // We have knowledge of the key.
+                  if (0 < t_key.getFleetId().length()) {
+                    msgObj.setCurrentProject(t_key.getFleetId());
+                  }
+                  if (t_key.isInvalid()) {
+                    msgObj.clearVerifiers(); // No point to verifying.
+                    LOG.info("prepSignatures(): Key " + t_key.getKeyId() + " was marked invalid.");
+                    return null;
+                  }
+                  msgObj.addVerifier(t_key);
+                  return t_key;
+                })
+            );
+          }
+        }
+      }
+      return CompletableFuture.allOf((CompletableFuture<TdiKeyStructureShape>[]) promise_queue.toArray())
         .thenApply((arg) -> {
           CompletableFuture<TdiCanonicalMessageShape> future = new CompletableFuture<>();
           if (0 == msgObj.getCurrentProject().length()) {
             LOG.warn("fleetVerify(): WARNING: No currentProject set");
           }
+          int verify_count = 0;
+
+          for (CompletableFuture<TdiKeyStructureShape> cffk : (CompletableFuture<TdiKeyStructureShape>[]) promise_queue.toArray()) {
+            if (null != cffk) {
+              verify_count++;
+            }
+          }
           if (0 != verify_count) {
+            // NOTE: We are not checking for roles here.
             return future.complete(msgObj);
           }
           else {
@@ -336,23 +333,18 @@ public class FleetSigner extends TdiPluginBase {
         });
     });
     flow.addMethod("validateCosigner", (data) -> {
-      CompletableFuture<TdiCanonicalMessageShape> future = new CompletableFuture<>();
       String requestBody = (String) data;
-      if ((null != requestBody) && (0 < requestBody.length())) {
-        // TODO: Might-should have better check?
-        //      return this.fleetVerify(
-        //        requestBody
-        //      ).then((vCanon: TdiCanonicalMessageShape) => {
-        //        return requestBody;
-        //      });
-        return this.fleetVerify.apply(requestBody);
-      }
-      else {
-        future.completeExceptionally(
-          new FrameworkRuntimeException("No response body in cosigner reply.")
-        );
-      }
-      return future;
+      return this.fleetVerify.apply(requestBody)
+        .thenApply((msg_str) -> {
+          TdiCanonicalMessageShape cosignedJWS = (TdiCanonicalMessageShape) msg_str;
+          // NOTE: Not _strictly_ what the TS package does, but should be equivalent.
+          return CompletableFuture.completedFuture(cosignedJWS.getRawPayload());
+        })
+        .exceptionally(throwable -> {
+          String errMsg = "validateCosigner() failed.";
+          LOG.error(errMsg);
+          throw new FrameworkRuntimeException(errMsg);
+        });
     });
     flow.addMethod("fleetSign", (data) -> {
       TdiCanonicalMessageShape verifiedJWS = (TdiCanonicalMessageShape) data;
@@ -395,21 +387,18 @@ public class FleetSigner extends TdiPluginBase {
         });
     });
     flow.addMethod("validateCosigner", (data) -> {
-      //  validateCosigner: (requestBody: string) => {
-      //    if (requestBody) {
-      //      return this.fleetVerify(
-      //        requestBody
-      //      ).then((vCanon: TdiCanonicalMessageShape) => {
-      //        return requestBody;
-      //      });
-      //    } else {
-      //      return Promise.reject(
-      //        new Error('No response body in cosigner reply')
-      //      );
-      //    }
-      //  },
-      TdiCanonicalMessageShape verifiedJWS = (TdiCanonicalMessageShape) data;
-      return this.fleetCosign.apply(verifiedJWS);
+      String requestBody = (String) data;
+      return this.fleetVerify.apply(requestBody)
+        .thenApply((msg_str) -> {
+          TdiCanonicalMessageShape cosignedJWS = (TdiCanonicalMessageShape) msg_str;
+          // NOTE: Not _strictly_ what the TS package does, but should be equivalent.
+          return CompletableFuture.completedFuture(cosignedJWS.getRawPayload());
+        })
+        .exceptionally(throwable -> {
+          String errMsg = "validateCosigner() failed.";
+          LOG.error(errMsg);
+          throw new FrameworkRuntimeException(errMsg);
+        });
     });
     flow.addMethod("fleetSign", (data) -> {
       TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
