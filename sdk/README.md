@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/Neustar-TDI/java-ntdi.svg?style=svg&circle-token=8df38531e4dfff635375fd651a9bda1a8948362c)](https://circleci.com/gh/Neustar-TDI/java-ntdi)
+[![CircleCI](https://circleci.com/gh/Neustar-TDI/ntdi-sdk-java.svg?style=svg&circle-token=8df38531e4dfff635375fd651a9bda1a8948362c)](https://circleci.com/gh/Neustar-TDI/ntdi-sdk-java)
 
 # Neustar TDI Java Implementation
 
@@ -13,7 +13,7 @@ This java library includes full definitions and sourceMaps for debugging if you 
 
 To get started, download following, build and include the library in your project:
 
-`https://github.com/Neustar-TDI/java-ntdi.git`
+`https://github.com/Neustar-TDI/ntdi-sdk-java.git`
 
 This will download the framework and sdk source codes. 
 It would also download example implementations for Platform and Plugin. You can however write your own implementations for them by referring to the examples.  
@@ -26,13 +26,13 @@ This library forms the application's secure and authenticated channel to the res
 
 To use the OSI metaphor, this package represents a layer-6 authentication mechanism that allows the injection of policy and arbitrary rules surrounding signatures.
 
-#### 2. [Platform](https://github.com/Neustar-TDI/java-ntdi/examples/platform)
+#### 2. [Platform](https://github.com/Neustar-TDI/ntdi-sdk-java/examples/platform)
 
 The platform is the interface between the library, and the system below it. Our example platform and application demos assume java, and provide a uniform interface to (often novel) hardware features (cryptography, time and date, persistent storage, etc).
 
 For more detail, see the platform repo. For now, we will use the example platform.
 
-`https://github.com/Neustar-TDI/java-ntdi/examples/platform`
+`https://github.com/Neustar-TDI/ntdi-sdk-java/examples/platform`
 
 #### 3. Configuration
 
@@ -81,9 +81,9 @@ At present, only `nonce` has configurable behavior. Its configuration options ar
 | `expDuration` | _number_ | `true`  | For how many seconds will messages be valid? |
 | `nbfMinimum` | _number_ | `false`  | If provided, represents the earliest date this system will begin accepting messages. Expressed as a 64-bit epoch timestamp. <br />If not provided and absent from the datastore, defaults to the system time. This value will be regularly updated in the datastore. |
 
-#### 5. [Plugins](https://github.com/Neustar-TDI/java-ntdi/plugins)
+#### 5. [Plugins](https://github.com/Neustar-TDI/ntdi-sdk-java/plugins)
 
-These are modular API extensions that impart a given capability to the network-level application. More detail can be found in the plugin and  [app-examples](https://github.com/Neustar-TDI/java-ntdi/examples/app) repos.
+These are modular API extensions that impart a given capability to the network-level application. More detail can be found in the plugin and  [app-examples](https://github.com/Neustar-TDI/ntdi-sdk-java/examples/app) repos.
 
 
 ##### Plugin loading example
@@ -99,7 +99,7 @@ sdkOptions.plugins = pluginsList;
 
 ## Tying it together
 
-`TdiSdk.init()` returns a CompletableFuture<TdiSdkWrapperShape> that will return a TdiSdkWrapper object when it finishes loading and passes all of its internal checks. See the [framework repo](https://github.com/Neustar-TDI/java-ntdi/framework) for details on this process.
+`TdiSdk.init()` returns a CompletableFuture<TdiSdkWrapperShape> that will return a TdiSdkWrapper object when it finishes loading and passes all of its internal checks. See the [framework repo](https://github.com/Neustar-TDI/ntdi-sdk-java/framework) for details on this process.
 
 `TdiSdk` constructor takes a `TdiSdkOptions` composed of the following arguments:
  - (required) A Platform class
