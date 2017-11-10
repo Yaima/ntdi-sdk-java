@@ -69,32 +69,32 @@ public class FleetSigner extends TdiPluginBase {
    * Generates a new signature around a payload with the fleet key
    * @param payload Payload to be encased in claims
    */
-  public Function<Object, CompletableFuture<Object>> fleetSign = null;
+  public Function<TdiCanonicalMessageShape, CompletableFuture<TdiCanonicalMessageShape>> fleetSign = null;
   /**
    * Appends a fleet signature to the provided JWS
    * @param jws The JWS to add a signature to
    */
-  public Function<Object, CompletableFuture<Object>> fleetCosign = null;
+  public Function<TdiCanonicalMessageShape, CompletableFuture<TdiCanonicalMessageShape>> fleetCosign = null;
   /**
    * Verify a server or device signature
    * @param jws The JWS to be verified
    */
-  public Function<Object, CompletableFuture<Object>> fleetVerify = null;
+  public Function<String, CompletableFuture<TdiCanonicalMessageShape>> fleetVerify = null;
   /**
    * Execute a full round-trip signing ceremony.  Returns a JWS ready for device consumption
    * @param payload
    */
-  public Function<Object, CompletableFuture<Object>> fleetToDevice = null;
+  public Function<String, CompletableFuture<TdiCanonicalMessageShape>> fleetToDevice = null;
   /**
    * Execute a full round-trip verify ceremony.  Returns a payload if all verifications pass
    * @param JWS
    */
-  public Function<Object, CompletableFuture<Object>> fleetFromDevice = null;
+  public Function<String, CompletableFuture<TdiCanonicalMessageShape>> fleetFromDevice = null;
   /**
    * Signs a payload as a token
    * @param payload Payload to be sent
    */
-  public Function<Object, CompletableFuture<Object>> signToken = null;
+  public Function<TdiCanonicalMessageShape, CompletableFuture<TdiCanonicalMessageShape>> signToken = null;
 
 
   public FleetSigner(TdiImplementationShape impl, TdiSdkWrapperShape sdkWrapper) {
