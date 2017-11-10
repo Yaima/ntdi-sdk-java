@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/Neustar-TDI/java-ntdi.svg?style=svg&circle-token=8df38531e4dfff635375fd651a9bda1a8948362c)](https://circleci.com/gh/Neustar-TDI/java-ntdi)
+[![CircleCI](https://circleci.com/gh/Neustar-TDI/ntdi-sdk-java.svg?style=svg&circle-token=8df38531e4dfff635375fd651a9bda1a8948362c)](https://circleci.com/gh/Neustar-TDI/ntdi-sdk-java)
 
 # NTDI Platform Template for Java
 

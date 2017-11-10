@@ -1,0 +1,11 @@
+.directory
+.project
+.settings
+.classpath
+*.dat
+
+# Test artifacts
+framework/testClaimsJsonFile.json
+
+# Build artifacts
+target/

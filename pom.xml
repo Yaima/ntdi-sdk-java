@@ -3,14 +3,15 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>biz.neustar.tdi</groupId>
-  <artifactId>java-ntdi</artifactId>
+  <artifactId>ntdi-sdk-java</artifactId>
   <version>1.0</version>
   <packaging>pom</packaging>
 
-  <name>java-ntdi</name>
-  <url>https://github.com/Neustar-TDI/java-ndti</url>
+  <name>ntdi-sdk-java</name>
+  <url>https://github.com/Neustar-TDI/ntdi-sdk-java</url>
 
   <modules>
+    <module>plugins</module>
     <module>framework</module>
     <module>sdk</module>
     <module>examples</module>
