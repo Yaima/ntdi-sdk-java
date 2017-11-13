@@ -1,11 +1,26 @@
 .directory
-.project
-.settings
-.classpath
 *.dat
 
 # Test artifacts
 framework/testClaimsJsonFile.json
+examples/platform/src/test/resources/keystore.json
 
 # Build artifacts
+target/
+
+# Eclipse
+.classpath
+.project
+.settings
+
+# Intellij
+.idea/
+*.iml
+*.iws
+
+# Mac
+.DS_Store
+
+# Maven
+log/
 target/

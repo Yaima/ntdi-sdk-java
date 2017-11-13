@@ -97,7 +97,7 @@ public class FleetSigner extends TdiPluginBase {
   public Function<TdiCanonicalMessageShape, CompletableFuture<TdiCanonicalMessageShape>> signToken = null;
 
 
-  public FleetSigner(TdiImplementationShape impl, TdiSdkWrapperShape sdkWrapper) {
+  public FleetSigner(TdiImplementationShape impl, TdiSdkWrapperShape sdkWrapper) throws Exception {
     super("FleetSigner", impl, sdkWrapper);
     LOG.trace("FleetSigner:constructor()");
     // Now that we have refs to implementation and SDK, build up our API methods...
@@ -159,7 +159,7 @@ public class FleetSigner extends TdiPluginBase {
 
 
 
-  private TdiFlowArguments buildFlowFleetSign() {
+  private TdiFlowArguments buildFlowFleetSign() throws Exception{
     TdiFlowArguments flow = new TdiFlowArguments();
     // TODO: Why is this replicated?
     flow.addOverrideSteps(Arrays.asList("setSigners"));
