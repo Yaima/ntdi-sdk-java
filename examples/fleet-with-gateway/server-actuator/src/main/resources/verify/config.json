@@ -1,0 +1,13 @@
+{
+	"platform": {
+		"data": {
+			"basepath": "src/main/resources/verify/"
+		},
+		"keys": {
+			"basepath": "src/main/resources/verify/"
+		}
+	},
+	"nonce002": {
+		"expDuration": 10
+	}
+}
