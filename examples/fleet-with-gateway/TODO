@@ -1,0 +1,15 @@
+
+
+sensors handling actions
+
+connection action handlers
+
+share more common code/patterns/config
+
+Have services listen on wildcarded topics?
+cloud zone needs fleet prefix (different template)
+move dynamic config out of jars
+
+move main code into class.start, make main optional
+
+clean up dependencies, etc in poms
