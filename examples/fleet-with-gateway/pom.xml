@@ -15,5 +15,6 @@
 	<url>https://github.com/Neustar-TDI/ntdi-sdk-java/examples/fleet-with-gateway</url>
 
 	<modules>
+		<module>device-sensor</module>
 	</modules>
 </project>

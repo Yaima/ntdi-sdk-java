@@ -1,42 +1,23 @@
-# NTDI Sensor Example  (Java)
+# Simple Sensor
 
-This project demonstrates the usage of Neustar's TDI components namely 
-framework, sdk and platform example. This example Signs and Co-signs
-the payload ```(motion=active, name=Room 1 Sensor, battery=85)``` string. 
-Note: The explaination about the key flags in keystore.json files is provided 
-in [KeyFlags.txt](KeyFlags.txt) file.
+This is a basic NTDI device that reports motion activity and battery level, and includes a switch that can be turned on and off.
 
+It posts its values to an MQTT topic every second (configurable), and listens on another topic for commands to turn the switch on or off.
 
-## Pre-requisite
-Checkout Neustar TDI [ntdi-sdk-java](https://github.com/Neustar-TDI/ntdi-sdk-java) and execute the command below
-```
-$ git clone https://github.com/Neustar-TDI/ntdi-sdk-java
-$ cd ntdi-sdk-java
-$ mvn clean install
-```
+# Configuration
 
-## Building this example
-Checkout this project and build it as shown below:
-```
-$ git clone https://github.com/Neustar-TDI/demo-device-java.git
-$ cd demo-device-java
-$ mvn clean package
-```
-## How does it work
+The configuration files in `src/main/resources` are in two parts. In `device/config.json` are basic NTDI configuration values for the device. These include where to find the keystore and data files, as well as basic parameters such as nonce expiration times.
 
-The Sensor signs the data ```(motion=active, name=Room 1 Sensor, battery=85)```, ```signDevice(String payload)``` and sends the jws
-to the Gateway to co-sign ```cosignDevice(String signedMsg)```. The Gateway will send the co-signed jws to ntdi-demo-docker-java 
-to verify the message ```verifySignature(String cosignedMsg)```.
+In `controller/config.json` are runtime values required for the SensorController, such as MQTT values and Fleet information. It also contains the ID of the gateway device that the sensor reports to.
 
-## Executing the example:
-### 1. Via command line
+# Running
+
+Once configured and built, the device can be run from the commmand line:
 ```
 mvn exec:java
 ```
 
-### 2. Execute from any editior
-Just execute the ```Sensor.java```.
-
-## Additional Documentation
-### TDI Node Services
-The TDI node services also provide API endpoints for `/signMessage` `/verifyMessage` and `/device`. Documentation for the API can be found in [documentation/node_api_doc.md](documentation/node_api_doc.md).
+Or, with logging (change "info" to "debug" for more detailed logging):
+```
+mvn exec:java -Dorg.slf4j.simpleLogger.defaultLogLevel=info
+```
