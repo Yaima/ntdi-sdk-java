@@ -16,5 +16,6 @@
 
 	<modules>
 		<module>device-sensor</module>
+		<module>device-gateway</module>
 	</modules>
 </project>
