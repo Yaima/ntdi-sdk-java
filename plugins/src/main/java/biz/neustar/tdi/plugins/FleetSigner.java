@@ -45,6 +45,7 @@ import biz.neustar.tdi.fw.keystructure.TdiKeyFlagsEnum;
 import biz.neustar.tdi.fw.keystructure.TdiKeyStructureShape;
 import biz.neustar.tdi.fw.plugin.TdiPluginBase;
 import biz.neustar.tdi.fw.wrapper.TdiSdkWrapperShape;
+import biz.neustar.tdi.sdk.component.jws.TdiJwsSignature;
 
 /**
  *
@@ -64,14 +65,14 @@ public class FleetSigner extends TdiPluginBase {
 	 * @param payload
 	 *            Payload to be encased in claims
 	 */
-	public Function<TdiCanonicalMessageShape, CompletableFuture<TdiCanonicalMessageShape>> fleetSign = null;
+	public Function<String, CompletableFuture<TdiCanonicalMessageShape>> fleetSign = null;
 	/**
 	 * Appends a fleet signature to the provided JWS
 	 *
 	 * @param jws
 	 *            The JWS to add a signature to
 	 */
-	public Function<TdiCanonicalMessageShape, CompletableFuture<TdiCanonicalMessageShape>> fleetCosign = null;
+	public Function<String, CompletableFuture<TdiCanonicalMessageShape>> fleetCosign = null;
 	/**
 	 * Verify a server or device signature
 	 *
@@ -99,15 +100,15 @@ public class FleetSigner extends TdiPluginBase {
 	 * @param payload
 	 *            Payload to be sent
 	 */
-	public Function<TdiCanonicalMessageShape, CompletableFuture<TdiCanonicalMessageShape>> signToken = null;
+	public Function<String, CompletableFuture<TdiCanonicalMessageShape>> signToken = null;
 
 	public FleetSigner(TdiImplementationShape impl, TdiSdkWrapperShape sdkWrapper) {
 		super("FleetSigner", impl, sdkWrapper);
 		LOG.trace("FleetSigner:constructor()");
-		this.fleetSign = this.impl.buildApiFlow(this.buildFlowFleetSign(), null);
-		this.signToken = this.impl.buildApiFlow(this.buildFlowSignToken(), null); // <--- No deferral to orginal flow.
-		this.fleetCosign = this.impl.buildApiFlow(this.buildFlowFleetCosign(), null); // _or: ['setSigners'],
-		this.fleetVerify = this.impl.buildApiFlow(this.buildFlowFleetVerify(), null); // _or: ['prepSignatures',
+		this.fleetSign = this.impl.buildApiFlow(this.sdkWrapper.getDefaultFlows().get("SignFlow"), this.buildFlowFleetSign());
+		this.signToken = this.impl.buildApiFlow(this.sdkWrapper.getDefaultFlows().get("SignFlow"), this.buildFlowSignToken()); // <--- No deferral to orginal flow.
+		this.fleetCosign = this.impl.buildApiFlow(this.sdkWrapper.getDefaultFlows().get("CosignFlow"), this.buildFlowFleetCosign()); // _or: ['setSigners'],
+		this.fleetVerify = this.impl.buildApiFlow(this.sdkWrapper.getDefaultFlows().get("VerifyFlow"), this.buildFlowFleetVerify()); // _or: ['prepSignatures',
 																						// 'handleReturn'],
 		this.fleetToDevice = this.impl.buildApiFlow(this.buildFlowFleetToDev(), null);
 		this.fleetFromDevice = this.impl.buildApiFlow(this.buildFlowFleetFromDev(), null);
@@ -203,12 +204,11 @@ public class FleetSigner extends TdiPluginBase {
 		flow.addMethod("prepSignatures", (data) -> {
 			TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
 			List<CompletableFuture<TdiKeyStructureShape>> promise_queue = new ArrayList<>();
-			for (Object k : msgObj.getSignaturesToVerify().toArray()) {
-				Map<String, Map<String, String>> sig_map = (Map<String, Map<String, String>>) k;
-				if (sig_map.containsKey("parsedHeader")) {
-					Map<String, String> parsedHeader = sig_map.get("parsedHeader");
-					if (parsedHeader.containsKey("kid")) {
-						promise_queue.add(this.impl.getPlatform().getKeystore().getKey(parsedHeader.get("kid"))
+			for (Object s : msgObj.getSignaturesToVerify().toArray()) {
+				TdiJwsSignature sig = (TdiJwsSignature) s;
+				if (null != sig.parsedHeader) {
+					if (0 < sig.parsedHeader.kid.length()) {
+						promise_queue.add(this.impl.getPlatform().getKeystore().getKey(sig.parsedHeader.kid)
 								.thenApply((TdiKeyStructureShape t_key) -> {
 									// We have knowledge of the key.
 									if (0 < t_key.getFleetId().length()) {
@@ -225,7 +225,7 @@ public class FleetSigner extends TdiPluginBase {
 					}
 				}
 			}
-			return CompletableFuture.allOf((CompletableFuture<TdiKeyStructureShape>[]) promise_queue.toArray())
+			return CompletableFuture.allOf(promise_queue.toArray(new CompletableFuture<?>[0]))
 					.thenApply((arg) -> {
 						CompletableFuture<TdiCanonicalMessageShape> future = new CompletableFuture<>();
 						if (0 == msgObj.getCurrentProject().length()) {
@@ -233,8 +233,7 @@ public class FleetSigner extends TdiPluginBase {
 						}
 						int verify_count = 0;
 
-						for (CompletableFuture<TdiKeyStructureShape> cffk : (CompletableFuture<TdiKeyStructureShape>[]) promise_queue
-								.toArray()) {
+						for (CompletableFuture<TdiKeyStructureShape> cffk : (CompletableFuture<TdiKeyStructureShape>[]) promise_queue.toArray(new CompletableFuture<?>[0])) {
 							if (null != cffk) {
 								verify_count++;
 							}
@@ -262,9 +261,9 @@ public class FleetSigner extends TdiPluginBase {
 
 	private TdiFlowArguments buildFlowFleetToDev() {
 		TdiFlowArguments flow = new TdiFlowArguments();
-		flow.addMethod("sign", (data) -> {
-			return this.sdkWrapper.api("sign").apply(data);
-		});
+//		flow.addMethod("sign", (data) -> {
+//			return this.sdkWrapper.api("sign").apply(data);
+//		});
 		flow.addMethod("sendToCosigner", (data) -> {
 			String jwsPayload = (String) data;
 			return this.impl.getPlatform().getKeystore().getSelfKey().thenApply((TdiKeyStructureShape self) -> {
@@ -297,7 +296,7 @@ public class FleetSigner extends TdiPluginBase {
 			});
 		});
 		flow.addMethod("fleetSign", (data) -> {
-			TdiCanonicalMessageShape verifiedJWS = (TdiCanonicalMessageShape) data;
+			String verifiedJWS = (String) data;
 			return this.fleetCosign.apply(verifiedJWS);
 		});
 		return flow;
@@ -340,7 +339,7 @@ public class FleetSigner extends TdiPluginBase {
 		});
 		flow.addMethod("fleetSign", (data) -> {
 			TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
-			return this.fleetCosign.apply(msgObj);
+			return this.fleetCosign.apply(msgObj.getBuiltMessage());
 		});
 		return flow;
 	}
