@@ -1,0 +1,19 @@
+{
+  "platform": {
+    "data": {
+      "basepath": "src/test/resources/server/"
+    },
+    "keys": {
+      "basepath": "src/test/resources/server/"
+    }
+  },
+  "nonce002": {
+    "expDuration": 100
+  },
+  "FleetSigner": {
+    "acceptDevices": false,
+    "cosigner": {
+      "baseURI":  "https://api-dev.oneid.com"
+    }
+  }
+}

@@ -147,7 +147,6 @@ public class TdiCanonicalMessage implements TdiCanonicalMessageShape {
   /**
    * Add the verifier in the verifiers list.
    *
-   * @param verifier
    *          {@link TdiKeyStructureShape} instance with verifiying key details.
    */
   @Override

@@ -16,267 +16,70 @@
 
 package biz.neustar.tdi.plugins;
 
-import biz.neustar.tdi.fw.keystructure.TdiKeyFlagsEnum;
-import biz.neustar.tdi.fw.keystructure.TdiKeyStructure;
-import biz.neustar.tdi.fw.keystructure.TdiKeyStructureShape;
-import biz.neustar.tdi.fw.platform.TdiPlatformBase;
-import biz.neustar.tdi.fw.platform.TdiPlatformShape;
-import biz.neustar.tdi.fw.platform.TdiPlatformShapeFactory;
-import biz.neustar.tdi.fw.platform.facet.crypto.TdiPlatformCryptoShape;
-import biz.neustar.tdi.fw.platform.facet.data.TdiPlatformDataShape;
-import biz.neustar.tdi.fw.platform.facet.keys.TdiPlatformKeysShape;
-import biz.neustar.tdi.fw.platform.facet.time.TdiPlatformTimeShape;
-import biz.neustar.tdi.fw.platform.facet.utils.TdiPlatformUtilsShape;
+import biz.neustar.tdi.fw.canonicalmessage.TdiCanonicalMessageShape;
+import biz.neustar.tdi.fw.plugin.TdiPluginBaseFactory;
+import biz.neustar.tdi.fw.wrapper.TdiSdkWrapperShape;
+import biz.neustar.tdi.platform.Platform;
+import biz.neustar.tdi.sdk.TdiSdk;
+import biz.neustar.tdi.sdk.TdiSdkOptions;
 
-import java.util.Arrays;
-import java.util.HashMap;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
-public class TestData {
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-	public static TdiKeyStructureShape goodKey = new TdiKeyStructure("Key1", "Fleet1", "TempData",
-			TdiKeyFlagsEnum.CAN_SIGN.getNumber());
+class EasySdk {
+	private TdiSdkWrapperShape sdk;
 
-	public static class DummyPlatformBase extends TdiPlatformBase {
-
-		/**
-		 * Constructor.
-		 * 
-		 * @param conf
-		 *            : config map
-		 */
-		public DummyPlatformBase(Map<String, Object> conf) {
-			super(conf);
-			config.put("k1", "v1");
-			config.put("k2", "v2");
-			config.put("k3", "v3");
-
-		}
-
-		@Override
-		public CompletableFuture<Void> init() {
-			return null;
-		}
-
-		@Override
-		public TdiPlatformUtilsShape getUtils() {
-			return null;
-		}
-
-		@Override
-		public TdiPlatformTimeShape getTime() {
-			return null;
-		}
-
-		@Override
-		public TdiPlatformKeysShape getKeystore() {
-			return null;
-		}
-
-		@Override
-		public TdiPlatformDataShape getDataStore() {
-			return null;
-		}
-
-		@Override
-		public TdiPlatformCryptoShape getCrypto() {
-			return null;
-		}
-
-		@Override
-		public TdiPlatformShapeFactory newInstance(Map<String, Object> conf) {
-			return null;
-		}
-
+	public EasySdk(List<TdiPluginBaseFactory> plugins, String configPath)
+			throws ExecutionException, InterruptedException {
+		sdk = (new SdkFactory()).setup(plugins, configPath).get();
 	}
 
-	/**
-	 * Creates a dummy datastore.
-	 * 
-	 * @return TdiPlatformDataShape instance.
-	 */
-	public static TdiPlatformDataShape getDummyDataStore() {
-		return new TdiPlatformDataShape() {
-			@Override
-			public CompletableFuture<Void> init() {
-				return null;
-			}
-
-			@Override
-			public TdiPlatformShape getPlatform() {
-				return null;
-			}
-
-			@Override
-			public CompletableFuture<Void> set(String storeName, String key, Object value) {
-				return CompletableFuture.completedFuture(null);
-			}
-
-			@Override
-			public CompletableFuture<List<String>> keys(String storeName) {
-				return CompletableFuture.completedFuture(Arrays.asList("k1", "k2"));
-			}
-
-			@Override
-			public CompletableFuture<?> get(String storeName, String key) {
-				if (key.equals("k1")) {
-
-					return CompletableFuture.supplyAsync(() -> {
-						return "fromDataStore";
-					});
-				} else {
-					return CompletableFuture.completedFuture(null);
-				}
-			}
-
-			@Override
-			public CompletableFuture<Void> drop(String storeName, String key) {
-				return CompletableFuture.completedFuture(null);
-			}
-
-			@Override
-			public CompletableFuture<Void> deleteStore(String storeName) {
-				return null;
-			}
-
-			@Override
-			public CompletableFuture<?> createStore(String storeName, Map<String, Object> value) {
-				return CompletableFuture.completedFuture(new HashMap<String, Object>());
-			}
-		};
+	public String sign(String data) throws ExecutionException, InterruptedException {
+		return ((TdiCanonicalMessageShape) sdk.api("SignFlow").apply(data).get()).getBuiltMessage();
 	}
 
-	public static class DummyKeyStore implements TdiPlatformKeysShape {
-
-		@Override
-		public CompletableFuture<Void> init() {
-			return null;
-		}
-
-		@Override
-		public TdiPlatformShape getPlatform() {
-			return null;
-		}
-
-		@Override
-		public CompletableFuture<TdiKeyStructureShape> setKeyFromProvision(Object key) {
-			return null;
-		}
-
-		@Override
-		public CompletableFuture<TdiKeyStructureShape> setKey(Object key, Integer flags, String fleetId) {
-			return null;
-		}
-
-		@Override
-		public CompletableFuture<Void> saveStore() {
-			return null;
-		}
-
-		@Override
-		public CompletableFuture<TdiKeyStructureShape> getSelfKey() {
-			return CompletableFuture.completedFuture(goodKey);
-		}
-
-		@Override
-		public Object getPublicPem(Object key) {
-			return null;
-		}
-
-		@Override
-		public CompletableFuture<List<TdiKeyStructureShape>> getKeys() {
-			return null;
-		}
-
-		@Override
-		public CompletableFuture<TdiKeyStructureShape> getKeyByRole(Integer role, String fleetId) {
-			return null;
-		}
-
-		@Override
-		public CompletableFuture<TdiKeyStructureShape> getKey(String kid) {
-			return null;
-		}
-
-		@Override
-		public CompletableFuture<TdiKeyStructureShape> generateKey(Integer flags, String kid, String fleetId) {
-			return null;
-		}
-
-		@Override
-		public CompletableFuture<Void> forgetKey(String kid) {
-			return null;
-		}
+	public String cosign(String msg) throws ExecutionException, InterruptedException {
+		return ((TdiCanonicalMessageShape) sdk.api("CosignFlow").apply(msg).get()).getBuiltMessage();
 	}
 
-	/**
-	 * Creates a dummy keystore.
-	 * 
-	 * @return TdiPlatformKeysShape instance
-	 */
-	public static TdiPlatformKeysShape getDummyKeyStore() {
-		return new DummyKeyStore();
+	public String fleetToDevice(String data) throws ExecutionException, InterruptedException {
+		return (((FleetSigner) sdk.plugin("FleetSigner")).fleetToDevice.apply(data).get()).getBuiltMessage();
 	}
 
-	public static class DummyPlatform implements TdiPlatformShape {
-
-		/**
-		 * Configuration for datastore defaults.
-		 */
-		Map<String, Object> config;
-
-		public DummyPlatform(Map<String, Object> conf) {
-			config = conf;
-		}
-
-		@Override
-		public CompletableFuture<Void> init() {
-			return CompletableFuture.completedFuture(null);
-		}
-
-		@Override
-		public TdiPlatformUtilsShape getUtils() {
-			return null;
-		}
-
-		@Override
-		public TdiPlatformTimeShape getTime() {
-			return null;
-		}
-
-		@Override
-		public TdiPlatformKeysShape getKeystore() {
-			return TestData.getDummyKeyStore();
-		}
-
-		@Override
-		public TdiPlatformDataShape getDataStore() {
-			return TestData.getDummyDataStore();
-		}
-
-		@Override
-		public TdiPlatformCryptoShape getCrypto() {
-			return null;
-		}
-
-		@Override
-		public Map<String, Object> getConfig() {
-			return null;
-		}
-
-		@Override
-		public boolean checkConfig(Set<String> keys) {
-			return false;
-		}
-
-		@Override
-		public TdiPlatformShapeFactory newInstance(Map<String, Object> conf) {
-			return null;
-		}
-
+	public String fleetFromDevice(String msg) throws ExecutionException, InterruptedException {
+		return ((FleetSigner) sdk.plugin("FleetSigner")).fleetFromDevice.apply(msg).get().getBuiltMessage();
 	}
 
+	public String verify(String msg) throws ExecutionException, InterruptedException {
+		return ((String) sdk.api("VerifyFlow").apply(msg).get());
+	}
+}
+
+class SdkFactory {
+	private Map<String, Object> getConfig(String configPath) {
+		Map<String, Object> map = null;
+		InputStream inStream = getClass().getClassLoader().getResourceAsStream(configPath);
+		try {
+			map = new ObjectMapper().readValue(inStream, new TypeReference<Map<String, Object>>() {
+			});
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return map;
+	}
+
+	public CompletableFuture<TdiSdkWrapperShape> setup(List<TdiPluginBaseFactory> plugins, String configPath) {
+		TdiSdkOptions sdkOptions = new TdiSdkOptions();
+		sdkOptions.platform = Platform::new;
+		sdkOptions.plugins = plugins;
+		sdkOptions.config = getConfig(configPath);
+		return (new TdiSdk(sdkOptions)).init();
+	}
 }
