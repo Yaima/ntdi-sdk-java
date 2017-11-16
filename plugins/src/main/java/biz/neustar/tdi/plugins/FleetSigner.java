@@ -240,7 +240,7 @@ public class FleetSigner extends TdiPluginBase {
 						}
 						if (0 != verify_count) {
 							// NOTE: We are not checking for roles here.
-							return future.complete(msgObj);
+							future.complete(msgObj);
 						} else {
 							future.completeExceptionally(new FrameworkRuntimeException(
 									"prepSignatures(): No known keys to verify against."));
