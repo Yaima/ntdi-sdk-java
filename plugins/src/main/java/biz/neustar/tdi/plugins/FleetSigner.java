@@ -243,22 +243,20 @@ public class FleetSigner extends TdiPluginBase {
 						if (0 != verify_count) {
 							// NOTE: We are not checking for roles here.
 							future.complete(msgObj);
-							LOG.info("returning this: " + future);
-							return future.thenApply(a -> a);
 						} else {
 							future.completeExceptionally(new FrameworkRuntimeException(
 									"prepSignatures(): No known keys to verify against."));
-							return future;
 						}
+						return future;
 					})
 					.thenCompose(arg -> {
 						return arg;
+					})
+					.exceptionally(throwable -> {
+						String errMsg = "sendToCosigner() failed.";
+						LOG.error(errMsg + ": " + throwable.getMessage());
+						throw new FrameworkRuntimeException(errMsg);
 					});
-//					.exceptionally(throwable -> {
-//						String errMsg = "sendToCosigner() failed.";
-//						LOG.error(errMsg + ": " + throwable.getMessage());
-//						throw new FrameworkRuntimeException(errMsg);
-//					});
 		});
 		flow.addMethod("handleReturn", (data) -> {
 			TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
