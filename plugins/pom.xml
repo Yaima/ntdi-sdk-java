@@ -20,5 +20,10 @@
             <artifactId>framework</artifactId>
             <version>1.0</version>
         </dependency>
+        <dependency>
+            <groupId>biz.neustar.tdi</groupId>
+            <artifactId>sdk</artifactId>
+            <version>1.0</version>
+        </dependency>
     </dependencies>
 </project>
