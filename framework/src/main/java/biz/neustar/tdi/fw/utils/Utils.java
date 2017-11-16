@@ -1,17 +1,17 @@
 /*
  * Copyright 2017 Neustar, Inc
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  */
 
 package biz.neustar.tdi.fw.utils;
@@ -37,26 +37,26 @@ public class Utils {
   static {
     init();
   }
-  
+
   private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
 
   /**
-   * Method that initializes {@link ObjectMapper} for better performance. 
+   * Method that initializes {@link ObjectMapper} for better performance.
    */
   public static void init() {
     ObjectMapper mapper = new ObjectMapper();
     mapper.getTypeFactory().constructType(new TypeReference<Map<String, Object>>() {
     });
   }
-  
+
   /**
    * Method to convert Map to JSON String.
-   * 
+   *
    * @param map
    *          : Map object to be converted to JSON
-   * 
+   *
    * @return {@link String} Converted JSON String.
-   * 
+   *
    * @throws InvalidFormatException
    *           Thrown if there is any issues in conversion.
    */
@@ -70,12 +70,12 @@ public class Utils {
 
   /**
    * Method to convert JSON String to Map&lt;String, Object&gt;
-   * 
+   *
    * @param jsonString
    *          JSON string that needs to be converted.
-   * 
+   *
    * @return Map&lt;String, Object&gt; converted Map.
-   * 
+   *
    * @throws InvalidFormatException
    *           when invalid JSON format is encountered
    */
@@ -94,12 +94,12 @@ public class Utils {
 
   /**
    * Method to convert Object to JSON String.
-   * 
+   *
    * @param object
    *          : Object to be converted
-   * 
+   *
    * @return JSON String.
-   * 
+   *
    * @throws InvalidFormatException
    *           if there is any issues in conversion.
    */
@@ -118,15 +118,15 @@ public class Utils {
 
   /**
    * Method to convert JSON string to Object provided by Class attribute.
-   * 
+   *
    * @param jsonString
    *          : JSON String to be converted.
    * @param clazz
    *          : Class reference of the object to be converted into.
-   * @param <T> : Class type template 
-   * 
+   * @param <T> : Class type template
+   *
    * @return Object initialized with JSON properties.
-   * 
+   *
    * @throws InvalidFormatException
    *           if any issues in conversion to object.
    */
@@ -147,12 +147,12 @@ public class Utils {
 
   /**
    * Method to convert Object to JSON and write to the file specified.
-   * 
+   *
    * @param object
    *          : Object to be converted
    * @param jsonFilePath
    *          : JSON file to be written to.
-   * 
+   *
    * @throws InvalidFormatException
    *           if there is any issues in conversion.
    */
@@ -174,15 +174,15 @@ public class Utils {
 
   /**
    * Method to convert JSON File to Object provided by Class attribute.
-   * 
+   *
    * @param jsonFilePath
    *          : JSON File to be converted.
    * @param clazz
    *          : Class reference of the object to be converted into.
-   * @param <T> : Class type template 
-   * 
+   * @param <T> : Class type template
+   *
    * @return Object initialized with JSON properties.
-   * 
+   *
    * @throws InvalidFormatException
    *           if any issues in conversion to object.
    */
@@ -203,12 +203,12 @@ public class Utils {
 
   /**
    * Method to convert Map to JSON and write to the file specified.
-   * 
+   *
    * @param map
    *          : Map object to be converted to JSON
    * @param jsonFilePath
    *          : JSON file to be written to.
-   * 
+   *
    * @throws InvalidFormatException
    *           Thrown if there is any issues in conversion.
    */
@@ -228,12 +228,12 @@ public class Utils {
 
   /**
    * Method to convert JSON String to Map&lt;String, Object&gt;
-   * 
+   *
    * @param jsonFilePath
    *          JSON file that needs to be converted.
-   * 
+   *
    * @return Map&lt;String, Object&gt; converted Map.
-   * 
+   *
    * @throws InvalidFormatException
    *           when invalid JSON format is encountered
    */

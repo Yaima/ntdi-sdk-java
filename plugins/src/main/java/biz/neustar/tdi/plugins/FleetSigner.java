@@ -60,21 +60,21 @@ public class FleetSigner extends TdiPluginBase {
 
 	/**
 	 * Generates a new signature around a payload with the fleet key
-	 * 
+	 *
 	 * @param payload
 	 *            Payload to be encased in claims
 	 */
 	public Function<TdiCanonicalMessageShape, CompletableFuture<TdiCanonicalMessageShape>> fleetSign = null;
 	/**
 	 * Appends a fleet signature to the provided JWS
-	 * 
+	 *
 	 * @param jws
 	 *            The JWS to add a signature to
 	 */
 	public Function<TdiCanonicalMessageShape, CompletableFuture<TdiCanonicalMessageShape>> fleetCosign = null;
 	/**
 	 * Verify a server or device signature
-	 * 
+	 *
 	 * @param jws
 	 *            The JWS to be verified
 	 */
@@ -82,20 +82,20 @@ public class FleetSigner extends TdiPluginBase {
 	/**
 	 * Execute a full round-trip signing ceremony. Returns a JWS ready for device
 	 * consumption
-	 * 
+	 *
 	 * @param payload
 	 */
 	public Function<String, CompletableFuture<TdiCanonicalMessageShape>> fleetToDevice = null;
 	/**
 	 * Execute a full round-trip verify ceremony. Returns a payload if all
 	 * verifications pass
-	 * 
+	 *
 	 * @param JWS
 	 */
 	public Function<String, CompletableFuture<TdiCanonicalMessageShape>> fleetFromDevice = null;
 	/**
 	 * Signs a payload as a token
-	 * 
+	 *
 	 * @param payload
 	 *            Payload to be sent
 	 */
