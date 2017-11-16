@@ -339,7 +339,7 @@ public class FleetSigner extends TdiPluginBase {
 			return this.fleetVerify.apply(requestBody).thenApply((msg_str) -> {
 				TdiCanonicalMessageShape cosignedJWS = (TdiCanonicalMessageShape) msg_str;
 				// NOTE: Not _strictly_ what the TS package does, but should be equivalent.
-				return CompletableFuture.completedFuture(cosignedJWS.getRawPayload());
+				return CompletableFuture.completedFuture(cosignedJWS);
 			}).thenCompose(a -> a).exceptionally(throwable -> {
 				String errMsg = "validateCosigner() failed.";
 				LOG.error(errMsg + ": " + throwable.getMessage());
@@ -348,7 +348,7 @@ public class FleetSigner extends TdiPluginBase {
 		});
 		flow.addMethod("fleetSign", (data) -> {
 			TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
-			return this.fleetCosign.apply(msgObj.getBuiltMessage());
+			return this.fleetCosign.apply(msgObj.getReceivedMessage());
 		});
 		return flow;
 	}
