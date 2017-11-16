@@ -27,10 +27,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 
-import biz.neustar.tdi.fw.canonicalmessage.TdiCanonicalMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,34 +105,55 @@ public class FleetSigner extends TdiPluginBase {
 	public FleetSigner(TdiImplementationShape impl, TdiSdkWrapperShape sdkWrapper) {
 		super("FleetSigner", impl, sdkWrapper);
 		LOG.trace("FleetSigner:constructor()");
-		this.fleetSign = this.impl.buildApiFlow(this.sdkWrapper.getDefaultFlows().get("SignFlow"), this.buildFlowFleetSign());
-		this.signToken = this.impl.buildApiFlow(this.sdkWrapper.getDefaultFlows().get("SignFlow"), this.buildFlowSignToken()); // <--- No deferral to orginal flow.
-		this.fleetCosign = this.impl.buildApiFlow(this.sdkWrapper.getDefaultFlows().get("CosignFlow"), this.buildFlowFleetCosign()); // _or: ['setSigners'],
-		this.fleetVerify = this.impl.buildApiFlow(this.sdkWrapper.getDefaultFlows().get("VerifyFlow"), this.buildFlowFleetVerify()); // _or: ['prepSignatures',
-																						// 'handleReturn'],
-		this.fleetToDevice = this.impl.buildApiFlow(this.buildFlowFleetToDev(), null);
-		this.fleetFromDevice = this.impl.buildApiFlow(this.buildFlowFleetFromDev(), null);
-
+		this.fleetSign = this.impl.buildApiFlow(
+			this.sdkWrapper.getDefaultFlows().get("SignFlow"),
+			this.buildFlowFleetSign()
+		);
+		this.signToken = this.impl.buildApiFlow(    // <--- No deferral to orginal flow.
+			this.sdkWrapper.getDefaultFlows().get("SignFlow"),
+			this.buildFlowSignToken()
+		);
+		this.fleetCosign = this.impl.buildApiFlow(  // _or: ['setSigners'],
+			this.sdkWrapper.getDefaultFlows().get("CosignFlow"),
+			this.buildFlowFleetCosign()
+		);
+		this.fleetVerify = this.impl.buildApiFlow(  // _or: ['prepSignatures','handleReturn']
+			this.sdkWrapper.getDefaultFlows().get("VerifyFlow"),
+			this.buildFlowFleetVerify()
+		);
+		this.fleetToDevice = this.impl.buildApiFlow(
+			this.buildFlowFleetToDev(),
+			null
+		);
+		this.fleetFromDevice = this.impl.buildApiFlow(
+			this.buildFlowFleetFromDev(),
+			null
+		);
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public CompletableFuture<Boolean> init() {
 		LOG.trace("FleetSigner:init()");
 		return this.validatePluginDataStore(Arrays.asList("cosigner")).thenCompose((Boolean confValid) -> {
 			if (confValid) {
-				return this.getDataStore().get("cosigner").thenApply((cosignerConf) -> {
-					LOG.trace("Cosigner conf loaded.");
-					Map<String, Object> cosignerConfMap = (Map<String, Object>) cosignerConf;
-					if (cosignerConfMap.containsKey("baseURI")) {
-						this.baseURI = cosignerConfMap.get("baseURI").toString();
-						LOG.info("The selected cosigner is at " + this.baseURI);
-						return true;
-					} else {
-						LOG.error("FleetSigner requires a cosigner.baseURI string.");
-					}
-					return false;
-				});
-			} else {
+				return this.getDataStore().get("cosigner")
+					.thenApply((cosignerConf) -> {
+						LOG.info("Cosigner conf loaded.");
+						// NOTE: Map cast is internal and error-checked upstream.
+						Map<String, Object> cosignerConfMap = (Map<String, Object>) cosignerConf;
+						if (cosignerConfMap.containsKey("baseURI")) {
+							this.baseURI = cosignerConfMap.get("baseURI").toString();
+							LOG.info("The selected cosigner is at " + this.baseURI);
+							return true;
+						}
+						else {
+							LOG.error("FleetSigner requires a cosigner.baseURI string.");
+						}
+						return false;
+					});
+			}
+			else {
 				LOG.error("FleetSigner requires a cosigner configuration.");
 				return CompletableFuture.supplyAsync(() -> false);
 			}
@@ -218,7 +237,7 @@ public class FleetSigner extends TdiPluginBase {
 									}
 									if (t_key.isInvalid()) {
 										msgObj.clearVerifiers(); // No point to verifying.
-										LOG.info("prepSignatures(): Key " + t_key.getKeyId() + " was marked invalid.");
+										LOG.warn("prepSignatures(): Key " + t_key.getKeyId() + " was marked invalid.");
 										return null;
 									}
 									msgObj.addVerifier(t_key);
@@ -260,7 +279,7 @@ public class FleetSigner extends TdiPluginBase {
 		});
 		flow.addMethod("handleReturn", (data) -> {
 			TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
-			return CompletableFuture.completedFuture(msgObj).thenApply(a -> a);
+			return CompletableFuture.completedFuture(msgObj.getRawPayload());
 		});
 		return flow;
 	}
@@ -295,16 +314,15 @@ public class FleetSigner extends TdiPluginBase {
 			return this.fleetVerify.apply(requestBody).thenApply((msg_str) -> {
 				TdiCanonicalMessageShape cosignedJWS = (TdiCanonicalMessageShape) msg_str;
 				// NOTE: Not _strictly_ what the TS package does, but should be equivalent.
-				return CompletableFuture.completedFuture(cosignedJWS);
-			}).thenCompose(a -> a)
-			.exceptionally(throwable -> {
+				return CompletableFuture.completedFuture(cosignedJWS.getRawPayload());
+			}).exceptionally(throwable -> {
 				LOG.error("validateCosigner() failed.");
 				throw new FrameworkRuntimeException(throwable.getMessage());
 			});
 		});
 		flow.addMethod("fleetSign", (data) -> {
-				String verifiedJWS = ((TdiCanonicalMessage) data).getReceivedMessage();
-				return this.fleetCosign.apply(verifiedJWS);
+			String verifiedJWS = (String) data;
+			return this.fleetCosign.apply(verifiedJWS);
 		});
 		return flow;
 	}
@@ -326,7 +344,7 @@ public class FleetSigner extends TdiPluginBase {
 					future.completeExceptionally(new FrameworkRuntimeException(e.toString()));
 				}
 				return future;
-			}).thenCompose(a -> a).exceptionally(throwable -> {
+			}).exceptionally(throwable -> {
 				String errMsg = "sendToCosigner() failed.";
 				LOG.error(errMsg + ": " + throwable.getMessage());
 				throw new FrameworkRuntimeException(errMsg);
@@ -337,8 +355,8 @@ public class FleetSigner extends TdiPluginBase {
 			return this.fleetVerify.apply(requestBody).thenApply((msg_str) -> {
 				TdiCanonicalMessageShape cosignedJWS = (TdiCanonicalMessageShape) msg_str;
 				// NOTE: Not _strictly_ what the TS package does, but should be equivalent.
-				return CompletableFuture.completedFuture(cosignedJWS);
-			}).thenCompose(a -> a).exceptionally(throwable -> {
+				return CompletableFuture.completedFuture(cosignedJWS.getRawPayload());
+			}).exceptionally(throwable -> {
 				String errMsg = "validateCosigner() failed.";
 				LOG.error(errMsg + ": " + throwable.getMessage());
 				throw new FrameworkRuntimeException(errMsg);
@@ -346,7 +364,7 @@ public class FleetSigner extends TdiPluginBase {
 		});
 		flow.addMethod("fleetSign", (data) -> {
 			TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
-			return this.fleetCosign.apply(msgObj.getReceivedMessage());
+			return this.fleetCosign.apply(msgObj.getBuiltMessage());
 		});
 		return flow;
 	}
@@ -391,7 +409,7 @@ public class FleetSigner extends TdiPluginBase {
 		HttpURLConnection con = null;
 		StringBuffer resp = new StringBuffer();
 		int payload_len = payload.getBytes().length;
-		LOG.info("Sending a " + payload_len + " byte payload for cosigning.");
+		LOG.trace("Sending a " + payload_len + " byte payload for cosigning.");
 		try {
 			URL url = new URL(this.baseURI + "/projects/" + fleet + "/" + method + "/" + kid);
 			LOG.info("Calling out to cosigner: " + url.toString());

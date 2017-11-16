@@ -29,7 +29,6 @@ import biz.neustar.tdi.sdk.component.TdiSdkNonceComponent;
 import biz.neustar.tdi.sdk.component.TdiSdkNotBeforeComponent;
 import biz.neustar.tdi.sdk.component.jws.TdiJwsSignature;
 import biz.neustar.tdi.sdk.exception.ApiException;
-import biz.neustar.tdi.fw.exception.FrameworkRuntimeException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,11 +90,9 @@ public class Verify extends BaseApi {
    *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> unpackEnvelope(Object msg) {
-
     LOG.trace("Invoking Verify:unpackEnvelope");
-
     return ((TdiSdkJsonWebSignature) impl.getModule(Components.JWS))
-        .unpack((TdiCanonicalMessageShape) msg);
+      .unpack((TdiCanonicalMessageShape) msg);
   }
 
   /**
@@ -109,11 +106,9 @@ public class Verify extends BaseApi {
    *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> unpackClaims(Object msg) {
-
     LOG.trace("Invoking Verify:unpackClaims");
-
     return ((TdiSdkJsonWebTokenComponent) impl.getModule(Components.JWT))
-        .unpackClaims((TdiCanonicalMessageShape) msg);
+      .unpackClaims((TdiCanonicalMessageShape) msg);
   }
 
   /**
@@ -135,34 +130,31 @@ public class Verify extends BaseApi {
       future.completeExceptionally(new ApiException("No issuer in token"));
       return future;
     }
-
     if (!((TdiSdkExpiresComponent) impl.getModule(Components.EXP))
         .check(tdiMsg.getClaims().exp)) {
       future.completeExceptionally(new ApiException("Expired Token"));
       return future;
     }
-
     if (!((TdiSdkNotBeforeComponent) impl.getModule(Components.NBF))
         .check(tdiMsg.getClaims().nbf)) {
       future.completeExceptionally(new ApiException("Token is not yet valid (nbf)"));
       return future;
     }
-
     return ((TdiSdkNonceComponent) impl.getModule(Components.NONCE))
-        .check((String) tdiMsg.getClaims().jti).thenApply((Boolean check) -> {
-
-          if (check) {
-            future.complete(tdiMsg);
-            return future;
-          } else {
-            future.completeExceptionally(new ApiException("Bad Nonce"));
-            return future;
-          }
-
-        }).thenCompose(arg -> {
-          return arg;
-        });
+      .check((String) tdiMsg.getClaims().jti).thenApply((Boolean check) -> {
+        if (check) {
+          future.complete(tdiMsg);
+        }
+        else {
+          future.completeExceptionally(new ApiException("Bad Nonce"));
+        }
+        return future;
+      })
+      .thenCompose(arg -> {
+        return arg;
+      });
   }
+
 
   /**
    * Parses signatures and collects available keys to verify.
@@ -176,34 +168,30 @@ public class Verify extends BaseApi {
    */
   public CompletableFuture<TdiCanonicalMessageShape> prepSignatures(Object msg) {
     LOG.trace("Invoking Verify:prepSignatures");
-
     TdiCanonicalMessageShape tdiMsg = (TdiCanonicalMessageShape) msg;
     List<CompletableFuture<TdiKeyStructureShape>> keys = new ArrayList<>();
     Map<Object, CompletableFuture<TdiKeyStructureShape>> keysWithKid = new HashMap<>();
     CompletableFuture<TdiCanonicalMessageShape> finalFuture = new CompletableFuture<>();
-
     List<Object> signaturesToVerify = tdiMsg.getSignaturesToVerify();
+
     for (int loopIndex = 0; loopIndex < signaturesToVerify.size(); loopIndex++) {
       TdiJwsSignature signature = (TdiJwsSignature) signaturesToVerify.get(loopIndex);
       String kid = signature.parsedHeader.kid;
-
       if (StringUtils.isNotBlank(kid)) {
-
-        CompletableFuture<TdiKeyStructureShape> tdiKey = impl.getPlatform().getKeystore()
-            .getKey(kid).thenApply((TdiKeyStructureShape key) -> {
-              return key;
-            }).exceptionally(throwable -> {
-              return null;
-            });
+        CompletableFuture<TdiKeyStructureShape> tdiKey = impl.getPlatform().getKeystore().getKey(kid)
+          .thenApply((TdiKeyStructureShape key) -> {
+            return key;
+          })
+          .exceptionally(throwable -> {
+            return null;
+          });
         keys.add(tdiKey);
         keysWithKid.put(signature, tdiKey);
       }
     }
 
     return CompletableFuture.allOf(keys.toArray(new CompletableFuture<?>[0])).thenApply((arg) -> {
-
       Object[] fcfs = new Object[2];
-
       for (Entry<Object, CompletableFuture<TdiKeyStructureShape>> entry : keysWithKid.entrySet()) {
         try {
           TdiKeyStructureShape keyVal = entry.getValue().get();
@@ -234,7 +222,8 @@ public class Verify extends BaseApi {
         finalFuture.completeExceptionally(new ApiException(errMsg));
       }
       return finalFuture;
-    }).thenCompose(arg -> {
+    })
+    .thenCompose(arg -> {
       return arg;
     });
   }
@@ -252,7 +241,7 @@ public class Verify extends BaseApi {
   public CompletableFuture<TdiCanonicalMessageShape> verifySignatures(Object msg) {
     LOG.trace("Invoking Verify:verifySignatures: " + msg);
     return ((TdiSdkJsonWebSignature) impl.getModule(Components.JWS))
-        .verify((TdiCanonicalMessageShape) msg);
+      .verify((TdiCanonicalMessageShape) msg);
   }
 
   /**
@@ -270,10 +259,10 @@ public class Verify extends BaseApi {
 
     LOG.trace("Invoking Verify:afterVerify");
     return ((TdiSdkNonceComponent) impl.getModule(Components.NONCE))
-        .burn(tdiMsg.getClaims().jti).thenApply(arg -> {
-          LOG.trace("Nonce successfully burned");
-          return tdiMsg;
-        });
+      .burn(tdiMsg.getClaims().jti).thenApply(arg -> {
+        LOG.trace("Nonce successfully burned");
+        return tdiMsg;
+      });
   }
 
   /**
@@ -287,7 +276,6 @@ public class Verify extends BaseApi {
    *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<String> handleReturn(Object msg) {
-
     LOG.trace("Invoking Verify:handleReturn");
     TdiCanonicalMessage tdiMsg = (TdiCanonicalMessage) msg;
     return CompletableFuture.completedFuture((String)tdiMsg.getClaims().payload);
