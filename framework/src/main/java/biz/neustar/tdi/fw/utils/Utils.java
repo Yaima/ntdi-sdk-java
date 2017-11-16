@@ -20,6 +20,7 @@ import biz.neustar.tdi.fw.exception.InvalidFormatException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -133,8 +134,10 @@ public class Utils {
   public static <T> T jsonToObject(String jsonString, Class<T> clazz)
       throws InvalidFormatException {
     if (StringUtils.isEmpty(jsonString) == false) {
+      ObjectMapper mapper = new ObjectMapper();
+      mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
       try {
-        return new ObjectMapper().readValue(jsonString, clazz);
+        return mapper.readValue(jsonString, clazz);
       } catch (IOException e) {
         LOG.debug("Unable to decode JSON to object: " + jsonString);
         LOG.debug(e.toString());
