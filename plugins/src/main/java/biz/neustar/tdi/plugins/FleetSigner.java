@@ -427,7 +427,7 @@ public class FleetSigner extends TdiPluginBase {
 		LOG.trace("Sending a " + payload_len + " byte payload for cosigning.");
 		try {
 			URL url = new URL(this.baseURI + "/projects/" + fleet + "/" + method + "/" + kid);
-			LOG.info("Calling out to cosigner: " + url.toString());
+			LOG.debug("Calling out to cosigner: " + url.toString());
 			con = (HttpURLConnection) url.openConnection();
 			con.setRequestMethod("POST");
 			con.setRequestProperty("Content-Type", "application/JOSE+JSON");
