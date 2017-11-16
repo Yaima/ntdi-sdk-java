@@ -3,6 +3,7 @@
 
 # Test artifacts
 framework/testClaimsJsonFile.json
+keystore.json
 
 # Build artifacts
 target/

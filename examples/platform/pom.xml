@@ -35,4 +35,27 @@
 			<version>${bouncycastle.version}</version>
 		</dependency>
 	</dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.coderplus.maven.plugins</groupId>
+        <artifactId>copy-rename-maven-plugin</artifactId>
+        <version>1.0</version>
+        <executions>
+          <execution>
+            <id>copy-file</id>
+            <phase>process-test-resources</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <sourceFile>src/test/resources/keystore-test.json</sourceFile>
+              <destinationFile>src/test/resources/keystore.json</destinationFile>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>
