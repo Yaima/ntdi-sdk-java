@@ -1,17 +1,17 @@
 /*
  * Copyright 2017 Neustar, Inc
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  */
 
 package biz.neustar.tdi.sdk.api;
@@ -29,6 +29,7 @@ import biz.neustar.tdi.sdk.component.TdiSdkNonceComponent;
 import biz.neustar.tdi.sdk.component.TdiSdkNotBeforeComponent;
 import biz.neustar.tdi.sdk.component.jws.TdiJwsSignature;
 import biz.neustar.tdi.sdk.exception.ApiException;
+import biz.neustar.tdi.fw.exception.FrameworkRuntimeException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +53,7 @@ public class Verify extends BaseApi {
 
   /**
    * Constructor.
-   * 
+   *
    * @param imp
    *          : {@link TdiImplementationShape}
    */
@@ -63,10 +64,10 @@ public class Verify extends BaseApi {
   /**
    * Creates instance of a {@link TdiCanonicalMessageShape} for the raw message
    * string.
-   * 
+   *
    * @param signaturePayload
    *          : raw message string for verification
-   * 
+   *
    * @return {@link CompletableFuture} with either of the following states: <br>
    *         <b>Completed Successfully</b>: {@link TdiCanonicalMessageShape}. <br>
    *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
@@ -81,10 +82,10 @@ public class Verify extends BaseApi {
 
   /**
    * Parse the message string according to JWS.
-   * 
+   *
    * @param msg
    *          : received {@link TdiCanonicalMessageShape} instance
-   * 
+   *
    * @return {@link CompletableFuture} with either of the following states: <br>
    *         <b>Completed Successfully</b>: {@link TdiCanonicalMessageShape}. <br>
    *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
@@ -99,10 +100,10 @@ public class Verify extends BaseApi {
 
   /**
    * Parse the claim contents according to JWT.
-   * 
+   *
    * @param msg
    *          : received {@link TdiCanonicalMessageShape} instance
-   * 
+   *
    * @return {@link CompletableFuture} with either of the following states: <br>
    *         <b>Completed Successfully</b>: {@link TdiCanonicalMessageShape}. <br>
    *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
@@ -117,18 +118,16 @@ public class Verify extends BaseApi {
 
   /**
    * Verify that the claims are correct.
-   * 
+   *
    * @param msg
    *          : received {@link TdiCanonicalMessageShape} instance
-   * 
+   *
    * @return {@link CompletableFuture} with either of the following states: <br>
    *         <b>Completed Successfully</b>: {@link TdiCanonicalMessageShape}. <br>
    *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> validateClaims(Object msg) {
-
     LOG.trace("Invoking Verify:validateClaims");
-    
     TdiCanonicalMessage tdiMsg = (TdiCanonicalMessage) msg;
     CompletableFuture<TdiCanonicalMessageShape> future = new CompletableFuture<>();
 
@@ -167,18 +166,17 @@ public class Verify extends BaseApi {
 
   /**
    * Parses signatures and collects available keys to verify.
-   * 
+   *
    * @param msg
    *          : received {@link TdiCanonicalMessageShape} instance
-   * 
+   *
    * @return {@link CompletableFuture} with either of the following states: <br>
    *         <b>Completed Successfully</b>: {@link TdiCanonicalMessageShape}. <br>
    *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> prepSignatures(Object msg) {
-    
     LOG.trace("Invoking Verify:prepSignatures");
-    
+
     TdiCanonicalMessageShape tdiMsg = (TdiCanonicalMessageShape) msg;
     List<CompletableFuture<TdiKeyStructureShape>> keys = new ArrayList<>();
     Map<Object, CompletableFuture<TdiKeyStructureShape>> keysWithKid = new HashMap<>();
@@ -207,22 +205,20 @@ public class Verify extends BaseApi {
       Object[] fcfs = new Object[2];
 
       for (Entry<Object, CompletableFuture<TdiKeyStructureShape>> entry : keysWithKid.entrySet()) {
-
         try {
-          if ((entry.getValue().get() != null) && (entry.getValue().get().getRoleFlag() != null)) {
-
-            if (TdiKeyFlagsEnum.ROLE_F_C.getNumber().equals(entry.getValue().get().getRoleFlag())) {
+          TdiKeyStructureShape keyVal = entry.getValue().get();
+          if ((null != keyVal) && (null != keyVal.getRoleFlag())) {
+            if (TdiKeyFlagsEnum.ROLE_F_C.getNumber().equals(keyVal.getRoleFlag())) {
               fcfs[0] = entry.getKey();
-            } else if (TdiKeyFlagsEnum.ROLE_F_S.getNumber()
-                .equals(entry.getValue().get().getRoleFlag())) {
+            }
+            else if (TdiKeyFlagsEnum.ROLE_F_S.getNumber()
+                .equals(keyVal.getRoleFlag())) {
               fcfs[1] = entry.getKey();
             }
-
           }
         } catch (CancellationException | InterruptedException | ExecutionException e) {
           LOG.error(e.getMessage());
         }
-
       }
 
       if ((fcfs[0] != null) && (fcfs[1] != null)) {
@@ -230,16 +226,14 @@ public class Verify extends BaseApi {
         tdiMsg.addSignatureToVerify(fcfs[0]);
         tdiMsg.addSignatureToVerify(fcfs[1]);
         finalFuture.complete(tdiMsg);
-        return finalFuture;
-
-      } else {
+      }
+      else {
         String errMsg = "Signatures do not have roles: F_C:"
             + ((fcfs[0] != null) ? " found" : "missing") + " F_S:"
             + ((fcfs[1] != null) ? " found" : "missing");
         finalFuture.completeExceptionally(new ApiException(errMsg));
-        return finalFuture;
       }
-
+      return finalFuture;
     }).thenCompose(arg -> {
       return arg;
     });
@@ -247,10 +241,10 @@ public class Verify extends BaseApi {
 
   /**
    * Verifies signatures.
-   * 
+   *
    * @param msg
    *          : received {@link TdiCanonicalMessageShape} instance
-   * 
+   *
    * @return {@link CompletableFuture} with either of the following states: <br>
    *         <b>Completed Successfully</b>: {@link TdiCanonicalMessageShape}. <br>
    *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
@@ -263,16 +257,15 @@ public class Verify extends BaseApi {
 
   /**
    * Updates nonce cache.
-   * 
+   *
    * @param msg
    *          : received {@link TdiCanonicalMessageShape} instance
-   * 
+   *
    * @return {@link CompletableFuture} with either of the following states: <br>
    *         <b>Completed Successfully</b>: {@link TdiCanonicalMessageShape}. <br>
    *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> afterVerify(Object msg) {
-    LOG.info("AFTER VERIFY: " + msg);
     TdiCanonicalMessage tdiMsg = (TdiCanonicalMessage) msg;
 
     LOG.trace("Invoking Verify:afterVerify");
@@ -285,16 +278,16 @@ public class Verify extends BaseApi {
 
   /**
    * Returns the authenticated payload.
-   * 
+   *
    * @param msg
    *          received {@link TdiCanonicalMessageShape} instance
-   * 
+   *
    * @return {@link CompletableFuture} with either of the following states: <br>
    *         <b>Completed Successfully</b>: {@link String}. <br>
    *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<String> handleReturn(Object msg) {
-    
+
     LOG.trace("Invoking Verify:handleReturn");
     TdiCanonicalMessage tdiMsg = (TdiCanonicalMessage) msg;
     return CompletableFuture.completedFuture((String)tdiMsg.getClaims().payload);
