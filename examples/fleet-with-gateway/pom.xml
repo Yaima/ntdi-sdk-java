@@ -17,5 +17,6 @@
 	<modules>
 		<module>device-sensor</module>
 		<module>device-gateway</module>
+		<module>server-data-collector</module>
 	</modules>
 </project>

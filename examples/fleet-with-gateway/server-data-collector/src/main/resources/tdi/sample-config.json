@@ -1,0 +1,19 @@
+{
+	"platform": {
+		"data": {
+			"basepath": "src/main/resources/tdi/"
+		},
+		"keys": {
+			"basepath": "src/main/resources/tdi/"
+		}
+	},
+	"nonce002": {
+		"expDuration": 10
+	},
+	"FleetSigner": {
+		"acceptDevices": false,
+		"cosigner": {
+		  "baseURI":  "https://api-demo.oneid.com"
+		}
+	}
+}
