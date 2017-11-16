@@ -86,7 +86,7 @@ public class Utils {
           new TypeReference<Map<String, Object>>() {
           });
     } catch (IOException e) {
-      LOG.debug("Unable to decode JSON");
+      LOG.debug("Unable to decode JSON: " + jsonString);
       throw new InvalidFormatException(e);
     }
     return returnMap;
@@ -136,7 +136,8 @@ public class Utils {
       try {
         return new ObjectMapper().readValue(jsonString, clazz);
       } catch (IOException e) {
-        LOG.debug("Unable to decode JSON to object");
+        LOG.debug("Unable to decode JSON to object: " + jsonString);
+        LOG.debug(e.toString());
         throw new InvalidFormatException(e);
       }
     } else {
@@ -245,7 +246,7 @@ public class Utils {
             new TypeReference<Map<String, Object>>() {
             });
       } catch (IOException e) {
-        LOG.debug("Unable to decode JSON");
+        LOG.debug("Unable to decode JSON from file.");
         throw new InvalidFormatException(e);
       }
       return returnMap;

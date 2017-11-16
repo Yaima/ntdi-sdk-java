@@ -160,7 +160,7 @@ public class FleetSigner extends TdiPluginBase {
 						return arg;
 					}).exceptionally(throwable -> {
 						String errMsg = "setSigners() failed.";
-						LOG.error(errMsg);
+						LOG.error(errMsg + ": " + throwable.getMessage());
 						throw new FrameworkRuntimeException(errMsg);
 					});
 		});
@@ -189,7 +189,7 @@ public class FleetSigner extends TdiPluginBase {
 						return arg;
 					}).exceptionally(throwable -> {
 						String errMsg = "setSigners() failed.";
-						LOG.error(errMsg);
+						LOG.error(errMsg + ": " + throwable.getMessage());
 						throw new FrameworkRuntimeException(errMsg);
 					});
 		});
@@ -249,7 +249,7 @@ public class FleetSigner extends TdiPluginBase {
 						return future;
 					}).exceptionally(throwable -> {
 						String errMsg = "sendToCosigner() failed.";
-						LOG.error(errMsg);
+						LOG.error(errMsg + ": " + throwable.getMessage());
 						throw new FrameworkRuntimeException(errMsg);
 					});
 		});
@@ -281,7 +281,7 @@ public class FleetSigner extends TdiPluginBase {
 				return arg;
 			}).exceptionally(throwable -> {
 				String errMsg = "sendToCosigner() failed.";
-				LOG.error(errMsg);
+				LOG.error(errMsg + ": " + throwable.getMessage());
 				throw new FrameworkRuntimeException(errMsg);
 			});
 		});
@@ -292,9 +292,8 @@ public class FleetSigner extends TdiPluginBase {
 				// NOTE: Not _strictly_ what the TS package does, but should be equivalent.
 				return CompletableFuture.completedFuture(cosignedJWS.getRawPayload());
 			}).exceptionally(throwable -> {
-				String errMsg = "validateCosigner() failed.";
-				LOG.error(errMsg);
-				throw new FrameworkRuntimeException(errMsg);
+				LOG.error("validateCosigner() failed.");
+				throw new FrameworkRuntimeException(throwable.getMessage());
 			});
 		});
 		flow.addMethod("fleetSign", (data) -> {
@@ -323,7 +322,7 @@ public class FleetSigner extends TdiPluginBase {
 				return future;
 			}).exceptionally(throwable -> {
 				String errMsg = "sendToCosigner() failed.";
-				LOG.error(errMsg);
+				LOG.error(errMsg + ": " + throwable.getMessage());
 				throw new FrameworkRuntimeException(errMsg);
 			});
 		});
@@ -335,7 +334,7 @@ public class FleetSigner extends TdiPluginBase {
 				return CompletableFuture.completedFuture(cosignedJWS.getRawPayload());
 			}).exceptionally(throwable -> {
 				String errMsg = "validateCosigner() failed.";
-				LOG.error(errMsg);
+				LOG.error(errMsg + ": " + throwable.getMessage());
 				throw new FrameworkRuntimeException(errMsg);
 			});
 		});
@@ -372,7 +371,7 @@ public class FleetSigner extends TdiPluginBase {
 						return arg;
 					}).exceptionally(throwable -> {
 						String errMsg = "setSigners() failed.";
-						LOG.error(errMsg);
+						LOG.error(errMsg + ": " + throwable.getMessage());
 						throw new FrameworkRuntimeException(errMsg);
 					});
 		});
@@ -389,6 +388,7 @@ public class FleetSigner extends TdiPluginBase {
 		LOG.info("Sending a " + payload_len + " byte payload for cosigning.");
 		try {
 			URL url = new URL(this.baseURI + "/projects/" + fleet + "/" + method + "/" + kid);
+			LOG.info("Calling out to cosigner: " + url.toString());
 			con = (HttpURLConnection) url.openConnection();
 			con.setRequestMethod("POST");
 			con.setRequestProperty("Content-Type", "application/JOSE+JSON");
