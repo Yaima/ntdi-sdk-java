@@ -27,8 +27,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 
+import biz.neustar.tdi.fw.canonicalmessage.TdiCanonicalMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -241,20 +243,26 @@ public class FleetSigner extends TdiPluginBase {
 						if (0 != verify_count) {
 							// NOTE: We are not checking for roles here.
 							future.complete(msgObj);
+							LOG.info("returning this: " + future);
+							return future.thenApply(a -> a);
 						} else {
 							future.completeExceptionally(new FrameworkRuntimeException(
 									"prepSignatures(): No known keys to verify against."));
+							return future;
 						}
-						return future;
-					}).exceptionally(throwable -> {
-						String errMsg = "sendToCosigner() failed.";
-						LOG.error(errMsg + ": " + throwable.getMessage());
-						throw new FrameworkRuntimeException(errMsg);
+					})
+					.thenCompose(arg -> {
+						return arg;
 					});
+//					.exceptionally(throwable -> {
+//						String errMsg = "sendToCosigner() failed.";
+//						LOG.error(errMsg + ": " + throwable.getMessage());
+//						throw new FrameworkRuntimeException(errMsg);
+//					});
 		});
 		flow.addMethod("handleReturn", (data) -> {
 			TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
-			return CompletableFuture.completedFuture(msgObj.getRawPayload());
+			return CompletableFuture.completedFuture(msgObj).thenApply(a -> a);
 		});
 		return flow;
 	}
@@ -289,15 +297,16 @@ public class FleetSigner extends TdiPluginBase {
 			return this.fleetVerify.apply(requestBody).thenApply((msg_str) -> {
 				TdiCanonicalMessageShape cosignedJWS = (TdiCanonicalMessageShape) msg_str;
 				// NOTE: Not _strictly_ what the TS package does, but should be equivalent.
-				return CompletableFuture.completedFuture(cosignedJWS.getRawPayload());
-			}).exceptionally(throwable -> {
+				return CompletableFuture.completedFuture(cosignedJWS);
+			}).thenCompose(a -> a)
+			.exceptionally(throwable -> {
 				LOG.error("validateCosigner() failed.");
 				throw new FrameworkRuntimeException(throwable.getMessage());
 			});
 		});
 		flow.addMethod("fleetSign", (data) -> {
-			String verifiedJWS = (String) data;
-			return this.fleetCosign.apply(verifiedJWS);
+				String verifiedJWS = ((TdiCanonicalMessage) data).getReceivedMessage();
+				return this.fleetCosign.apply(verifiedJWS);
 		});
 		return flow;
 	}
@@ -319,7 +328,7 @@ public class FleetSigner extends TdiPluginBase {
 					future.completeExceptionally(new FrameworkRuntimeException(e.toString()));
 				}
 				return future;
-			}).exceptionally(throwable -> {
+			}).thenCompose(a -> a).exceptionally(throwable -> {
 				String errMsg = "sendToCosigner() failed.";
 				LOG.error(errMsg + ": " + throwable.getMessage());
 				throw new FrameworkRuntimeException(errMsg);
@@ -331,7 +340,7 @@ public class FleetSigner extends TdiPluginBase {
 				TdiCanonicalMessageShape cosignedJWS = (TdiCanonicalMessageShape) msg_str;
 				// NOTE: Not _strictly_ what the TS package does, but should be equivalent.
 				return CompletableFuture.completedFuture(cosignedJWS.getRawPayload());
-			}).exceptionally(throwable -> {
+			}).thenCompose(a -> a).exceptionally(throwable -> {
 				String errMsg = "validateCosigner() failed.";
 				LOG.error(errMsg + ": " + throwable.getMessage());
 				throw new FrameworkRuntimeException(errMsg);

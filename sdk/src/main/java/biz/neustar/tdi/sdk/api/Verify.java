@@ -256,8 +256,7 @@ public class Verify extends BaseApi {
    *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> verifySignatures(Object msg) {
-
-    LOG.trace("Invoking Verify:verifySignatures");
+    LOG.trace("Invoking Verify:verifySignatures: " + msg);
     return ((TdiSdkJsonWebSignature) impl.getModule(Components.JWS))
         .verify((TdiCanonicalMessageShape) msg);
   }
@@ -273,11 +272,13 @@ public class Verify extends BaseApi {
    *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> afterVerify(Object msg) {
+    LOG.info("AFTER VERIFY: " + msg);
     TdiCanonicalMessage tdiMsg = (TdiCanonicalMessage) msg;
 
     LOG.trace("Invoking Verify:afterVerify");
     return ((TdiSdkNonceComponent) impl.getModule(Components.NONCE))
-        .burn((String) tdiMsg.getClaims().jti).thenApply(arg -> {
+        .burn(tdiMsg.getClaims().jti).thenApply(arg -> {
+          LOG.trace("Nonce successfully burned");
           return tdiMsg;
         });
   }
