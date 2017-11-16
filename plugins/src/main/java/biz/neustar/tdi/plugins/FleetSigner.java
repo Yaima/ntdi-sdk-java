@@ -218,6 +218,7 @@ public class FleetSigner extends TdiPluginBase {
 		return flow;
 	}
 
+	@SuppressWarnings("unchecked")
 	private TdiFlowArguments buildFlowFleetVerify() {
 		TdiFlowArguments flow = new TdiFlowArguments();
 		// Prevent the default behavior from taking place for these phases.
@@ -254,7 +255,13 @@ public class FleetSigner extends TdiPluginBase {
 						}
 						int verify_count = 0;
 
-						for (CompletableFuture<TdiKeyStructureShape> cffk : (CompletableFuture<TdiKeyStructureShape>[]) promise_queue.toArray(new CompletableFuture<?>[0])) {
+						// NOTE: This cast is safe, since it is sourced from local scope, and
+						//   its parameterized type is know with certainty.
+						// TODO: Using Iterators from the List would probably clean this up a good deal.
+						for (
+							CompletableFuture<TdiKeyStructureShape> cffk :
+							(CompletableFuture<TdiKeyStructureShape>[]) promise_queue.toArray(new CompletableFuture<?>[0])
+						) {
 							if (null != cffk) {
 								verify_count++;
 							}
@@ -279,16 +286,17 @@ public class FleetSigner extends TdiPluginBase {
 		});
 		flow.addMethod("handleReturn", (data) -> {
 			TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
-			return CompletableFuture.completedFuture(msgObj.getRawPayload());
+			return CompletableFuture.completedFuture(msgObj).thenApply(a -> a);
 		});
 		return flow;
 	}
 
 	private TdiFlowArguments buildFlowFleetToDev() {
 		TdiFlowArguments flow = new TdiFlowArguments();
-//		flow.addMethod("sign", (data) -> {
-//			return this.sdkWrapper.api("sign").apply(data);
-//		});
+		// TODO: Fix later.
+		// flow.addMethod("sign", (data) -> {
+		// 	return this.sdkWrapper.api("sign").apply(data);
+		// });
 		flow.addMethod("sendToCosigner", (data) -> {
 			String jwsPayload = (String) data;
 			return this.impl.getPlatform().getKeystore().getSelfKey().thenApply((TdiKeyStructureShape self) -> {
@@ -314,14 +322,16 @@ public class FleetSigner extends TdiPluginBase {
 			return this.fleetVerify.apply(requestBody).thenApply((msg_str) -> {
 				TdiCanonicalMessageShape cosignedJWS = (TdiCanonicalMessageShape) msg_str;
 				// NOTE: Not _strictly_ what the TS package does, but should be equivalent.
-				return CompletableFuture.completedFuture(cosignedJWS.getRawPayload());
-			}).exceptionally(throwable -> {
+				return CompletableFuture.completedFuture(cosignedJWS);
+			})
+			.thenCompose(a -> a)
+			.exceptionally(throwable -> {
 				LOG.error("validateCosigner() failed.");
 				throw new FrameworkRuntimeException(throwable.getMessage());
 			});
 		});
 		flow.addMethod("fleetSign", (data) -> {
-			String verifiedJWS = (String) data;
+			String verifiedJWS = ((TdiCanonicalMessageShape) data).getReceivedMessage();
 			return this.fleetCosign.apply(verifiedJWS);
 		});
 		return flow;
@@ -344,7 +354,9 @@ public class FleetSigner extends TdiPluginBase {
 					future.completeExceptionally(new FrameworkRuntimeException(e.toString()));
 				}
 				return future;
-			}).exceptionally(throwable -> {
+			})
+			.thenCompose(a -> a)
+			.exceptionally(throwable -> {
 				String errMsg = "sendToCosigner() failed.";
 				LOG.error(errMsg + ": " + throwable.getMessage());
 				throw new FrameworkRuntimeException(errMsg);
@@ -355,8 +367,10 @@ public class FleetSigner extends TdiPluginBase {
 			return this.fleetVerify.apply(requestBody).thenApply((msg_str) -> {
 				TdiCanonicalMessageShape cosignedJWS = (TdiCanonicalMessageShape) msg_str;
 				// NOTE: Not _strictly_ what the TS package does, but should be equivalent.
-				return CompletableFuture.completedFuture(cosignedJWS.getRawPayload());
-			}).exceptionally(throwable -> {
+				return CompletableFuture.completedFuture(cosignedJWS);
+			})
+			.thenCompose(a -> a)
+			.exceptionally(throwable -> {
 				String errMsg = "validateCosigner() failed.";
 				LOG.error(errMsg + ": " + throwable.getMessage());
 				throw new FrameworkRuntimeException(errMsg);
@@ -364,7 +378,8 @@ public class FleetSigner extends TdiPluginBase {
 		});
 		flow.addMethod("fleetSign", (data) -> {
 			TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
-			return this.fleetCosign.apply(msgObj.getBuiltMessage());
+			String verifiedJWS = msgObj.getReceivedMessage();
+			return this.fleetCosign.apply(verifiedJWS);
 		});
 		return flow;
 	}

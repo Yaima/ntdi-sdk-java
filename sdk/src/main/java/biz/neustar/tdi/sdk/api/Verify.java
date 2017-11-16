@@ -255,11 +255,11 @@ public class Verify extends BaseApi {
    *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> afterVerify(Object msg) {
-    TdiCanonicalMessage tdiMsg = (TdiCanonicalMessage) msg;
-
     LOG.trace("Invoking Verify:afterVerify");
+    TdiCanonicalMessage tdiMsg = (TdiCanonicalMessage) msg;
     return ((TdiSdkNonceComponent) impl.getModule(Components.NONCE))
-      .burn(tdiMsg.getClaims().jti).thenApply(arg -> {
+      .burn(tdiMsg.getClaims().jti)
+      .thenApply(arg -> {
         LOG.trace("Nonce successfully burned");
         return tdiMsg;
       });
