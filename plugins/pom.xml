@@ -66,6 +66,18 @@
 						<goals>
 							<goal>copy</goal>
 						</goals>
+						<configuration>
+							<fileSets>
+								<fileSet>
+									<sourceFile>src/test/resources/device/keystore-test.json</sourceFile>
+									<destinationFile>src/test/resources/device/keystore.json</destinationFile>
+								</fileSet>
+								<fileSet>
+									<sourceFile>src/test/resources/server/keystore-test.json</sourceFile>
+									<destinationFile>src/test/resources/server/keystore.json</destinationFile>
+								</fileSet>
+							</fileSets>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>

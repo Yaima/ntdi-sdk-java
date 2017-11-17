@@ -1,10 +1,10 @@
 {
   "platform": {
     "data": {
-      "basepath": "target/test-classes/device/"
+      "basepath": "src/test/resources/device/"
     },
     "keys": {
-      "basepath": "target/test-classes/device/"
+      "basepath": "src/test/resources/device/"
     }
   },
   "nonce002": {
