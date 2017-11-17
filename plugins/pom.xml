@@ -69,24 +69,12 @@
 						<configuration>
 							<fileSets>
 								<fileSet>
-									<sourceFile>src/test/resources/sign/keystore-test.json</sourceFile>
-									<destinationFile>src/test/resources/sign/keystore.json</destinationFile>
-								</fileSet>
-								<fileSet>
-									<sourceFile>src/test/resources/cosign/keystore-test.json</sourceFile>
-									<destinationFile>src/test/resources/cosign/keystore.json</destinationFile>
-								</fileSet>
-								<fileSet>
 									<sourceFile>src/test/resources/device/keystore-test.json</sourceFile>
 									<destinationFile>src/test/resources/device/keystore.json</destinationFile>
 								</fileSet>
 								<fileSet>
 									<sourceFile>src/test/resources/server/keystore-test.json</sourceFile>
 									<destinationFile>src/test/resources/server/keystore.json</destinationFile>
-								</fileSet>
-								<fileSet>
-									<sourceFile>src/test/resources/verify/keystore-test.json</sourceFile>
-									<destinationFile>src/test/resources/verify/keystore.json</destinationFile>
 								</fileSet>
 							</fileSets>
 						</configuration>

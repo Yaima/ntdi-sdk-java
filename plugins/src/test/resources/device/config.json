@@ -8,7 +8,7 @@
     }
   },
   "nonce002": {
-    "expDuration": 10
+    "expDuration": 3600
   },
   "FleetSigner": {
     "acceptDevices": false,
