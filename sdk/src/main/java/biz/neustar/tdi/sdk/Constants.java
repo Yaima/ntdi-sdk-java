@@ -23,7 +23,7 @@ package biz.neustar.tdi.sdk;
 public class Constants {
 
   public enum Api {
-    SignFlow, VerifyFlow, CosignFlow
+    SignFlow, VerifyFlow, CosignFlow, VerifyGeneralFlow
   }
   
   public static class Components {

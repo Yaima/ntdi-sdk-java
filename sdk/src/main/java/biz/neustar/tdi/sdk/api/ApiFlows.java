@@ -79,4 +79,29 @@ public class ApiFlows {
     handleReturn
   }
 
+  public static enum VerifyGeneralFlow {
+    /**
+     * Create Canonical message and populate canonical "receivedMessage" field.
+     */
+    handleInit,
+    /**
+     * Break the "receivedMessage" in to "rawPayload" and populate
+     * "signaturesToVerify" array.
+     */
+    unpackEnvelope,
+    /** Parse "rawClaims" in to "claims" key/values. */
+    unpackClaims,
+    /** Validate all "claims" properties. */
+    validateClaims,
+    /** Manipulate and/or validate "signaturesToVerify". */
+    prepSignatures,
+    /** Validate signatures to verify relative to "rawPayload". */
+    verifySignatures,
+    /** Run any necessary cleanup or post-validation steps. */
+    afterVerify,
+    /** Returns the authenticated message. */
+    handleReturn
+
+  }
+
 }
