@@ -1,14 +1,14 @@
 {
   "platform": {
     "data": {
-      "basepath": "src/test/resources/server/"
+      "basepath": "target/test-classes/server/"
     },
     "keys": {
-      "basepath": "src/test/resources/server/"
+      "basepath": "target/test-classes/server/"
     }
   },
   "nonce002": {
-    "expDuration": 100
+    "expDuration": 3600
   },
   "FleetSigner": {
     "acceptDevices": false,
