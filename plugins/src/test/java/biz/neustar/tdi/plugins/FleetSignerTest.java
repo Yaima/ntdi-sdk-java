@@ -14,37 +14,40 @@ import biz.neustar.tdi.fw.wrapper.TdiSdkWrapperShape;
 
 public class FleetSignerTest {
 	static TdiSdkWrapperShape sdkWrapper;
-	static EasySdk serverSdk;
-	static EasySdk deviceSdk;
+	static NTDIFleet serverSdk;
+	static NTDIFleet deviceSdk;
+	static NTDIFleet serverSdkException;
 	static final Logger log = LoggerFactory.getLogger(FleetSignerTest.class);
+	String logMsg;
 
 	@BeforeClass
 	public static void setup() throws ExecutionException, InterruptedException {
-		serverSdk = new EasySdk(Arrays.asList(FleetSigner::new), "server/config.json");
-		deviceSdk = new EasySdk(null, "device/config.json");
+		serverSdk = new NTDIFleet(Arrays.asList(FleetSigner::new), "server/config.json");
+		deviceSdk = new NTDIFleet(null, "device/config.json");
+		serverSdkException = new NTDIFleet(Arrays.asList(FleetSigner::new), "exception/config.json");
 	}
 
 	@Test
 	public void tesFleetSign() throws ExecutionException, InterruptedException {
-		String signedMsg = serverSdk.sign("testMessage");
-		final String logMsg = String.format("Sign message: [%s]: ", signedMsg);
+		String signedMsg = serverSdk.sign("test message");
+		logMsg = String.format("Sign msg: [%s]: ", signedMsg);
 		log.info(logMsg);
 		assertNotNull(signedMsg);
 	}
 
 	@Test
 	public void testFleetCosign() throws ExecutionException, InterruptedException {
-		String cosignedMsg = serverSdk.cosign(serverSdk.sign("testMessage"));
-		final String logMsg = String.format("Cosign message: [%s]: ", cosignedMsg);
+		String cosignedMsg = serverSdk.cosign(serverSdk.sign("test message"));
+		logMsg = String.format("Cosign message: [%s]: ", cosignedMsg);
 		log.info(logMsg);
 		assertNotNull(cosignedMsg);
 	}
 
 	@Test
 	public void testFleetVerify() throws ExecutionException, InterruptedException {
-		String fleetToDeviceMsg = serverSdk.fleetToDevice(serverSdk.sign("testMessage"));
+		String fleetToDeviceMsg = serverSdk.fleetToDevice(serverSdk.sign("test message"));
 		String verifiedMsg = deviceSdk.verify(fleetToDeviceMsg);
-		final String logMsg = String.format("Verify message: [%s]: ", verifiedMsg);
+		logMsg = String.format("Verify message: [%s]: ", verifiedMsg);
 		log.info(logMsg);
 		assertNotNull(verifiedMsg);
 	}
@@ -52,18 +55,28 @@ public class FleetSignerTest {
 	@Test
 	public void testFleetToDevice() throws ExecutionException, InterruptedException {
 		String fleetToDeviceMsg = serverSdk.fleetToDevice("message to device");
-		final String logMsg = String.format("Fleet to device message: [%s]: ", fleetToDeviceMsg);
+		logMsg = String.format("Fleet to device message: [%s]: ", fleetToDeviceMsg);
 		log.info(logMsg);
 		assertNotNull(fleetToDeviceMsg);
 	}
 
 	@Test
 	public void testFleetFromDevice() throws ExecutionException, InterruptedException {
-		String deviceMsg = deviceSdk.sign("fromDeviceMsg");
+		String deviceMsg = deviceSdk.sign("message from device");
 		String fleetFromDeviceMsg = serverSdk.fleetFromDevice(deviceMsg);
-		final String logMsg = String.format("Device to fleet msg: [%s]: ", fleetFromDeviceMsg);
+		logMsg = String.format("Device to fleet message: [%s]: ", fleetFromDeviceMsg);
 		log.info(logMsg);
 		assertNotNull(fleetFromDeviceMsg);
+	}
+
+	@Test(expected = ExecutionException.class)
+	public void testFleetToDeviceException() throws ExecutionException, InterruptedException {
+		serverSdkException.fleetToDevice("message to device");
+	}
+
+	@Test(expected = ExecutionException.class)
+	public void testFleetFromDeviceException() throws ExecutionException, InterruptedException {
+		serverSdkException.fleetFromDevice("message from device");
 	}
 
 }
