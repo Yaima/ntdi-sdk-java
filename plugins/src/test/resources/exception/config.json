@@ -1,0 +1,19 @@
+{
+  "platform": {
+    "data": {
+      "basepath": "src/test/resources/exception/"
+    },
+    "keys": {
+      "basepath": "src/test/resources/exception/"
+    }
+  },
+  "nonce002": {
+    "expDuration": 3600
+  },
+  "FleetSigner": {
+    "acceptDevices": false,
+    "cosigner": {
+      "baseURI":  "https://api-dev.oneid.com"
+    }
+  }
+}
