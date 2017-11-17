@@ -51,7 +51,7 @@ public class FleetSignerTest {
 
 	@Test
 	public void testFleetToDevice() throws ExecutionException, InterruptedException {
-		String fleetToDeviceMsg = serverSdk.fleetToDevice(serverSdk.sign("testMessage"));
+		String fleetToDeviceMsg = serverSdk.fleetToDevice("message to device");
 		final String logMsg = String.format("Fleet to device message: [%s]: ", fleetToDeviceMsg);
 		log.info(logMsg);
 		assertNotNull(fleetToDeviceMsg);
