@@ -32,12 +32,14 @@ import java.util.concurrent.ExecutionException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-class NTDIFleet {
+public class Helper {
+}
+
+class NTDI {
 	private TdiSdkWrapperShape sdkWrapper;
 
-	public NTDIFleet(List<TdiPluginBaseFactory> plugins, String configPath)
-			throws ExecutionException, InterruptedException {
-		sdkWrapper = (new NTDI()).setup(plugins, configPath).get();
+	public NTDI(List<TdiPluginBaseFactory> plugins, String configPath) throws ExecutionException, InterruptedException {
+		sdkWrapper = (new NTDIFactory()).setup(plugins, configPath).get();
 	}
 
 	public String sign(String data) throws ExecutionException, InterruptedException {
@@ -62,7 +64,7 @@ class NTDIFleet {
 	}
 }
 
-class NTDI {
+class NTDIFactory {
 	private Map<String, Object> getConfig(String configPath) {
 		Map<String, Object> map = null;
 		InputStream inStream = getClass().getClassLoader().getResourceAsStream(configPath);
