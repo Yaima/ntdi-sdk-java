@@ -21,7 +21,7 @@ public class FleetSignerTest {
 	@BeforeClass
 	public static void setup() throws ExecutionException, InterruptedException {
 		serverSdk = new EasySdk(Arrays.asList(FleetSigner::new), "server/config.json");
-		deviceSdk = new EasySdk(Arrays.asList(FleetSigner::new), "device/config.json");
+		deviceSdk = new EasySdk(null, "device/config.json");
 	}
 
 	@Test
