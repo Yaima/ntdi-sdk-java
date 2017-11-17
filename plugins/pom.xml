@@ -76,6 +76,10 @@
 									<sourceFile>src/test/resources/server/keystore-test.json</sourceFile>
 									<destinationFile>src/test/resources/server/keystore.json</destinationFile>
 								</fileSet>
+								<fileSet>
+									<sourceFile>src/test/resources/exception/keystore-test.json</sourceFile>
+									<destinationFile>src/test/resources/exception/keystore.json</destinationFile>
+								</fileSet>
 							</fileSets>
 						</configuration>
 					</execution>
