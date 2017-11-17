@@ -50,7 +50,7 @@ class EasySdk {
 	}
 
 	public String fleetToDevice(String data) throws ExecutionException, InterruptedException {
-		return (((FleetSigner) sdk.plugin("FleetSigner")).fleetToDevice.apply(data).get()).getBuiltMessage();
+		return (((FleetSigner) sdk.plugin("FleetSigner")).fleetToDevice.apply(this.sign(data)).get()).getBuiltMessage();
 	}
 
 	public String fleetFromDevice(String msg) throws ExecutionException, InterruptedException {
