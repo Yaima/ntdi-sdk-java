@@ -46,6 +46,7 @@ public class TdiSdkApiFactory {
     addSignArgs(imp, flows);
     addCoSignArgs(imp, flows);
     addVerifyArgs(imp, flows);
+    addVerifyGeneralArgs(imp, flows);
 
     return flows;
   }
@@ -123,6 +124,33 @@ public class TdiSdkApiFactory {
     verifyArgs.addMethod(ApiFlows.VerifyFlow.handleReturn.name(), verifyFlow::handleReturn);
 
     flows.put(Constants.Api.VerifyFlow.name(), verifyArgs);
+  }
+
+  /**
+   * Adds VerifyGeneral api flows.
+   *
+   * @param imp
+   *          : {@link TdiImplementationShape} instance
+   *
+   * @param flows
+   *          map to set, key as Api name and value {@link TdiFlowArguments}
+   */
+  private static void addVerifyGeneralArgs(TdiImplementationShape imp,
+                                    Map<String, TdiFlowArguments> flows) {
+
+    VerifyGeneral verifyGeneralFlow = new VerifyGeneral(imp);
+    TdiFlowArguments verifyGeneralArgs = new TdiFlowArguments();
+
+    verifyGeneralArgs.addMethod(ApiFlows.VerifyGeneralFlow.handleInit.name(), verifyGeneralFlow::handleInit);
+    verifyGeneralArgs.addMethod(ApiFlows.VerifyGeneralFlow.unpackEnvelope.name(), verifyGeneralFlow::unpackEnvelope);
+    verifyGeneralArgs.addMethod(ApiFlows.VerifyGeneralFlow.unpackClaims.name(), verifyGeneralFlow::unpackClaims);
+    verifyGeneralArgs.addMethod(ApiFlows.VerifyGeneralFlow.validateClaims.name(), verifyGeneralFlow::validateClaims);
+    verifyGeneralArgs.addMethod(ApiFlows.VerifyGeneralFlow.prepSignatures.name(), verifyGeneralFlow::prepSignatures);
+    verifyGeneralArgs.addMethod(ApiFlows.VerifyGeneralFlow.verifySignatures.name(), verifyGeneralFlow::verifySignatures);
+    verifyGeneralArgs.addMethod(ApiFlows.VerifyGeneralFlow.afterVerify.name(), verifyGeneralFlow::afterVerify);
+    verifyGeneralArgs.addMethod(ApiFlows.VerifyGeneralFlow.handleReturn.name(), verifyGeneralFlow::handleReturn);
+
+    flows.put(Constants.Api.VerifyGeneralFlow.name(), verifyGeneralArgs);
   }
 
 }
