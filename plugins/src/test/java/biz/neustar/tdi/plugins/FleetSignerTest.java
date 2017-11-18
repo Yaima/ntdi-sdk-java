@@ -14,17 +14,17 @@ import biz.neustar.tdi.fw.wrapper.TdiSdkWrapperShape;
 
 public class FleetSignerTest {
 	static TdiSdkWrapperShape sdkWrapper;
-	static NTDI serverSdk;
-	static NTDI deviceSdk;
-	static NTDI serverSdkException;
+	static NTDIHelper serverSdk;
+	static NTDIHelper deviceSdk;
+	static NTDIHelper serverSdkException;
 	static final Logger log = LoggerFactory.getLogger(FleetSignerTest.class);
 	String logMsg;
 
 	@BeforeClass
 	public static void setup() throws ExecutionException, InterruptedException {
-		serverSdk = new NTDI(Arrays.asList(FleetSigner::new), "server/config.json");
-		deviceSdk = new NTDI(null, "device/config.json");
-		serverSdkException = new NTDI(Arrays.asList(FleetSigner::new), "exception/config.json");
+		serverSdk = new NTDIHelper(Arrays.asList(FleetSigner::new), "server/config.json");
+		deviceSdk = new NTDIHelper(null, "device/config.json");
+		serverSdkException = new NTDIHelper(Arrays.asList(FleetSigner::new), "exception/config.json");
 	}
 
 	@Test

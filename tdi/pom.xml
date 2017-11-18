@@ -1,0 +1,34 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>biz.neustar.tdi</groupId>
+		<artifactId>ntdi-sdk-java</artifactId>
+		<version>1.0</version>
+	</parent>
+
+	<artifactId>tdi</artifactId>
+	<packaging>jar</packaging>
+
+	<name>tdi</name>
+	<url>https://github.com/Neustar-TDI/ntdi-sdk-java/tdi</url>
+
+	<dependencies>
+		<dependency>
+			<groupId>biz.neustar.tdi</groupId>
+			<artifactId>sdk</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>biz.neustar.tdi</groupId>
+			<artifactId>plugins</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>biz.neustar.tdi</groupId>
+			<artifactId>platform</artifactId>
+			<version>1.0</version>
+		</dependency>
+	</dependencies>
+</project>
