@@ -13,10 +13,8 @@ import biz.neustar.tdi.fw.utils.Utils;
 import biz.neustar.tdi.fw.exception.InvalidFormatException;
 
 
-public class NTDIFleet extends NTDI {
-    static {
-        log = LoggerFactory.getLogger(NTDIFleet.class);
-    }
+public class NTDIFleet extends BaseNTDI {
+    private static Logger log = LoggerFactory.getLogger(NTDIFleet.class);
 
     public NTDIFleet() throws ExecutionException, InterruptedException, IOException {
         super(Arrays.asList(FleetSigner::new), null);

@@ -14,7 +14,7 @@ To get started, download following, build and include the library in your projec
 
 The top-level `biz.neustar.tdi` package includes two primary classes. Each can be used in different contexts.
 
-### NTDI
+### NTDIDevice
 
 This class is primarily designed for simple devices and other entities that produce and consume messages to and from a Fleet.
 
@@ -25,7 +25,7 @@ It consists of three methods:
 
 ### NTDIFleet
 
-This class extends `NTDI` to provide additional methods useful for a Fleet server:
+Fleet servers provide services that represent the Fleet, and validate messages with the NTDI Core. This class provides methods useful for a Fleet server:
 
 * fleetToDevice
 * fleetFromDevice
