@@ -12,13 +12,10 @@ import biz.neustar.tdi.plugins.FleetSigner;
 import biz.neustar.tdi.fw.utils.Utils;
 import biz.neustar.tdi.fw.exception.InvalidFormatException;
 
-import biz.neustar.tdi.Config;
-import biz.neustar.tdi.NTDI;
-
 
 public class NTDIFleet extends NTDI {
-    {
-        log = LoggerFactory.getLogger(NTDI.class);
+    static {
+        log = LoggerFactory.getLogger(NTDIFleet.class);
     }
 
     public NTDIFleet() throws ExecutionException, InterruptedException, IOException {
@@ -43,7 +40,7 @@ public class NTDIFleet extends NTDI {
         return (((FleetSigner) sdk.plugin("FleetSigner")).fleetToDevice.apply(this.sign(data)).get()).getBuiltMessage();
     }
 
-    public String fleetFromDevice(String msg ) throws ExecutionException, InterruptedException {
+    public String fleetFromDevice(String msg) throws ExecutionException, InterruptedException {
         log.debug("fleetFromDevice {}", msg);
         return ((FleetSigner) sdk.plugin("FleetSigner")).fleetFromDevice.apply(msg).get().getBuiltMessage();
     }
