@@ -14,11 +14,6 @@ public class NTDIDevice extends BaseNTDI {
         super();
     }
 
-    public String cosign(String msg) throws ExecutionException, InterruptedException {
-        log.debug("cosigning {}", msg);
-        return ((TdiCanonicalMessageShape) this.sdk.api("CosignFlow").apply(msg).get()).getBuiltMessage();
-    }
-
     public String verify(String msg) throws ExecutionException, InterruptedException {
         log.debug("verifying {}", msg);
         return ((String) this.sdk.api("VerifyFlow").apply(msg).get());
