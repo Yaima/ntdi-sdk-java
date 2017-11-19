@@ -28,18 +28,18 @@ public class NTDIFleet extends BaseNTDI {
         super(Arrays.asList(FleetSigner::new), config);
     }
 
-    public String fleetToDevice(Map<String, Object> data) throws ExecutionException, InterruptedException, InvalidFormatException {
+    public String signForFleet(Map<String, Object> data) throws ExecutionException, InterruptedException, InvalidFormatException {
         // TODO: better format for payload
-        return fleetToDevice(Utils.mapToJson(data));
+        return signForFleet(Utils.mapToJson(data));
     }
 
-    public String fleetToDevice(String data) throws ExecutionException, InterruptedException {
-        log.debug("fleetToDevice {}", data);
+    public String signForFleet(String data) throws ExecutionException, InterruptedException {
+        log.debug("signForFleet {}", data);
         return (((FleetSigner) sdk.plugin("FleetSigner")).fleetToDevice.apply(this.sign(data)).get()).getBuiltMessage();
     }
 
-    public String fleetFromDevice(String msg) throws ExecutionException, InterruptedException {
-        log.debug("fleetFromDevice {}", msg);
+    public String verifyFromDevice(String msg) throws ExecutionException, InterruptedException {
+        log.debug("verifyFromDevice {}", msg);
         return ((FleetSigner) sdk.plugin("FleetSigner")).fleetFromDevice.apply(msg).get().getBuiltMessage();
     }
 }

@@ -27,7 +27,7 @@ It consists of three methods:
 
 Fleet servers provide services that represent the Fleet, and validate messages with the NTDI Core. This class provides methods useful for a Fleet server:
 
-* fleetToDevice
-* fleetFromDevice
+* signForFleet
+* verifyFromDevice
 
 These classes prove insufficient, they can be extended with [plugins](../plugins/README.md), and provided alternate [platforms](../platform/README.md). Or, the [lower-level API](../sdk/README.md) is also available.
