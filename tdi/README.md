@@ -20,8 +20,13 @@ This class is primarily designed for simple devices and other entities that prod
 
 It consists of three methods:
 * sign
-* cosign
 * verify
+
+### NTDIGateway
+
+A gateway may be a device that intermediates with other devices. This class, a subclass of NTDIDevice, adds methods for dealing with gateway use cases:
+* cosign
+* verifyFromDevice
 
 ### NTDIFleet
 
