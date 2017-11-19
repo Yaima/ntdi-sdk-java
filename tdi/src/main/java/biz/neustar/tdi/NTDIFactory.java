@@ -12,11 +12,9 @@ import biz.neustar.tdi.fw.wrapper.TdiSdkWrapperShape;
 import biz.neustar.tdi.sdk.TdiSdk;
 import biz.neustar.tdi.sdk.TdiSdkOptions;
 
-import biz.neustar.tdi.Config;
-import biz.neustar.tdi.NTDI;
 
 class NTDIFactory {
-    protected static Logger log = LoggerFactory.getLogger(NTDI.class);
+    private static Logger log = LoggerFactory.getLogger(NTDIFactory.class);
 
     // ASYNC INIT
     public CompletableFuture<TdiSdkWrapperShape> setup(List<TdiPluginBaseFactory> plugins, Config config) {

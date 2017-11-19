@@ -30,4 +30,4 @@ This class extends `NTDI` to provide additional methods useful for a Fleet serve
 * fleetToDevice
 * fleetFromDevice
 
-These classes prove insufficient, they can be extended with [](../plugins/README.md), and provided alternate [](../platform/README.md). Or, the [lower-level API](../sdk/README.md) is also available.
+These classes prove insufficient, they can be extended with [plugins](../plugins/README.md), and provided alternate [platforms](../platform/README.md). Or, the [lower-level API](../sdk/README.md) is also available.
