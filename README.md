@@ -95,7 +95,7 @@ Diagram showing components of TDI in a real world scenario:
 
 This is Neustar's Trusted Device Identity (TDI) implementation in Java 8.
 
-[Framework](https://github.com/Neustar-TDI/ntdi-sdk-java/framework) is pulled in by these other components in the course of their installation. Application code _may_ use definitions from this namespace, but should not otherwise know of it. All application usage of TDI should be done via the [sdk package](https://github.com/Neustar-TDI/ntdi-sdk-java/sdk). See that documentation for the TDI API.
+[Framework](./framework) is pulled in by these other components in the course of their installation. Application code _may_ use definitions from this namespace, but should not otherwise know of it. All application usage of TDI should be done via the [sdk package](./sdk). See that documentation for the TDI API.
 
 
 ### Build:
