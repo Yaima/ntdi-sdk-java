@@ -4,7 +4,7 @@
 
 ## Prerequisite Information
 
-Before you continue with this SDK, STOP what you are doing and review the [TDI Overview](./TDI_overview/TDI_OVERVIEW.md) and [TDI Whitepaper](./TDI_overview/assets/TDI-WhitePaper.pdf) to fully understand the value proposition and core techinical concepts.
+Before you continue with this SDK, STOP what you are doing and review the [TDI Overview](./TDI_overview/TDI_OVERVIEW.md) and [TDI Whitepaper](./TDI_overview/assets/TDI-WhitePaper.pdf) to fully understand the value proposition and core technical concepts.
 
 ===================
 
@@ -42,9 +42,9 @@ It provides a top level API and contains an instantiation of the framework. This
 
 **"Plugins"** are Application-level optional modules that enable features and modify implementation control flow.  This allows us to release commercial plugins that expand on features of a base implementation.
 
-This folder contains a set of API Plugin class instances that are specific to our initial TDI flows. These are portable as long as the flows in the implementation sdk folder remain constant. They extend the default API provided by the initial implementation sdk when injected in the implementation instantiation. They also can define optional or required configuration options. For now, we relegate all higher-level non-device specific functionality to plugins to keep things composable and simple.
+This folder contains a set of API Plugin class instances that are specific to our initial TDI flows. These are portable as long as the flows in the implementation SDK folder remain constant. They extend the default API provided by the initial implementation SDK when injected in the implementation instantiation. They also can define optional or required configuration options. For now, we relegate all higher-level non-device specific functionality to plugins to keep things composable and simple.
 
-Our examples use our initial sample implementation sdk, and is not meant to be treated as a module or dependency. This also contains some tools for handling key materials, which should most likely be moved to our initial implementation in some way.
+Our examples use our initial sample implementation SDK, and is not meant to be treated as a module or dependency. This also contains some tools for handling key materials, which should most likely be moved to our initial implementation in some way.
 
 ### TDI Productized "Implementation" Features
 
@@ -95,7 +95,7 @@ Diagram showing components of TDI in a real world scenario:
 
 This is Neustar's Trusted Device Identity (TDI) implementation in Java 8.
 
-[Framework](./framework) is pulled in by these other components in the course of their installation. Application code _may_ use definitions from this namespace, but should not otherwise know of it. All application usage of TDI should be done via the [sdk package](./sdk). See that documentation for the TDI API.
+[Framework](./framework) is pulled in by these other components in the course of their installation. Application code _may_ use definitions from this namespace, but should not otherwise know of it. All application usage of TDI should be done via the [SDK package](./sdk). See that documentation for the TDI API.
 
 
 ### Build:
@@ -108,7 +108,7 @@ mvn clean package
 mvn javadoc:javadoc
 ```
 
-### Adding NTDI SDK as a dependency to other projects
+### Adding NTDI  as a dependency to other projects
 ```XML
 <dependency>
     <groupId>biz.neustar.tdi</groupId>
