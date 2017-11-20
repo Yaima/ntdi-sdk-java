@@ -34,7 +34,7 @@ public class Constants {
   /**
    * Class for all pre-defined api flows.
    * No order is implied by these definitions. Composition of these named flow
-   *   methods is handled in {@link TdiSdkFactory}.
+   *   methods is handled in TdiSdkFactory.
    */
   public class FlowMethods {
     public static final String handleInit   = "handleInit";
