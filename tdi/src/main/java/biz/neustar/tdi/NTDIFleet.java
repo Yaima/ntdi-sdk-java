@@ -40,6 +40,6 @@ public class NTDIFleet extends BaseNTDI {
 
     public String verifyFromDevice(String msg) throws ExecutionException, InterruptedException {
         log.debug("verifyFromDevice {}", msg);
-        return ((FleetSigner) sdk.plugin("FleetSigner")).fleetFromDevice.apply(msg).get().getBuiltMessage();
+        return ((FleetSigner) sdk.plugin("FleetSigner")).fleetFromDevice.apply(msg).get();
     }
 }
