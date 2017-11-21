@@ -32,6 +32,7 @@ It consists of two methods:
 ### NTDIGateway
 
 A gateway may be a device that intermediates with other devices. This class, a subclass of NTDIDevice, adds methods for dealing with gateway use cases:
+
 | Method | Argument Type | Return Type |
 | --- | --- | --- |
 | cosign | (String *`JWS`*) | String *`JWS`*  |
@@ -52,6 +53,7 @@ In simple pass through cases, you'll only need **cosign** and **verifyFromDevice
 ### NTDIFleet
 
 Fleet servers provide services that represent the Fleet, and validate messages with the NTDI Core. This class provides methods useful for a Fleet server:
+
 | Method | Argument Type | Return Type |
 | --- | --- | --- |
 | signForFleet | (String \| Map) | String *`JWS`*  |
