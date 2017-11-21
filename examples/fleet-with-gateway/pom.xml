@@ -4,18 +4,20 @@
 
 	<parent>
 		<groupId>biz.neustar.tdi</groupId>
-		<artifactId>ntdi-sdk-java</artifactId>
+		<artifactId>examples</artifactId>
 		<version>1.0</version>
 	</parent>
 
-	<artifactId>examples</artifactId>
+	<artifactId>fleet-with-gateway</artifactId>
 	<packaging>pom</packaging>
 
-	<name>examples</name>
-	<url>https://github.com/Neustar-TDI/ntdi-sdk-java/examples</url>
+	<name>fleet-with-gateway</name>
+	<url>https://github.com/Neustar-TDI/ntdi-sdk-java/examples/fleet-with-gateway</url>
 
 	<modules>
-		<module>platform</module>
-		<module>fleet-with-gateway</module>
+		<module>device-sensor</module>
+		<module>device-gateway</module>
+		<module>server-data-collector</module>
+		<module>server-actuator</module>
 	</modules>
 </project>

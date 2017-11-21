@@ -1,0 +1,37 @@
+{
+    "fleet": {
+        "id": "<fleetID>"
+    },
+    "gateways": {
+        "<gatewayID1>": [
+            "<sensorID11>",
+            "<sensorID12>",
+            ...
+            "<sensorID1n>"
+        ],
+        "<gatewayID2>": [
+            "<sensorID21>",
+            "<sensorID22>",
+            ...
+            "<sensorID2n>"
+        ],
+        ...
+        "<gatewayIDm>": [
+            "<sensorIDm1>",
+            "<sensorIDm2>",
+            ...
+            "<sensorIDmn>"
+        ]
+    },
+    "server": {
+        "name": "My Data Collection Server",
+        "id": "<serverID>"
+    },
+    "mqtt": {
+        "broker": "tcp://test.mosquitto.org:1883",
+        "qos": {
+            "publish": 2,
+            "subscribe": 1
+        }
+    }
+}
