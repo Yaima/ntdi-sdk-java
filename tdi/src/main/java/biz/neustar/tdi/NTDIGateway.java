@@ -42,4 +42,9 @@ public class NTDIGateway extends NTDIDevice {
         log.debug("verifying from device(s) {}", msg);
         return ((String) this.sdk.api("VerifyGeneralFlow").apply(msg).get());
     }
+
+    public String verifyFromFleet(String msg) throws ExecutionException, InterruptedException {
+        log.debug("verifying from fleet {}", msg);
+        return ((String) this.sdk.api("VerifyFlow").apply(msg).get());
+    }
 }
