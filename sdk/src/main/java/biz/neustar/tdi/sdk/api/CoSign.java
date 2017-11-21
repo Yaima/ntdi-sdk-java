@@ -79,7 +79,8 @@ public class CoSign extends BaseApi {
         }
 
         future.complete(tdiMsg);
-      } catch (Exception e) {
+      }
+      catch (Exception e) {
         future.completeExceptionally(new ApiException("Error parsing jws string"));
       }
       return future;

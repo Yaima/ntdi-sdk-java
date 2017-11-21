@@ -129,29 +129,30 @@ public class FleetSigner extends TdiPluginBase {
   @SuppressWarnings("unchecked")
   public CompletableFuture<Boolean> init() {
     LOG.trace("FleetSigner:init()");
-    return this.validatePluginDataStore(Arrays.asList("cosigner")).thenCompose((Boolean confValid) -> {
-      if (confValid) {
-        return this.getDataStore().get("cosigner")
-          .thenApply((cosignerConf) -> {
-            LOG.info("Cosigner conf loaded.");
-            // NOTE: Map cast is internal and error-checked upstream.
-            Map<String, Object> cosignerConfMap = (Map<String, Object>) cosignerConf;
-            if (cosignerConfMap.containsKey("baseURI")) {
-              this.baseURI = cosignerConfMap.get("baseURI").toString();
-              LOG.info("The selected cosigner is at " + this.baseURI);
-              return true;
-            }
-            else {
-              LOG.error("FleetSigner requires a cosigner.baseURI string.");
-            }
-            return false;
-          });
-      }
-      else {
-        LOG.error("FleetSigner requires a cosigner configuration.");
-        return CompletableFuture.supplyAsync(() -> false);
-      }
-    });
+    return this.validatePluginDataStore(Arrays.asList("cosigner"))
+      .thenCompose((Boolean confValid) -> {
+        if (confValid) {
+          return this.getDataStore().get("cosigner")
+            .thenApply((cosignerConf) -> {
+              LOG.info("Cosigner conf loaded.");
+              // NOTE: Map cast is internal and error-checked upstream.
+              Map<String, Object> cosignerConfMap = (Map<String, Object>) cosignerConf;
+              if (cosignerConfMap.containsKey("baseURI")) {
+                this.baseURI = cosignerConfMap.get("baseURI").toString();
+                LOG.info("The selected cosigner is at " + this.baseURI);
+                return true;
+              }
+              else {
+                LOG.error("FleetSigner requires a cosigner.baseURI string.");
+              }
+              return false;
+            });
+        }
+        else {
+          LOG.error("FleetSigner requires a cosigner configuration.");
+          return CompletableFuture.supplyAsync(() -> false);
+        }
+      });
   }
 
   private TdiFlowArguments buildFlowFleetSign() {

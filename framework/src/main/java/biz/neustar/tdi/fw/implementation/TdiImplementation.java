@@ -262,13 +262,7 @@ public class TdiImplementation implements TdiImplementationShape {
       @SuppressWarnings("unchecked")
       @Override
       public CompletableFuture<R> apply(T data) {
-
-        return (CompletableFuture<R>) CompletableFuture.supplyAsync(() -> {
-
-          return buildFlows(data, originalFlow, otherFlow);
-        }).thenCompose((finalFuture) -> {
-          return finalFuture;
-        });
+        return (CompletableFuture<R>) buildFlows(data, originalFlow, otherFlow);
       }
 
       /**
