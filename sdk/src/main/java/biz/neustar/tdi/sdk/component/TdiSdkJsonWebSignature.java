@@ -206,8 +206,9 @@ public class TdiSdkJsonWebSignature extends TdiComponent {
       TdiJwsSignature signature = (TdiJwsSignature) message.getSignaturesToVerify().get(loopIndex);
       queue.add(this.getPlatform().getKeystore().getKey(signature.parsedHeader.kid)
           .thenCompose((TdiKeyStructureShape key) -> {
-            String toVerifyPayload = (signature.protectedHeader).concat(".")
-                .concat(message.getRawPayload());
+            String toVerifyPayload = (signature.protectedHeader)
+              .concat(".")
+              .concat(message.getRawPayload());
             return this.getPlatform().getCrypto().verify(key, toVerifyPayload, signature.signature);
           }));
     }

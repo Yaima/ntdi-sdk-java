@@ -51,405 +51,409 @@ import biz.neustar.tdi.sdk.component.jws.TdiJwsSignature;
  *
  */
 public class FleetSigner extends TdiPluginBase {
-	private static final Logger LOG = LoggerFactory.getLogger(FleetSigner.class);
+  private static final Logger LOG = LoggerFactory.getLogger(FleetSigner.class);
 
-	/**
-	 * This is populated by config and is the network location for our preferred
-	 * cosigner.
-	 */
-	private String baseURI = "";
+  /**
+   * This is populated by config and is the network location for our preferred
+   * cosigner.
+   */
+  private String baseURI = "";
 
-	/**
-	 * Generates a new signature around a payload with the fleet key
-	 *
-	 *            Payload to be encased in claims
-	 */
-	public Function<String, CompletableFuture<TdiCanonicalMessageShape>> fleetSign = null;
-	/**
-	 * Appends a fleet signature to the provided JWS
-	 *
-	 *            The JWS to add a signature to
-	 */
-	public Function<String, CompletableFuture<TdiCanonicalMessageShape>> fleetCosign = null;
-	/**
-	 * Verify a server or device signature
-	 *
-	 *            The JWS to be verified
-	 */
-	public Function<String, CompletableFuture<TdiCanonicalMessageShape>> fleetVerify = null;
-	/**
-	 * Execute a full round-trip signing ceremony. Returns a JWS ready for device
-	 * consumption
-	 *
-	 */
-	public Function<String, CompletableFuture<TdiCanonicalMessageShape>> fleetToDevice = null;
-	/**
-	 * Execute a full round-trip verify ceremony. Returns a payload if all
-	 * verifications pass
-	 *
-	 */
-	public Function<String, CompletableFuture<TdiCanonicalMessageShape>> fleetFromDevice = null;
-	/**
-	 * Signs a payload as a token
-	 *
-	 *            Payload to be sent
-	 */
-	public Function<String, CompletableFuture<TdiCanonicalMessageShape>> signToken = null;
+  /**
+   * Generates a new signature around a payload with the fleet key
+   *
+   *            Payload to be encased in claims
+   */
+  public Function<String, CompletableFuture<TdiCanonicalMessageShape>> fleetSign = null;
+  /**
+   * Appends a fleet signature to the provided JWS
+   *
+   *            The JWS to add a signature to
+   */
+  public Function<String, CompletableFuture<TdiCanonicalMessageShape>> fleetCosign = null;
+  /**
+   * Verify a server or device signature
+   *
+   *            The JWS to be verified
+   */
+  public Function<String, CompletableFuture<TdiCanonicalMessageShape>> fleetVerify = null;
+  /**
+   * Execute a full round-trip signing ceremony. Returns a JWS ready for device
+   * consumption
+   *
+   */
+  public Function<String, CompletableFuture<TdiCanonicalMessageShape>> fleetToDevice = null;
+  /**
+   * Execute a full round-trip verify ceremony. Returns a payload if all
+   * verifications pass
+   *
+   */
+  public Function<String, CompletableFuture<TdiCanonicalMessageShape>> fleetFromDevice = null;
+  /**
+   * Signs a payload as a token
+   *
+   *            Payload to be sent
+   */
+  public Function<String, CompletableFuture<TdiCanonicalMessageShape>> signToken = null;
 
-	public FleetSigner(TdiImplementationShape impl, TdiSdkWrapperShape sdkWrapper) {
-		super("FleetSigner", impl, sdkWrapper);
-		LOG.trace("FleetSigner:constructor()");
-		this.fleetSign = this.impl.buildApiFlow(
-			this.sdkWrapper.getDefaultFlows().get("SignFlow"),
-			this.buildFlowFleetSign()
-		);
-		this.signToken = this.impl.buildApiFlow(    // <--- No deferral to orginal flow.
-			this.sdkWrapper.getDefaultFlows().get("SignFlow"),
-			this.buildFlowSignToken()
-		);
-		this.fleetCosign = this.impl.buildApiFlow(  // _or: ['setSigners'],
-			this.sdkWrapper.getDefaultFlows().get("CosignFlow"),
-			this.buildFlowFleetCosign()
-		);
-		this.fleetVerify = this.impl.buildApiFlow(  // _or: ['prepSignatures','handleReturn']
-			this.sdkWrapper.getDefaultFlows().get("VerifyFlow"),
-			this.buildFlowFleetVerify()
-		);
-		this.fleetToDevice = this.impl.buildApiFlow(
-			this.buildFlowFleetToDev(),
-			null
-		);
-		this.fleetFromDevice = this.impl.buildApiFlow(
-			this.buildFlowFleetFromDev(),
-			null
-		);
-	}
+  public FleetSigner(TdiImplementationShape impl, TdiSdkWrapperShape sdkWrapper) {
+    super("FleetSigner", impl, sdkWrapper);
+    LOG.trace("FleetSigner:constructor()");
+    this.fleetSign = this.impl.buildApiFlow(
+      this.sdkWrapper.getDefaultFlows().get("SignFlow"),
+      this.buildFlowFleetSign()
+    );
+    this.signToken = this.impl.buildApiFlow(    // <--- No deferral to orginal flow.
+      this.sdkWrapper.getDefaultFlows().get("SignFlow"),
+      this.buildFlowSignToken()
+    );
+    this.fleetCosign = this.impl.buildApiFlow(  // _or: ['setSigners'],
+      this.sdkWrapper.getDefaultFlows().get("CosignFlow"),
+      this.buildFlowFleetCosign()
+    );
+    this.fleetVerify = this.impl.buildApiFlow(  // _or: ['prepSignatures','handleReturn']
+      this.sdkWrapper.getDefaultFlows().get("VerifyFlow"),
+      this.buildFlowFleetVerify()
+    );
+    this.fleetToDevice = this.impl.buildApiFlow(
+      this.buildFlowFleetToDev(),
+      null
+    );
+    this.fleetFromDevice = this.impl.buildApiFlow(
+      this.buildFlowFleetFromDev(),
+      null
+    );
+  }
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public CompletableFuture<Boolean> init() {
-		LOG.trace("FleetSigner:init()");
-		return this.validatePluginDataStore(Arrays.asList("cosigner")).thenCompose((Boolean confValid) -> {
-			if (confValid) {
-				return this.getDataStore().get("cosigner")
-					.thenApply((cosignerConf) -> {
-						LOG.info("Cosigner conf loaded.");
-						// NOTE: Map cast is internal and error-checked upstream.
-						Map<String, Object> cosignerConfMap = (Map<String, Object>) cosignerConf;
-						if (cosignerConfMap.containsKey("baseURI")) {
-							this.baseURI = cosignerConfMap.get("baseURI").toString();
-							LOG.info("The selected cosigner is at " + this.baseURI);
-							return true;
-						}
-						else {
-							LOG.error("FleetSigner requires a cosigner.baseURI string.");
-						}
-						return false;
-					});
-			}
-			else {
-				LOG.error("FleetSigner requires a cosigner configuration.");
-				return CompletableFuture.supplyAsync(() -> false);
-			}
-		});
-	}
+  @Override
+  @SuppressWarnings("unchecked")
+  public CompletableFuture<Boolean> init() {
+    LOG.trace("FleetSigner:init()");
+    return this.validatePluginDataStore(Arrays.asList("cosigner")).thenCompose((Boolean confValid) -> {
+      if (confValid) {
+        return this.getDataStore().get("cosigner")
+          .thenApply((cosignerConf) -> {
+            LOG.info("Cosigner conf loaded.");
+            // NOTE: Map cast is internal and error-checked upstream.
+            Map<String, Object> cosignerConfMap = (Map<String, Object>) cosignerConf;
+            if (cosignerConfMap.containsKey("baseURI")) {
+              this.baseURI = cosignerConfMap.get("baseURI").toString();
+              LOG.info("The selected cosigner is at " + this.baseURI);
+              return true;
+            }
+            else {
+              LOG.error("FleetSigner requires a cosigner.baseURI string.");
+            }
+            return false;
+          });
+      }
+      else {
+        LOG.error("FleetSigner requires a cosigner configuration.");
+        return CompletableFuture.supplyAsync(() -> false);
+      }
+    });
+  }
 
-	private TdiFlowArguments buildFlowFleetSign() {
-		TdiFlowArguments flow = new TdiFlowArguments();
-		flow.addOverrideSteps(Arrays.asList("setSigners"));
-		flow.addMethod("setSigners", (data) -> {
-			TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
-			msgObj.setSignatureType("compact");
-			return this.impl.getPlatform().getKeystore()
-					.getKeyByRole(TdiKeyFlagsEnum.ROLE_F_S.getNumber(), msgObj.getCurrentProject())
-					.thenCompose((TdiKeyStructureShape key) -> {
-						CompletableFuture<TdiCanonicalMessageShape> future = new CompletableFuture<>();
-						if ((null != key) && key.canSign()) {
-							msgObj.addSigner(key);
-							future.complete(msgObj);
-						} else {
-							future.completeExceptionally(new FrameworkRuntimeException(
-									"setSigners() failed to find a signing key for either F_C or F_S."));
-						}
-						return future;
-					}).exceptionally(throwable -> {
-						String errMsg = "setSigners() failed.";
-						LOG.error(errMsg + ": " + throwable.getMessage());
-						throw new FrameworkRuntimeException(errMsg);
-					});
-		});
-		return flow;
-	}
+  private TdiFlowArguments buildFlowFleetSign() {
+    TdiFlowArguments flow = new TdiFlowArguments();
+    flow.addOverrideSteps(Arrays.asList("setSigners"));
+    flow.addMethod("setSigners", (data) -> {
+      TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
+      msgObj.setSignatureType("compact");
+      return this.impl.getPlatform().getKeystore()
+        .getKeyByRole(TdiKeyFlagsEnum.ROLE_F_S.getNumber(), msgObj.getCurrentProject())
+        .thenCompose((TdiKeyStructureShape key) -> {
+          CompletableFuture<TdiCanonicalMessageShape> future = new CompletableFuture<>();
+          if ((null != key) && key.canSign()) {
+            msgObj.addSigner(key);
+            future.complete(msgObj);
+          } else {
+            future.completeExceptionally(new FrameworkRuntimeException(
+                "setSigners() failed to find a signing key for either F_C or F_S."));
+          }
+          return future;
+        })
+        .exceptionally(throwable -> {
+          String errMsg = "setSigners() failed.";
+          LOG.error(errMsg + ": " + throwable.getMessage());
+          throw new FrameworkRuntimeException(errMsg);
+        });
+    });
+    return flow;
+  }
 
-	private TdiFlowArguments buildFlowFleetCosign() {
-		TdiFlowArguments flow = new TdiFlowArguments();
-		flow.addOverrideSteps(Arrays.asList("setSigners"));
-		flow.addMethod("setSigners", (data) -> {
-			TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
-			msgObj.setSignatureType("compact");
-			return this.impl.getPlatform().getKeystore()
-					.getKeyByRole(TdiKeyFlagsEnum.ROLE_F_S.getNumber(), msgObj.getCurrentProject())
-					.thenCompose((TdiKeyStructureShape key) -> {
-						CompletableFuture<TdiCanonicalMessageShape> future = new CompletableFuture<>();
-						if ((null != key) && key.canSign()) {
-							msgObj.addSigner(key);
-							future.complete(msgObj);
-						} else {
-							future.completeExceptionally(new FrameworkRuntimeException(
-									"setSigners() failed to find a signing key for either F_C or F_S."));
-						}
-						return future;
-					}).exceptionally(throwable -> {
-						String errMsg = "setSigners() failed.";
-						LOG.error(errMsg + ": " + throwable.getMessage());
-						throw new FrameworkRuntimeException(errMsg);
-					});
-		});
-		return flow;
-	}
+  private TdiFlowArguments buildFlowFleetCosign() {
+    TdiFlowArguments flow = new TdiFlowArguments();
+    flow.addOverrideSteps(Arrays.asList("setSigners"));
+    flow.addMethod("setSigners", (data) -> {
+      TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
+      msgObj.setSignatureType("compact");
+      return this.impl.getPlatform().getKeystore()
+        .getKeyByRole(TdiKeyFlagsEnum.ROLE_F_S.getNumber(), msgObj.getCurrentProject())
+        .thenCompose((TdiKeyStructureShape key) -> {
+          CompletableFuture<TdiCanonicalMessageShape> future = new CompletableFuture<>();
+          if ((null != key) && key.canSign()) {
+            msgObj.addSigner(key);
+            future.complete(msgObj);
+          } else {
+            future.completeExceptionally(new FrameworkRuntimeException(
+                "setSigners() failed to find a signing key for either F_C or F_S."));
+          }
+          return future;
+        })
+        .exceptionally(throwable -> {
+          String errMsg = "setSigners() failed.";
+          LOG.error(errMsg + ": " + throwable.getMessage());
+          throw new FrameworkRuntimeException(errMsg);
+        });
+    });
+    return flow;
+  }
 
-	@SuppressWarnings("unchecked")
-	private TdiFlowArguments buildFlowFleetVerify() {
-		TdiFlowArguments flow = new TdiFlowArguments();
-		// Prevent the default behavior from taking place for these phases.
-		flow.addOverrideSteps(Arrays.asList("prepSignatures", "handleReturn"));
-		flow.addMethod("prepSignatures", (data) -> {
-			TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
-			List<CompletableFuture<TdiKeyStructureShape>> promise_queue = new ArrayList<>();
-			for (Object s : msgObj.getSignaturesToVerify().toArray()) {
-				TdiJwsSignature sig = (TdiJwsSignature) s;
-				if (null != sig.parsedHeader) {
-					if (0 < sig.parsedHeader.kid.length()) {
-						promise_queue.add(this.impl.getPlatform().getKeystore().getKey(sig.parsedHeader.kid)
-								.thenApply((TdiKeyStructureShape t_key) -> {
-									// We have knowledge of the key.
-									if (0 < t_key.getFleetId().length()) {
-										msgObj.setCurrentProject(t_key.getFleetId());
-									}
-									if (t_key.isInvalid()) {
-										msgObj.clearVerifiers(); // No point to verifying.
-										LOG.warn("prepSignatures(): Key " + t_key.getKeyId() + " was marked invalid.");
-										return null;
-									}
-									msgObj.addVerifier(t_key);
-									return t_key;
-								}));
-					}
-				}
-			}
-			return CompletableFuture.allOf(promise_queue.toArray(new CompletableFuture<?>[0]))
-					.thenCompose((arg) -> {
-						CompletableFuture<TdiCanonicalMessageShape> future = new CompletableFuture<>();
-						if (0 == msgObj.getCurrentProject().length()) {
-							LOG.warn("fleetVerify(): WARNING: No currentProject set");
-						}
-						int verify_count = 0;
+  @SuppressWarnings("unchecked")
+  private TdiFlowArguments buildFlowFleetVerify() {
+    TdiFlowArguments flow = new TdiFlowArguments();
+    // Prevent the default behavior from taking place for these phases.
+    flow.addOverrideSteps(Arrays.asList("prepSignatures", "handleReturn"));
+    flow.addMethod("prepSignatures", (data) -> {
+      TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
+      List<CompletableFuture<TdiKeyStructureShape>> promise_queue = new ArrayList<>();
+      for (Object s : msgObj.getSignaturesToVerify().toArray()) {
+        TdiJwsSignature sig = (TdiJwsSignature) s;
+        if (null != sig.parsedHeader) {
+          if (0 < sig.parsedHeader.kid.length()) {
+            promise_queue.add(this.impl.getPlatform().getKeystore().getKey(sig.parsedHeader.kid)
+              .thenApply((TdiKeyStructureShape t_key) -> {
+                // We have knowledge of the key.
+                if (0 < t_key.getFleetId().length()) {
+                  msgObj.setCurrentProject(t_key.getFleetId());
+                }
+                if (t_key.isInvalid()) {
+                  msgObj.clearVerifiers(); // No point to verifying.
+                  LOG.warn("prepSignatures(): Key " + t_key.getKeyId() + " was marked invalid.");
+                  return null;
+                }
+                msgObj.addVerifier(t_key);
+                return t_key;
+              }));
+          }
+        }
+      }
+      return CompletableFuture.allOf(promise_queue.toArray(new CompletableFuture<?>[0]))
+        .thenCompose((arg) -> {
+          CompletableFuture<TdiCanonicalMessageShape> future = new CompletableFuture<>();
+          if (0 == msgObj.getCurrentProject().length()) {
+            LOG.warn("fleetVerify(): WARNING: No currentProject set");
+          }
+          int verify_count = 0;
 
-						// NOTE: This cast is safe, since it is sourced from local scope, and
-						//   its parameterized type is know with certainty.
-						// TODO: Using Iterators from the List would probably clean this up a good deal.
-						for (
-							CompletableFuture<TdiKeyStructureShape> cffk :
-							(CompletableFuture<TdiKeyStructureShape>[]) promise_queue.toArray(new CompletableFuture<?>[0])
-						) {
-							if (null != cffk) {
-								verify_count++;
-							}
-						}
-						if (0 != verify_count) {
-							// NOTE: We are not checking for roles here.
-							future.complete(msgObj);
-						} else {
-							future.completeExceptionally(new FrameworkRuntimeException(
-									"prepSignatures(): No known keys to verify against."));
-						}
-						return future;
-					})
-					.exceptionally(throwable -> {
-						String errMsg = "sendToCosigner() failed.";
-						LOG.error(errMsg + ": " + throwable.getMessage());
-						throw new FrameworkRuntimeException(errMsg);
-					});
-		});
-		flow.addMethod("handleReturn", (data) -> {
-			TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
-			return CompletableFuture.completedFuture(msgObj);
-		});
-		return flow;
-	}
+          // NOTE: This cast is safe, since it is sourced from local scope, and
+          //   its parameterized type is know with certainty.
+          // TODO: Using Iterators from the List would probably clean this up a good deal.
+          for (
+            CompletableFuture<TdiKeyStructureShape> cffk :
+            (CompletableFuture<TdiKeyStructureShape>[]) promise_queue.toArray(new CompletableFuture<?>[0])
+          ) {
+            if (null != cffk) {
+              verify_count++;
+            }
+          }
+          if (0 != verify_count) {
+            // NOTE: We are not checking for roles here.
+            future.complete(msgObj);
+          } else {
+            future.completeExceptionally(new FrameworkRuntimeException(
+                "prepSignatures(): No known keys to verify against."));
+          }
+          return future;
+        })
+        .exceptionally(throwable -> {
+          String errMsg = "sendToCosigner() failed.";
+          LOG.error(errMsg + ": " + throwable.getMessage());
+          throw new FrameworkRuntimeException(errMsg);
+        });
+    });
+    flow.addMethod("handleReturn", (data) -> {
+      TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
+      return CompletableFuture.completedFuture(msgObj);
+    });
+    return flow;
+  }
 
-	private TdiFlowArguments buildFlowFleetToDev() {
-		TdiFlowArguments flow = new TdiFlowArguments();
-		// TODO: Fix later.
-		// flow.addMethod("sign", (data) -> {
-		// 	return this.sdkWrapper.api("sign").apply(data);
-		// });
-		flow.addMethod("sendToCosigner", (data) -> {
-			String jwsPayload = (String) data;
-			return this.impl.getPlatform().getKeystore().getSelfKey()
-			  .thenCompose((TdiKeyStructureShape self) -> {
-			  	CompletableFuture<String> future = new CompletableFuture<>();
-			  	String fleet = self.getFleetId();
-			  	String kid = self.getKeyId();
-			  	try {
-			  		future.complete(this.httpPostToCosigner("cosign_for_server", fleet, kid, jwsPayload));
-			  	} catch (Exception e) {
-			  		future.completeExceptionally(new FrameworkRuntimeException(e.toString()));
-			  	}
-			  	return future;
-			  }).exceptionally(throwable -> {
-			  	String errMsg = "sendToCosigner() failed.";
-			  	LOG.error(errMsg + ": " + throwable.getMessage());
-			  	throw new FrameworkRuntimeException(errMsg);
-			  });
-		});
-		flow.addMethod("validateCosigner", (data) -> {
-			String requestBody = (String) data;
-			return this.fleetVerify.apply(requestBody).thenCompose((msg_str) -> {
-				TdiCanonicalMessageShape cosignedJWS = (TdiCanonicalMessageShape) msg_str;
-				// NOTE: Not _strictly_ what the TS package does, but should be equivalent.
-				return CompletableFuture.completedFuture(cosignedJWS);
-			})
-			.exceptionally(throwable -> {
-				LOG.error("validateCosigner() failed.");
-				throw new FrameworkRuntimeException(throwable.getMessage());
-			});
-		});
-		flow.addMethod("fleetSign", (data) -> {
-			String verifiedJWS = ((TdiCanonicalMessageShape) data).getReceivedMessage();
-			return this.fleetCosign.apply(verifiedJWS);
-		});
-		return flow;
-	}
+  private TdiFlowArguments buildFlowFleetToDev() {
+    TdiFlowArguments flow = new TdiFlowArguments();
+    // TODO: Fix later.
+    // flow.addMethod("sign", (data) -> {
+    //   return this.sdkWrapper.api("sign").apply(data);
+    // });
+    flow.addMethod("sendToCosigner", (data) -> {
+      String jwsPayload = (String) data;
+      return this.impl.getPlatform().getKeystore().getSelfKey()
+        .thenCompose((TdiKeyStructureShape self) -> {
+          CompletableFuture<String> future = new CompletableFuture<>();
+          String fleet = self.getFleetId();
+          String kid = self.getKeyId();
+          try {
+            future.complete(this.httpPostToCosigner("cosign_for_server", fleet, kid, jwsPayload));
+          } catch (Exception e) {
+            future.completeExceptionally(new FrameworkRuntimeException(e.toString()));
+          }
+          return future;
+        }).exceptionally(throwable -> {
+          String errMsg = "sendToCosigner() failed.";
+          LOG.error(errMsg + ": " + throwable.getMessage());
+          throw new FrameworkRuntimeException(errMsg);
+        });
+    });
+    flow.addMethod("validateCosigner", (data) -> {
+      String requestBody = (String) data;
+      return this.fleetVerify.apply(requestBody).thenCompose((msg_str) -> {
+        TdiCanonicalMessageShape cosignedJWS = (TdiCanonicalMessageShape) msg_str;
+        // NOTE: Not _strictly_ what the TS package does, but should be equivalent.
+        return CompletableFuture.completedFuture(cosignedJWS);
+      })
+      .exceptionally(throwable -> {
+        LOG.error("validateCosigner() failed.");
+        throw new FrameworkRuntimeException(throwable.getMessage());
+      });
+    });
+    flow.addMethod("fleetSign", (data) -> {
+      String verifiedJWS = ((TdiCanonicalMessageShape) data).getReceivedMessage();
+      return this.fleetCosign.apply(verifiedJWS);
+    });
+    return flow;
+  }
 
-	private TdiFlowArguments buildFlowFleetFromDev() {
-		TdiFlowArguments flow = new TdiFlowArguments();
-		flow.addOverrideSteps(Arrays.asList("sendToCosigner", "validateCosigner", "fleetSign"));
-		flow.addMethod("sendToCosigner", (data) -> {
-			String outboundJWS = (String) data;
-			return this.impl.getPlatform().getKeystore().getSelfKey()
-			  .thenCompose((TdiKeyStructureShape self) -> {
-			  	CompletableFuture<String> future = new CompletableFuture<>();
-			  	String fleet = self.getFleetId();
-			  	try {
-			  		String kid = this.fetchIssFromJwsString(outboundJWS);
-			  		future.complete(this.httpPostToCosigner("cosign_for_edge_device", fleet, kid, outboundJWS));
-			  	} catch (IOException e) {
-			  		future.completeExceptionally(new FrameworkRuntimeException(e.toString()));
-			  	} catch (Exception e) {
-			  		future.completeExceptionally(new FrameworkRuntimeException(e.toString()));
-			  	}
-			  	return future;
-			  })
-			  .exceptionally(throwable -> {
-			  	String errMsg = "sendToCosigner() failed: " + throwable.getMessage();
-			  	LOG.error(errMsg);
-			  	throw new FrameworkRuntimeException(errMsg);
-			  });
-		});
-		flow.addMethod("validateCosigner", (data) -> {
-			String requestBody = (String) data;
-			return this.fleetVerify.apply(requestBody).thenCompose((msg_str) -> {
-				TdiCanonicalMessageShape cosignedJWS = (TdiCanonicalMessageShape) msg_str;
-				// NOTE: Not _strictly_ what the TS package does, but should be equivalent.
-				return CompletableFuture.completedFuture(cosignedJWS);
-			})
-			.exceptionally(throwable -> {
-				String errMsg = "validateCosigner() failed: " + throwable.getMessage();
-				LOG.error(errMsg);
-				throw new FrameworkRuntimeException(errMsg);
-			});
-		});
-		flow.addMethod("fleetSign", (data) -> {
-			TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
-			String verifiedJWS = msgObj.getReceivedMessage();
-			return this.fleetCosign.apply(verifiedJWS);
-		});
-		return flow;
-	}
+  private TdiFlowArguments buildFlowFleetFromDev() {
+    TdiFlowArguments flow = new TdiFlowArguments();
+    flow.addOverrideSteps(Arrays.asList("sendToCosigner", "validateCosigner", "fleetSign"));
+    flow.addMethod("sendToCosigner", (data) -> {
+      String outboundJWS = (String) data;
+      return this.impl.getPlatform().getKeystore().getSelfKey()
+        .thenCompose((TdiKeyStructureShape self) -> {
+          CompletableFuture<String> future = new CompletableFuture<>();
+          String fleet = self.getFleetId();
+          try {
+            String kid = this.fetchIssFromJwsString(outboundJWS);
+            future.complete(this.httpPostToCosigner("cosign_for_edge_device", fleet, kid, outboundJWS));
+          } catch (IOException e) {
+            future.completeExceptionally(new FrameworkRuntimeException(e.toString()));
+          } catch (Exception e) {
+            future.completeExceptionally(new FrameworkRuntimeException(e.toString()));
+          }
+          return future;
+        })
+        .exceptionally(throwable -> {
+          String errMsg = "sendToCosigner() failed: " + throwable.getMessage();
+          LOG.error(errMsg);
+          throw new FrameworkRuntimeException(errMsg);
+        });
+    });
+    flow.addMethod("validateCosigner", (data) -> {
+      String requestBody = (String) data;
+      return this.fleetVerify.apply(requestBody).thenCompose((msg_str) -> {
+        TdiCanonicalMessageShape cosignedJWS = (TdiCanonicalMessageShape) msg_str;
+        // NOTE: Not _strictly_ what the TS package does, but should be equivalent.
+        return CompletableFuture.completedFuture(cosignedJWS);
+      })
+      .exceptionally(throwable -> {
+        String errMsg = "validateCosigner() failed: " + throwable.getMessage();
+        LOG.error(errMsg);
+        throw new FrameworkRuntimeException(errMsg);
+      });
+    });
+    flow.addMethod("fleetSign", (data) -> {
+      TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
+      String verifiedJWS = msgObj.getReceivedMessage();
+      return this.fleetCosign.apply(verifiedJWS);
+    });
+    return flow;
+  }
 
-	/**
-	 * Signs a token if a ROLE_EXTERN key is found in the keystore relevent to the
-	 * project
-	 */
-	private TdiFlowArguments buildFlowSignToken() {
-		TdiFlowArguments flow = new TdiFlowArguments();
-		flow.addOverrideSteps(Arrays.asList("setSigners"));
-		flow.addMethod("setSigners", (data) -> {
-			TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
-			msgObj.setSignatureType("compact");
-			return this.impl.getPlatform().getKeystore()
-					.getKeyByRole(TdiKeyFlagsEnum.ROLE_EXTERN.getNumber(), msgObj.getCurrentProject())
-					.thenCompose((TdiKeyStructureShape key) -> {
-						CompletableFuture<TdiCanonicalMessageShape> future = new CompletableFuture<>();
-						if ((null != key) && key.canSign()) {
-							msgObj.addSigner(key);
-							future.complete(msgObj);
-						} else {
-							future.completeExceptionally(new FrameworkRuntimeException(
-									"setSigners() failed to find a signing key for either F_C or F_S."));
-						}
-						return future;
-					}).exceptionally(throwable -> {
-						String errMsg = "setSigners() failed.";
-						LOG.error(errMsg + ": " + throwable.getMessage());
-						throw new FrameworkRuntimeException(errMsg);
-					});
-		});
-		return flow;
-	}
+  /**
+   * Signs a token if a ROLE_EXTERN key is found in the keystore relevent to the
+   * project
+   */
+  private TdiFlowArguments buildFlowSignToken() {
+    TdiFlowArguments flow = new TdiFlowArguments();
+    flow.addOverrideSteps(Arrays.asList("setSigners"));
+    flow.addMethod("setSigners", (data) -> {
+      TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
+      msgObj.setSignatureType("compact");
+      return this.impl.getPlatform().getKeystore()
+        .getKeyByRole(TdiKeyFlagsEnum.ROLE_EXTERN.getNumber(), msgObj.getCurrentProject())
+        .thenCompose((TdiKeyStructureShape key) -> {
+          CompletableFuture<TdiCanonicalMessageShape> future = new CompletableFuture<>();
+          if ((null != key) && key.canSign()) {
+            msgObj.addSigner(key);
+            future.complete(msgObj);
+          } else {
+            future.completeExceptionally(new FrameworkRuntimeException(
+                "setSigners() failed to find a signing key for either F_C or F_S."));
+          }
+          return future;
+        })
+        .exceptionally(throwable -> {
+          String errMsg = "setSigners() failed.";
+          LOG.error(errMsg + ": " + throwable.getMessage());
+          throw new FrameworkRuntimeException(errMsg);
+        });
+    });
+    return flow;
+  }
 
-	/*
-	 * Blocks until a response is received.
-	 */
-	private String httpPostToCosigner(String method, String fleet, String kid, String payload) {
-		HttpURLConnection con = null;
-		StringBuffer resp = new StringBuffer();
-		int payload_len = payload.getBytes().length;
-		LOG.trace("Sending a " + payload_len + " byte payload for cosigning.");
-		try {
-			URL url = new URL(this.baseURI + "/projects/" + fleet + "/" + method + "/" + kid);
-			LOG.debug("Calling out to cosigner: " + url.toString());
-			con = (HttpURLConnection) url.openConnection();
-			con.setRequestMethod("POST");
-			con.setRequestProperty("Content-Type", "application/JOSE+JSON");
-			con.setRequestProperty("Accept", "application/JOSE+JSON");
-			con.setRequestProperty("encoding", "utf8");
-			con.setRequestProperty("Content-Length", Integer.toString(payload_len));
-			con.setRequestProperty("Content-Language", "en-US");
-			con.setUseCaches(false);
-			con.setDoInput(true);
-			con.setDoOutput(true);
-			DataOutputStream tx = new DataOutputStream(con.getOutputStream());
-			tx.writeBytes(payload);
-			tx.flush();
-			tx.close();
-			BufferedReader rx = new BufferedReader(new InputStreamReader(con.getInputStream()));
-			String line;
-			while ((line = rx.readLine()) != null) {
-				resp.append(line);
-				resp.append('\r');
-			}
-			rx.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		if (con != null) {
-			con.disconnect();
-		}
-		return resp.toString();
-	}
+  /*
+   * Blocks until a response is received.
+   */
+  private String httpPostToCosigner(String method, String fleet, String kid, String payload) {
+    HttpURLConnection con = null;
+    StringBuffer resp = new StringBuffer();
+    int payload_len = payload.getBytes().length;
+    LOG.trace("Sending a " + payload_len + " byte payload for cosigning.");
+    try {
+      URL url = new URL(this.baseURI + "/projects/" + fleet + "/" + method + "/" + kid);
+      LOG.debug("Calling out to cosigner: " + url.toString());
+      con = (HttpURLConnection) url.openConnection();
+      con.setRequestMethod("POST");
+      con.setRequestProperty("Content-Type", "application/JOSE+JSON");
+      con.setRequestProperty("Accept", "application/JOSE+JSON");
+      con.setRequestProperty("encoding", "utf8");
+      con.setRequestProperty("Content-Length", Integer.toString(payload_len));
+      con.setRequestProperty("Content-Language", "en-US");
+      con.setUseCaches(false);
+      con.setDoInput(true);
+      con.setDoOutput(true);
+      DataOutputStream tx = new DataOutputStream(con.getOutputStream());
+      tx.writeBytes(payload);
+      tx.flush();
+      tx.close();
+      BufferedReader rx = new BufferedReader(new InputStreamReader(con.getInputStream()));
+      String line;
+      while ((line = rx.readLine()) != null) {
+        resp.append(line);
+        resp.append('\r');
+      }
+      rx.close();
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+    }
+    if (null != con) {
+      con.disconnect();
+    }
+    return resp.toString();
+  }
 
-	private String fetchIssFromJwsString(String jwsString)
-			throws IOException, JsonParseException, JsonMappingException {
-		String ret = null;
-		Map<String, Object> jws = new ObjectMapper().readValue(jwsString, new TypeReference<Map<String, Object>>() {
-		});
-		String serialized_inner_payload = (String) jws.get("payload");
-		String decoded = this.impl.getPlatform().getUtils().b64UrlDecode(serialized_inner_payload);
-		Map<String, Object> inner_jws = new ObjectMapper().readValue(decoded, new TypeReference<Map<String, Object>>() {
-		});
-		ret = (String) inner_jws.get("iss");
-		return ret;
-	}
+  private String fetchIssFromJwsString(String jwsString)
+      throws IOException, JsonParseException, JsonMappingException {
+    String ret = null;
+    Map<String, Object> jws = new ObjectMapper().readValue(jwsString, new TypeReference<Map<String, Object>>() {
+    });
+    String serialized_inner_payload = (String) jws.get("payload");
+    String decoded = this.impl.getPlatform().getUtils().b64UrlDecode(serialized_inner_payload);
+    Map<String, Object> inner_jws = new ObjectMapper().readValue(decoded, new TypeReference<Map<String, Object>>() {
+    });
+    ret = (String) inner_jws.get("iss");
+    return ret;
+  }
 }

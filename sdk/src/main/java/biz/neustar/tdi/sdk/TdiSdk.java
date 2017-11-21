@@ -1,17 +1,17 @@
 /*
  * Copyright 2017 Neustar, Inc
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  */
 
 package biz.neustar.tdi.sdk;
@@ -35,7 +35,6 @@ import java.util.concurrent.CompletableFuture;
  *
  */
 public class TdiSdk {
-
   /**
    * Options of the {@link TdiSdk}.
    */
@@ -43,73 +42,57 @@ public class TdiSdk {
 
   /**
    * Constructor.
-   * 
+   *
    * @param sdkOptions
    *          : {@link TdiSdkOptions} object.
-   * 
+   *
    * @throws FrameworkRuntimeException
    *           if 1. arguments are not valid 2. there is an issue with loading
    *           plugins
    */
   public TdiSdk(TdiSdkOptions sdkOptions) {
-    if (sdkOptions == null) {
+    if (null == sdkOptions) {
       throw new FrameworkRuntimeException("No SDK Options Provided");
     }
-
     this.sdkOptions = sdkOptions;
-
-    if (this.sdkOptions.plugins == null) {
+    if (null == this.sdkOptions.plugins) {
       this.sdkOptions.plugins = new ArrayList<>();
     }
-
-    /*
-     * Validate the parameters
-     */
-    validateParameters();
+    validateParameters();   // Validate the parameters
   }
 
   /**
    * Initializes the sdk. It spins up the implementation asynchronously
-   * 
+   *
    * @return {@link CompletableFuture} with either of the following states: <br>
    *         <b>Completed Successfully</b>: {@link TdiSdkWrapperShape}. <br>
    *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiSdkWrapperShape> init() {
-
     TdiClassFactoryShape lib = new TdiClassFactory(this.sdkOptions.config);
-
-    return lib.create(this.sdkOptions.platform).thenApply((TdiImplementationShape impl) -> {
-
-      return impl.loadModules(ComponentUtils.getModules()).thenApply(arg -> {
-
-        TdiSdkWrapperShape sdkWrapper = new TdiSdkWrapper();
-
-        if (this.sdkOptions.exposeImpl) {
-          ((TdiSdkWrapper) sdkWrapper).setImpl(impl);
-        }
-
-        sdkWrapper.setDefaultFlows(TdiSdkApiFactory.buildArgs(impl));
-        return sdkWrapper;
-      }).thenApply((TdiSdkWrapperShape wrapper) -> {
-
-        /*
-         * build the default api flows
-         */
-        for (Entry<String, TdiFlowArguments> entry : wrapper.getDefaultFlows().entrySet()) {
-          wrapper.api(entry.getKey(), impl.buildApiFlow(entry.getValue(), null));
-        }
-        return wrapper;
-      }).thenApply((TdiSdkWrapperShape sdkWrapper) -> {
-
-        impl.loadPlugins(sdkWrapper, this.sdkOptions.plugins);
-
-        return sdkWrapper;
-      });
-
-    }).thenCompose(arg -> {
-      return arg;
-    });
+    return lib.create(this.sdkOptions.platform)
+      .thenCompose((TdiImplementationShape impl) -> {
+        return impl.loadModules(ComponentUtils.getModules())
+          .thenApply(arg -> {
+            TdiSdkWrapperShape sdkWrapper = new TdiSdkWrapper();
+            if (this.sdkOptions.exposeImpl) {
+              ((TdiSdkWrapper) sdkWrapper).setImpl(impl);
+            }
+            sdkWrapper.setDefaultFlows(TdiSdkApiFactory.buildArgs(impl));
+            return sdkWrapper;
+          })
+          .thenApply((TdiSdkWrapperShape wrapper) -> {
+            // build the default api flows
+            for (Entry<String, TdiFlowArguments> entry : wrapper.getDefaultFlows().entrySet()) {
+              wrapper.api(entry.getKey(), impl.buildApiFlow(entry.getValue(), null));
+            }
+            return wrapper;
+          })
+          .thenApply((TdiSdkWrapperShape sdkWrapper) -> {
+            impl.loadPlugins(sdkWrapper, this.sdkOptions.plugins);
+            return sdkWrapper;
+          });
+        });
   }
 
   /**
@@ -117,11 +100,9 @@ public class TdiSdk {
    * present.
    */
   private void validateParameters() {
-
     if (this.sdkOptions.config == null) {
       throw new FrameworkRuntimeException("No Config Provided");
     }
-
     if (this.sdkOptions.platform == null) {
       throw new FrameworkRuntimeException("No Platform Provided");
     }

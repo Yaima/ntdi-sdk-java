@@ -34,52 +34,52 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 class NTDIHelper {
-	private TdiSdkWrapperShape sdkWrapper;
+  private TdiSdkWrapperShape sdkWrapper;
 
-	public NTDIHelper(List<TdiPluginBaseFactory> plugins, String configPath) throws ExecutionException, InterruptedException {
-		sdkWrapper = (new NTDIHelperFactory()).setup(plugins, configPath).get();
-	}
+  public NTDIHelper(List<TdiPluginBaseFactory> plugins, String configPath) throws ExecutionException, InterruptedException {
+    sdkWrapper = (new NTDIHelperFactory()).setup(plugins, configPath).get();
+  }
 
-	public String sign(String data) throws ExecutionException, InterruptedException {
-		return ((TdiCanonicalMessageShape) sdkWrapper.api("SignFlow").apply(data).get()).getBuiltMessage();
-	}
+  public String sign(String data) throws ExecutionException, InterruptedException {
+    return ((TdiCanonicalMessageShape) sdkWrapper.api("SignFlow").apply(data).get()).getBuiltMessage();
+  }
 
-	public String cosign(String msg) throws ExecutionException, InterruptedException {
-		return ((TdiCanonicalMessageShape) sdkWrapper.api("CosignFlow").apply(msg).get()).getBuiltMessage();
-	}
+  public String cosign(String msg) throws ExecutionException, InterruptedException {
+    return ((TdiCanonicalMessageShape) sdkWrapper.api("CosignFlow").apply(msg).get()).getBuiltMessage();
+  }
 
-	public String fleetToDevice(String data) throws ExecutionException, InterruptedException {
-		return (((FleetSigner) sdkWrapper.plugin("FleetSigner")).fleetToDevice.apply(this.sign(data)).get())
-				.getBuiltMessage();
-	}
+  public String fleetToDevice(String data) throws ExecutionException, InterruptedException {
+    return (((FleetSigner) sdkWrapper.plugin("FleetSigner")).fleetToDevice.apply(this.sign(data)).get())
+        .getBuiltMessage();
+  }
 
-	public String fleetFromDevice(String msg) throws ExecutionException, InterruptedException {
-		return ((FleetSigner) sdkWrapper.plugin("FleetSigner")).fleetFromDevice.apply(msg).get().getBuiltMessage();
-	}
+  public String fleetFromDevice(String msg) throws ExecutionException, InterruptedException {
+    return ((FleetSigner) sdkWrapper.plugin("FleetSigner")).fleetFromDevice.apply(msg).get().getBuiltMessage();
+  }
 
-	public String verify(String msg) throws ExecutionException, InterruptedException {
-		return ((String) sdkWrapper.api("VerifyFlow").apply(msg).get());
-	}
+  public String verify(String msg) throws ExecutionException, InterruptedException {
+    return ((String) sdkWrapper.api("VerifyFlow").apply(msg).get());
+  }
 }
 
 class NTDIHelperFactory {
-	private Map<String, Object> getConfig(String configPath) {
-		Map<String, Object> map = null;
-		InputStream inStream = getClass().getClassLoader().getResourceAsStream(configPath);
-		try {
-			map = new ObjectMapper().readValue(inStream, new TypeReference<Map<String, Object>>() {
-			});
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return map;
-	}
+  private Map<String, Object> getConfig(String configPath) {
+    Map<String, Object> map = null;
+    InputStream inStream = getClass().getClassLoader().getResourceAsStream(configPath);
+    try {
+      map = new ObjectMapper().readValue(inStream, new TypeReference<Map<String, Object>>() {
+      });
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return map;
+  }
 
-	public CompletableFuture<TdiSdkWrapperShape> setup(List<TdiPluginBaseFactory> plugins, String configPath) {
-		TdiSdkOptions sdkOptions = new TdiSdkOptions();
-		sdkOptions.platform = Platform::new;
-		sdkOptions.plugins = plugins;
-		sdkOptions.config = getConfig(configPath);
-		return (new TdiSdk(sdkOptions)).init();
-	}
+  public CompletableFuture<TdiSdkWrapperShape> setup(List<TdiPluginBaseFactory> plugins, String configPath) {
+    TdiSdkOptions sdkOptions = new TdiSdkOptions();
+    sdkOptions.platform = Platform::new;
+    sdkOptions.plugins = plugins;
+    sdkOptions.config = getConfig(configPath);
+    return (new TdiSdk(sdkOptions)).init();
+  }
 }
