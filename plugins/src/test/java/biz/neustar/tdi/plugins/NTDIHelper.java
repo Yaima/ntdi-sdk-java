@@ -54,7 +54,7 @@ class NTDIHelper {
 	}
 
 	public String fleetFromDevice(String msg) throws ExecutionException, InterruptedException {
-		return ((FleetSigner) sdkWrapper.plugin("FleetSigner")).fleetFromDevice.apply(msg).get().getBuiltMessage();
+		return ((FleetSigner) sdkWrapper.plugin("FleetSigner")).fleetFromDevice.apply(msg).get().getClaims().payload.toString();
 	}
 
 	public String verify(String msg) throws ExecutionException, InterruptedException {

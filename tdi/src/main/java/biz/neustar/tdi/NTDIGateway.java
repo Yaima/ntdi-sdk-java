@@ -25,6 +25,14 @@ public class NTDIGateway extends NTDIDevice {
         super();
     }
 
+    public NTDIGateway(Config config) throws ExecutionException, InterruptedException, IOException {
+        super(config);
+    }
+
+    public NTDIGateway(String configPath) throws ExecutionException, InterruptedException, IOException {
+        super(configPath);
+    }
+
     public String cosign(String msg) throws ExecutionException, InterruptedException {
         log.debug("cosigning {}", msg);
         return ((TdiCanonicalMessageShape) this.sdk.api("CosignFlow").apply(msg).get()).getBuiltMessage();

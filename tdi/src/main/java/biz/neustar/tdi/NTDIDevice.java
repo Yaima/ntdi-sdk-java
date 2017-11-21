@@ -14,6 +14,14 @@ public class NTDIDevice extends BaseNTDI {
         super();
     }
 
+    public NTDIDevice(Config config) throws ExecutionException, InterruptedException, IOException {
+        super(config);
+    }
+
+    public NTDIDevice(String configPath) throws ExecutionException, InterruptedException, IOException {
+        super(configPath);
+    }
+
     public String verify(String msg) throws ExecutionException, InterruptedException {
         log.debug("verifying {}", msg);
         return ((String) this.sdk.api("VerifyFlow").apply(msg).get());
