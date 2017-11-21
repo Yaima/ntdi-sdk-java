@@ -1,17 +1,17 @@
 /*
  * Copyright 2017 Neustar, Inc
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  */
 
 package biz.neustar.tdi.sdk;
@@ -61,7 +61,7 @@ public class TestData {
 
   /**
    * Static method to return the instance.
-   * 
+   *
    * @return TestData instance.
    */
   public static TestData getInstance() {
@@ -83,7 +83,7 @@ public class TestData {
 
   /**
    * Returns the configuration map.
-   * 
+   *
    * @return Map of String, Object.
    */
   public static Map<String, Object> getTestConfig() {
@@ -100,7 +100,7 @@ public class TestData {
 
   /**
    * Returns a dummy implementation.
-   * 
+   *
    * @return {@link TdiImplementationShape} instance
    */
   public static TdiImplementationShape getDummyImplementation() {
@@ -111,7 +111,7 @@ public class TestData {
   /**
    * Returns a dummy implementation such that the getSeffKey() raises an
    * exception.
-   * 
+   *
    * @return {@link TdiImplementationShape} instance
    */
   public static TdiImplementationShape getDummyImplementationWithKeyError() {
@@ -121,7 +121,7 @@ public class TestData {
 
   /**
    * Method to return a dummy utils instance.
-   * 
+   *
    * @return TdiPlatformUtilsShape instance.
    */
   public static TdiPlatformUtilsShape getDummyUtils() {
@@ -160,7 +160,7 @@ public class TestData {
 
   /**
    * Creates a dummy datastore.
-   * 
+   *
    * @return TdiPlatformDataShape instance.
    */
   public static TdiPlatformDataShape getDummyDataStore() {
@@ -220,7 +220,7 @@ public class TestData {
 
   /**
    * Creates a dummy keystore.
-   * 
+   *
    * @return TdiPlatformKeysShape instance
    */
   public static TdiPlatformKeysShape getDummyKeyStore(String keyType) {
@@ -360,7 +360,7 @@ public class TestData {
 
   /**
    * Method to return a dummy Time instance.
-   * 
+   *
    * @return TdiPlatformTimeshape instance.
    */
   public static TdiPlatformTimeShape getDummyTime() {
@@ -409,7 +409,7 @@ public class TestData {
 
   /**
    * Method to return a dummy crypto instance.
-   * 
+   *
    * @return TdiPlatformCryptoShape instance.
    */
   public static TdiPlatformCryptoShape getDummyCrypto() {
@@ -459,7 +459,7 @@ public class TestData {
 
     /**
      * Constructor.
-     * 
+     *
      * @param conf
      *          : Configuration object.
      */
@@ -554,7 +554,7 @@ public class TestData {
 
   /**
    * Method to return {@link TdiSdkOptions}.
-   * 
+   *
    * @return {@link TdiSdkOptions}
    */
   public static TdiSdkOptions getDummyPlatformOptions() {
@@ -567,7 +567,7 @@ public class TestData {
 
   /**
    * Method to return {@link TdiSdkOptions} for Sign Api.
-   * 
+   *
    * @return {@link TdiSdkOptions}
    */
   public static TdiSdkOptions getSignPlatformSdkOptions() {
@@ -580,7 +580,7 @@ public class TestData {
 
   /**
    * Method to return {@link TdiSdkOptions} for Cosign Api.
-   * 
+   *
    * @return {@link TdiSdkOptions}
    */
   public static TdiSdkOptions getCosignPlatformSdkOptions() {
@@ -594,7 +594,7 @@ public class TestData {
 
   /**
    * Method to return {@link TdiSdkOptions} with error retrieving key with kid.
-   * 
+   *
    * @return {@link TdiSdkOptions}
    */
   public static TdiSdkOptions getKidErrorPlatformSdkOptions() {
@@ -607,9 +607,9 @@ public class TestData {
 
   /**
    * Signs the payload.
-   * 
+   *
    * @return signed {@link TdiCanonicalMessage}
-   * 
+   *
    * @throws Exception
    *           if an error occurs
    */
@@ -622,7 +622,7 @@ public class TestData {
     CompletableFuture<TdiCanonicalMessage> signedMessage = signSdkWrapper
         .thenCompose((signWrapper) -> {
           Function<String, CompletableFuture<TdiCanonicalMessage>> signApi = signWrapper
-              .api(Api.SignFlow.name());
+              .api(Api.SignFlow);
           CompletableFuture<TdiCanonicalMessage> signResult = signApi
               .apply(TestData.PAYLOAD_VALUE);
           return signResult;
@@ -635,12 +635,12 @@ public class TestData {
 
   /**
    * Cosigns the received/input message.
-   * 
+   *
    * @param signedMsg
    *          :jws string
-   * 
+   *
    * @return cosigned {@link TdiCanonicalMessage}
-   * 
+   *
    * @throws Exception
    *           if an error occurs
    */
@@ -653,7 +653,7 @@ public class TestData {
     CompletableFuture<TdiCanonicalMessage> cosignedMessage = cosignSdkWrapper
         .thenCompose((cosignWrapper) -> {
           Function<String, CompletableFuture<TdiCanonicalMessage>> cosignApi = cosignWrapper
-              .api(Api.CosignFlow.name());
+              .api(Api.CosignFlow);
           CompletableFuture<TdiCanonicalMessage> cosignResult = cosignApi
               .apply(signedMsg);
           return cosignResult;
