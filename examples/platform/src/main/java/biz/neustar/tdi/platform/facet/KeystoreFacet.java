@@ -203,8 +203,9 @@ public class KeystoreFacet implements TdiPlatformKeysShape {
    *         kstruct data.
    */
   private CompletableFuture<TdiKeyStructureShape> addKey(Key kstruct) {
-    TdiKeyStructureShape newKeyStruct = new TdiKeyStructure(kstruct.kid, kstruct.fleet, kstruct.ref,
-        kstruct.flags);
+    TdiKeyStructureShape newKeyStruct = new TdiKeyStructure(
+      kstruct.kid, kstruct.fleet, kstruct.ref, kstruct.flags
+    );
     kstore.put(kstruct.kid, newKeyStruct);
 
     // Check if it is our own key, if it is then add as SELF
@@ -233,21 +234,16 @@ public class KeystoreFacet implements TdiPlatformKeysShape {
    *         error encountered while saving to keystore.json.
    */
   private CompletableFuture<TdiKeyStructureShape> addKeyAndSaveToFile(Key kstruct) {
-    CompletableFuture<TdiKeyStructureShape> future = new CompletableFuture<>();
-    CompletableFuture.supplyAsync(() -> {
-      addKey(kstruct).thenApply((argTdiKeyStructure) -> {
-        saveStore().thenApply((fileArg) -> {
-          future.complete(argTdiKeyStructure);
-          return null;
-        }).exceptionally(err -> {
-          future.completeExceptionally(new PlatformRuntimeException(err.getMessage()));
-          return null;
-        });
-        return true;
+    return addKey(kstruct)
+      .thenCompose((argTdiKeyStructure) -> {
+        return saveStore()
+          .thenCompose((fileArg) -> {
+            return CompletableFuture.completedFuture(argTdiKeyStructure);
+          });
+      })
+      .exceptionally(err -> {
+        throw new PlatformRuntimeException(err.getMessage());
       });
-      return null;
-    });
-    return future;
   }
 
   /**
@@ -269,9 +265,7 @@ public class KeystoreFacet implements TdiPlatformKeysShape {
       future.completeExceptionally(new PlatformRuntimeException("Invalid input, kid is null"));
     }
     else if (kstore.containsKey(kid)) {
-      return CompletableFuture.supplyAsync(() -> {
-        return kstore.get(kid);
-      });
+      future.complete(kstore.get(kid));
     }
     else {
       future.completeExceptionally(new PlatformRuntimeException("kid: " + kid + " - not found in keystore"));
@@ -335,14 +329,14 @@ public class KeystoreFacet implements TdiPlatformKeysShape {
   @Override
   public CompletableFuture<TdiKeyStructureShape> getKeyByRole(Integer role, String fleetId) {
     TdiKeyStructureShape temp = rstore.get((fleetId + role));
-    if (temp == null) {
+    if (null != temp) {
+      return CompletableFuture.completedFuture(temp);
+    }
+    else {
       String error = "Failed to find key in fleet " + fleetId + " with role " + role;
       CompletableFuture<TdiKeyStructureShape> future = new CompletableFuture<>();
       future.completeExceptionally(new PlatformRuntimeException(error));
       return future;
-    }
-    else {
-      return CompletableFuture.completedFuture(temp);
     }
   }
 
@@ -525,7 +519,6 @@ public class KeystoreFacet implements TdiPlatformKeysShape {
    */
   @Override
   public CompletableFuture<TdiKeyStructureShape> setKeyFromProvision(Object key) {
-    CompletableFuture<TdiKeyStructureShape> future = new CompletableFuture<>();
     String error_msg = "";
     if (null != key) {
       if (key instanceof String) {
@@ -554,6 +547,7 @@ public class KeystoreFacet implements TdiPlatformKeysShape {
     else {
       error_msg = "setKeyFromProvision: Key is NULL";
     }
+    CompletableFuture<TdiKeyStructureShape> future = new CompletableFuture<>();
     future.completeExceptionally(new PlatformRuntimeException(error_msg));
     return future;
   }

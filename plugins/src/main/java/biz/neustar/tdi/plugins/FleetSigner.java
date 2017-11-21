@@ -342,8 +342,8 @@ public class FleetSigner extends TdiPluginBase {
 			  	return future;
 			  })
 			  .exceptionally(throwable -> {
-			  	String errMsg = "sendToCosigner() failed.";
-			  	LOG.error(errMsg + ": " + throwable.getMessage());
+			  	String errMsg = "sendToCosigner() failed: " + throwable.getMessage();
+			  	LOG.error(errMsg);
 			  	throw new FrameworkRuntimeException(errMsg);
 			  });
 		});
@@ -355,8 +355,8 @@ public class FleetSigner extends TdiPluginBase {
 				return CompletableFuture.completedFuture(cosignedJWS);
 			})
 			.exceptionally(throwable -> {
-				String errMsg = "validateCosigner() failed.";
-				LOG.error(errMsg + ": " + throwable.getMessage());
+				String errMsg = "validateCosigner() failed: " + throwable.getMessage();
+				LOG.error(errMsg);
 				throw new FrameworkRuntimeException(errMsg);
 			});
 		});
