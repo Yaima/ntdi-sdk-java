@@ -3,7 +3,6 @@ package biz.neustar.tdi.sdk.api;
 import biz.neustar.tdi.fw.canonicalmessage.TdiCanonicalMessage;
 import biz.neustar.tdi.fw.canonicalmessage.TdiCanonicalMessageShape;
 import biz.neustar.tdi.fw.implementation.TdiImplementationShape;
-import biz.neustar.tdi.fw.keystructure.TdiKeyFlagsEnum;
 import biz.neustar.tdi.fw.keystructure.TdiKeyStructureShape;
 import biz.neustar.tdi.sdk.Constants.Components;
 import biz.neustar.tdi.sdk.component.TdiSdkExpiresComponent;
@@ -28,7 +27,6 @@ import java.util.concurrent.ExecutionException;
 
 
 public class VerifyGeneral extends BaseApi {
-
   private static final Logger LOG = LoggerFactory.getLogger(Verify.class);
 
   /**
@@ -73,7 +71,7 @@ public class VerifyGeneral extends BaseApi {
   public CompletableFuture<TdiCanonicalMessageShape> unpackEnvelope(Object msg) {
     LOG.trace("Invoking VerifyGeneral:unpackEnvelope");
     return ((TdiSdkJsonWebSignature) impl.getModule(Components.JWS))
-            .unpack((TdiCanonicalMessageShape) msg);
+      .unpack((TdiCanonicalMessageShape) msg);
   }
 
   /**
@@ -89,7 +87,7 @@ public class VerifyGeneral extends BaseApi {
   public CompletableFuture<TdiCanonicalMessageShape> unpackClaims(Object msg) {
     LOG.trace("Invoking VerifyGeneral:unpackClaims");
     return ((TdiSdkJsonWebTokenComponent) impl.getModule(Components.JWT))
-            .unpackClaims((TdiCanonicalMessageShape) msg);
+      .unpackClaims((TdiCanonicalMessageShape) msg);
   }
 
   /**
@@ -112,28 +110,28 @@ public class VerifyGeneral extends BaseApi {
       return future;
     }
     if (!((TdiSdkExpiresComponent) impl.getModule(Components.EXP))
-            .check(tdiMsg.getClaims().exp)) {
+        .check(tdiMsg.getClaims().exp)) {
       future.completeExceptionally(new ApiException("Expired Token"));
       return future;
     }
     if (!((TdiSdkNotBeforeComponent) impl.getModule(Components.NBF))
-            .check(tdiMsg.getClaims().nbf)) {
+        .check(tdiMsg.getClaims().nbf)) {
       future.completeExceptionally(new ApiException("Token is not yet valid (nbf)"));
       return future;
     }
     return ((TdiSdkNonceComponent) impl.getModule(Components.NONCE))
-            .check((String) tdiMsg.getClaims().jti).thenApply((Boolean check) -> {
-              if (check) {
-                future.complete(tdiMsg);
-              }
-              else {
-                future.completeExceptionally(new ApiException("Bad Nonce"));
-              }
-              return future;
-            })
-            .thenCompose(arg -> {
-              return arg;
-            });
+      .check((String) tdiMsg.getClaims().jti).thenApply((Boolean check) -> {
+        if (check) {
+          future.complete(tdiMsg);
+        }
+        else {
+          future.completeExceptionally(new ApiException("Bad Nonce"));
+        }
+        return future;
+      })
+      .thenCompose(arg -> {
+        return arg;
+      });
   }
 
 
@@ -160,19 +158,18 @@ public class VerifyGeneral extends BaseApi {
       String kid = signature.parsedHeader.kid;
       if (StringUtils.isNotBlank(kid)) {
         CompletableFuture<TdiKeyStructureShape> tdiKey = impl.getPlatform().getKeystore().getKey(kid)
-                .thenApply((TdiKeyStructureShape key) -> {
-                  return key;
-                })
-                .exceptionally(throwable -> {
-                  return null;
-                });
+          .thenApply((TdiKeyStructureShape key) -> {
+            return key;
+          })
+          .exceptionally(throwable -> {
+            return null;
+          });
         keys.add(tdiKey);
         keysWithKid.put(signature, tdiKey);
       }
     }
 
     return CompletableFuture.allOf(keys.toArray(new CompletableFuture<?>[0])).thenApply((arg) -> {
-      Object[] fcfs = new Object[2];
       tdiMsg.getSignaturesToVerify().clear();
       for (Entry<Object, CompletableFuture<TdiKeyStructureShape>> entry : keysWithKid.entrySet()) {
         try {
@@ -194,9 +191,9 @@ public class VerifyGeneral extends BaseApi {
       }
       return finalFuture;
     })
-            .thenCompose(arg -> {
-              return arg;
-            });
+    .thenCompose(arg -> {
+      return arg;
+    });
   }
 
   /**
@@ -212,7 +209,7 @@ public class VerifyGeneral extends BaseApi {
   public CompletableFuture<TdiCanonicalMessageShape> verifySignatures(Object msg) {
     LOG.trace("Invoking VerifyGeneral:verifySignatures: " + msg);
     return ((TdiSdkJsonWebSignature) impl.getModule(Components.JWS))
-            .verify((TdiCanonicalMessageShape) msg);
+      .verify((TdiCanonicalMessageShape) msg);
   }
 
   /**
@@ -229,11 +226,11 @@ public class VerifyGeneral extends BaseApi {
     LOG.trace("Invoking VerifyGeneral:afterVerify");
     TdiCanonicalMessage tdiMsg = (TdiCanonicalMessage) msg;
     return ((TdiSdkNonceComponent) impl.getModule(Components.NONCE))
-            .burn(tdiMsg.getClaims().jti)
-            .thenApply(arg -> {
-              LOG.trace("Nonce successfully burned");
-              return tdiMsg;
-            });
+      .burn(tdiMsg.getClaims().jti)
+      .thenApply(arg -> {
+        LOG.trace("Nonce successfully burned");
+        return tdiMsg;
+      });
   }
 
   /**
