@@ -1,0 +1,33 @@
+{
+    "fleet": {
+        "id": "<fleetID>"
+    },
+    "device": {
+        "name": "My Gateway",
+        "id": "<deviceID>"
+    },
+    "sensors": [
+        "<sensorID1>",
+        "<sensorID2>",
+        ...
+        "<sensorIDn>"
+    ],
+    "mqtt": {
+        "local": {
+            "broker": "tcp://iot.eclipse.org:1883",
+            "qos": {
+                "publish": 2,
+                "subscribe": 1
+            },
+            "retained": false
+        },
+        "cloud": {
+            "broker": "tcp://test.mosquitto.org:1883",
+            "qos": {
+                "publish": 2,
+                "subscribe": 1
+            },
+            "retained": false
+        }
+    }
+}
