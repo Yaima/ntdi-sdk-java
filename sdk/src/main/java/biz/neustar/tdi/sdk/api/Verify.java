@@ -141,7 +141,7 @@ public class Verify extends BaseApi {
       return future;
     }
     return ((TdiSdkNonceComponent) impl.getModule(Components.NONCE))
-      .check((String) tdiMsg.getClaims().jti).thenApply((Boolean check) -> {
+      .check((String) tdiMsg.getClaims().jti).thenCompose((Boolean check) -> {
         if (check) {
           future.complete(tdiMsg);
         }
@@ -149,9 +149,6 @@ public class Verify extends BaseApi {
           future.completeExceptionally(new ApiException("Bad Nonce"));
         }
         return future;
-      })
-      .thenCompose(arg -> {
-        return arg;
       });
   }
 
@@ -190,7 +187,7 @@ public class Verify extends BaseApi {
       }
     }
 
-    return CompletableFuture.allOf(keys.toArray(new CompletableFuture<?>[0])).thenApply((arg) -> {
+    return CompletableFuture.allOf(keys.toArray(new CompletableFuture<?>[0])).thenCompose((arg) -> {
       Object[] fcfs = new Object[2];
       for (Entry<Object, CompletableFuture<TdiKeyStructureShape>> entry : keysWithKid.entrySet()) {
         try {
@@ -222,9 +219,6 @@ public class Verify extends BaseApi {
         finalFuture.completeExceptionally(new ApiException(errMsg));
       }
       return finalFuture;
-    })
-    .thenCompose(arg -> {
-      return arg;
     });
   }
 
