@@ -12,7 +12,6 @@ import biz.neustar.tdi.plugins.FleetSigner;
 import biz.neustar.tdi.fw.utils.Utils;
 import biz.neustar.tdi.fw.exception.InvalidFormatException;
 
-
 public class NTDIFleet extends BaseNTDI {
     private static Logger log = LoggerFactory.getLogger(NTDIFleet.class);
 

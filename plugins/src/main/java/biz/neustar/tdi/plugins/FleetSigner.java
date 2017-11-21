@@ -48,7 +48,6 @@ import biz.neustar.tdi.fw.plugin.TdiPluginBase;
 import biz.neustar.tdi.fw.wrapper.TdiSdkWrapperShape;
 import biz.neustar.tdi.sdk.Constants;
 import biz.neustar.tdi.sdk.component.jws.TdiJwsSignature;
-
 /**
  *
  */
@@ -85,6 +84,7 @@ public class FleetSigner extends TdiPluginBase {
 	 *
 	 */
 	public Function<String, CompletableFuture<TdiCanonicalMessageShape>> fleetToDevice = null;
+
 	/**
 	 * Execute a full round-trip verify ceremony. Returns a payload if all
 	 * verifications pass
@@ -106,11 +106,11 @@ public class FleetSigner extends TdiPluginBase {
 			this.buildFlowFleetSign()
 		);
 		this.fleetCosign = this.impl.buildApiFlow(  // _or: ['setSigners'],
-			this.sdkWrapper.getDefaultFlows().get("CosignFlow"),
+			this.sdkWrapper.getDefaultFlows().get(Constants.Api.CosignFlow),
 			this.buildFlowFleetCosign()
 		);
 		this.fleetVerify = this.impl.buildApiFlow(  // _or: ['prepSignatures','handleReturn']
-			this.sdkWrapper.getDefaultFlows().get("VerifyFlow"),
+			this.sdkWrapper.getDefaultFlows().get(Constants.Api.VerifyFlow),
 			this.buildFlowFleetVerify()
 		);
 		this.fleetToDevice = this.impl.buildApiFlow(
@@ -217,8 +217,8 @@ public class FleetSigner extends TdiPluginBase {
 	private TdiFlowArguments buildFlowFleetVerify() {
 		TdiFlowArguments flow = new TdiFlowArguments();
 		// Prevent the default behavior from taking place for these phases.
-		flow.addOverrideSteps(Arrays.asList("prepSignatures", "handleReturn"));
-		flow.addMethod("prepSignatures", (data) -> {
+		flow.addOverrideSteps(Arrays.asList(Constants.FlowMethods.Verifying.prepSignatures, Constants.FlowMethods.handleReturn));
+		flow.addMethod(Constants.FlowMethods.Verifying.prepSignatures, (data) -> {
 			TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
 			List<CompletableFuture<TdiKeyStructureShape>> promise_queue = new ArrayList<>();
 			for (Object s : msgObj.getSignaturesToVerify().toArray()) {
@@ -279,7 +279,7 @@ public class FleetSigner extends TdiPluginBase {
 						throw new FrameworkRuntimeException(errMsg);
 					});
 		});
-		flow.addMethod("handleReturn", (data) -> {
+		flow.addMethod(Constants.FlowMethods.handleReturn, (data) -> {
 			TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
 			return CompletableFuture.completedFuture(msgObj).thenApply(a -> a);
 		});
