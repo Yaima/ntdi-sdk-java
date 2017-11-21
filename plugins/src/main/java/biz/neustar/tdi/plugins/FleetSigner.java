@@ -128,6 +128,7 @@ public class FleetSigner extends TdiPluginBase {
     );
   }
 
+<<<<<<< HEAD
   @Override
   @SuppressWarnings("unchecked")
   public CompletableFuture<Boolean> init() {
@@ -157,6 +158,53 @@ public class FleetSigner extends TdiPluginBase {
         }
       });
   }
+=======
+	private TdiFlowArguments buildFlowFleetFromDev() {
+		TdiFlowArguments flow = new TdiFlowArguments();
+		flow.addOverrideSteps(Arrays.asList("sendToCosigner", "validateCosigner", "fleetSign"));
+		flow.addMethod("sendToCosigner", (data) -> {
+			String outboundJWS = (String) data;
+			return this.impl.getPlatform().getKeystore().getSelfKey()
+			  .thenCompose((TdiKeyStructureShape self) -> {
+			  	CompletableFuture<String> future = new CompletableFuture<>();
+			  	String fleet = self.getFleetId();
+			  	try {
+			  		String kid = this.fetchIssFromJwsString(outboundJWS);
+			  		future.complete(this.httpPostToCosigner("cosign_for_edge_device", fleet, kid, outboundJWS));
+			  	} catch (IOException e) {
+			  		future.completeExceptionally(new FrameworkRuntimeException(e.toString()));
+			  	} catch (Exception e) {
+			  		future.completeExceptionally(new FrameworkRuntimeException(e.toString()));
+			  	}
+			  	return future;
+			  })
+			  .exceptionally(throwable -> {
+			  	String errMsg = "sendToCosigner() failed: " + throwable.getMessage();
+			  	LOG.error(errMsg);
+			  	throw new FrameworkRuntimeException(errMsg);
+			  });
+		});
+		flow.addMethod("validateCosigner", (data) -> {
+			String requestBody = (String) data;
+			return this.fleetVerify.apply(requestBody).thenCompose((msg_str) -> {
+				TdiCanonicalMessageShape cosignedJWS = (TdiCanonicalMessageShape) msg_str;
+				// NOTE: Not _strictly_ what the TS package does, but should be equivalent.
+				return CompletableFuture.completedFuture(cosignedJWS);
+			})
+			.exceptionally(throwable -> {
+				String errMsg = "validateCosigner() failed: " + throwable.getMessage();
+				LOG.error(errMsg);
+				throw new FrameworkRuntimeException(errMsg);
+			});
+		});
+		flow.addMethod("fleetSign", (data) -> {
+			TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
+			String verifiedJWS = msgObj.getReceivedMessage();
+			return this.fleetCosign.apply(verifiedJWS);
+		});
+		return flow;
+	}
+>>>>>>> 849c3ef... More async cleanup.
 
   // override Constants.Api.CosignFlow
   private TdiFlowArguments buildFlowFleetCosign() {
