@@ -53,7 +53,7 @@ public class VerifyGeneral extends BaseApi {
    *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> handleInit(Object signaturePayload) {
-    LOG.trace("Invoking Verify:handleInit");
+    LOG.trace("Invoking VerifyGeneral:handleInit");
     return impl.generateMsg(null).thenApply((TdiCanonicalMessageShape msg) -> {
       ((TdiCanonicalMessage) msg).setReceivedMessage((String) signaturePayload);
       return msg;
@@ -71,7 +71,7 @@ public class VerifyGeneral extends BaseApi {
    *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> unpackEnvelope(Object msg) {
-    LOG.trace("Invoking Verify:unpackEnvelope");
+    LOG.trace("Invoking VerifyGeneral:unpackEnvelope");
     return ((TdiSdkJsonWebSignature) impl.getModule(Components.JWS))
             .unpack((TdiCanonicalMessageShape) msg);
   }
@@ -87,7 +87,7 @@ public class VerifyGeneral extends BaseApi {
    *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> unpackClaims(Object msg) {
-    LOG.trace("Invoking Verify:unpackClaims");
+    LOG.trace("Invoking VerifyGeneral:unpackClaims");
     return ((TdiSdkJsonWebTokenComponent) impl.getModule(Components.JWT))
             .unpackClaims((TdiCanonicalMessageShape) msg);
   }
@@ -103,7 +103,7 @@ public class VerifyGeneral extends BaseApi {
    *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> validateClaims(Object msg) {
-    LOG.trace("Invoking Verify:validateClaims");
+    LOG.trace("Invoking VerifyGeneral:validateClaims");
     TdiCanonicalMessage tdiMsg = (TdiCanonicalMessage) msg;
     CompletableFuture<TdiCanonicalMessageShape> future = new CompletableFuture<>();
 
@@ -148,7 +148,7 @@ public class VerifyGeneral extends BaseApi {
    *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> prepSignatures(Object msg) {
-    LOG.trace("Invoking Verify:prepSignatures");
+    LOG.trace("Invoking VerifyGeneral:prepSignatures");
     TdiCanonicalMessageShape tdiMsg = (TdiCanonicalMessageShape) msg;
     List<CompletableFuture<TdiKeyStructureShape>> keys = new ArrayList<>();
     Map<Object, CompletableFuture<TdiKeyStructureShape>> keysWithKid = new HashMap<>();
@@ -210,7 +210,7 @@ public class VerifyGeneral extends BaseApi {
    *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> verifySignatures(Object msg) {
-    LOG.trace("Invoking Verify:verifySignatures: " + msg);
+    LOG.trace("Invoking VerifyGeneral:verifySignatures: " + msg);
     return ((TdiSdkJsonWebSignature) impl.getModule(Components.JWS))
             .verify((TdiCanonicalMessageShape) msg);
   }
@@ -226,7 +226,7 @@ public class VerifyGeneral extends BaseApi {
    *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> afterVerify(Object msg) {
-    LOG.trace("Invoking Verify:afterVerify");
+    LOG.trace("Invoking VerifyGeneral:afterVerify");
     TdiCanonicalMessage tdiMsg = (TdiCanonicalMessage) msg;
     return ((TdiSdkNonceComponent) impl.getModule(Components.NONCE))
             .burn(tdiMsg.getClaims().jti)
@@ -247,7 +247,7 @@ public class VerifyGeneral extends BaseApi {
    *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<String> handleReturn(Object msg) {
-    LOG.trace("Invoking Verify:handleReturn");
+    LOG.trace("Invoking VerifyGeneral:handleReturn");
     TdiCanonicalMessage tdiMsg = (TdiCanonicalMessage) msg;
     return CompletableFuture.completedFuture((String)tdiMsg.getClaims().payload);
   }

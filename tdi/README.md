@@ -14,20 +14,25 @@ To get started, download following, build and include the library in your projec
 
 The top-level `biz.neustar.tdi` package includes two primary classes. Each can be used in different contexts.
 
-### NTDI
+### NTDIDevice
 
 This class is primarily designed for simple devices and other entities that produce and consume messages to and from a Fleet.
 
 It consists of three methods:
 * sign
-* cosign
 * verify
+
+### NTDIGateway
+
+A gateway may be a device that intermediates with other devices. This class, a subclass of NTDIDevice, adds methods for dealing with gateway use cases:
+* cosign
+* verifyFromDevice
 
 ### NTDIFleet
 
-This class extends `NTDI` to provide additional methods useful for a Fleet server:
+Fleet servers provide services that represent the Fleet, and validate messages with the NTDI Core. This class provides methods useful for a Fleet server:
 
-* fleetToDevice
-* fleetFromDevice
+* signForFleet
+* verifyFromDevice
 
-These classes prove insufficient, they can be extended with [](../plugins/README.md), and provided alternate [](../platform/README.md). Or, the [lower-level API](../sdk/README.md) is also available.
+These classes prove insufficient, they can be extended with [plugins](../plugins/README.md), and provided alternate [platforms](../platform/README.md). Or, the [lower-level API](../sdk/README.md) is also available.
