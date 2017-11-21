@@ -46,6 +46,7 @@ import biz.neustar.tdi.fw.keystructure.TdiKeyFlagsEnum;
 import biz.neustar.tdi.fw.keystructure.TdiKeyStructureShape;
 import biz.neustar.tdi.fw.plugin.TdiPluginBase;
 import biz.neustar.tdi.fw.wrapper.TdiSdkWrapperShape;
+import biz.neustar.tdi.sdk.Constants;
 import biz.neustar.tdi.sdk.component.jws.TdiJwsSignature;
 
 /**
@@ -65,19 +66,19 @@ public class FleetSigner extends TdiPluginBase {
 	 *
 	 *            Payload to be encased in claims
 	 */
-	public Function<String, CompletableFuture<TdiCanonicalMessageShape>> fleetSign = null;
+	private Function<String, CompletableFuture<TdiCanonicalMessageShape>> fleetSign = null;
 	/**
 	 * Appends a fleet signature to the provided JWS
 	 *
 	 *            The JWS to add a signature to
 	 */
-	public Function<String, CompletableFuture<TdiCanonicalMessageShape>> fleetCosign = null;
+	private Function<String, CompletableFuture<TdiCanonicalMessageShape>> fleetCosign = null;
 	/**
 	 * Verify a server or device signature
 	 *
 	 *            The JWS to be verified
 	 */
-	public Function<String, CompletableFuture<TdiCanonicalMessageShape>> fleetVerify = null;
+	private Function<String, CompletableFuture<TdiCanonicalMessageShape>> fleetVerify = null;
 	/**
 	 * Execute a full round-trip signing ceremony. Returns a JWS ready for device
 	 * consumption
@@ -90,13 +91,12 @@ public class FleetSigner extends TdiPluginBase {
 	 *
 	 */
 	public Function<String, CompletableFuture<TdiCanonicalMessageShape>> fleetFromDevice = null;
+  /**
+   * Execute a full round-trip verify ceremony. Returns a cosigned JWS if all
+   * verifications pass
+   *
+   */
 	public Function<String, CompletableFuture<TdiCanonicalMessageShape>> fleetFromDeviceAndCosign = null;
-	/**
-	 * Signs a payload as a token
-	 *
-	 *            Payload to be sent
-	 */
-	public Function<String, CompletableFuture<TdiCanonicalMessageShape>> signToken = null;
 
 	public FleetSigner(TdiImplementationShape impl, TdiSdkWrapperShape sdkWrapper) {
 		super("FleetSigner", impl, sdkWrapper);
@@ -104,10 +104,6 @@ public class FleetSigner extends TdiPluginBase {
 		this.fleetSign = this.impl.buildApiFlow(
 			this.sdkWrapper.getDefaultFlows().get("SignFlow"),
 			this.buildFlowFleetSign()
-		);
-		this.signToken = this.impl.buildApiFlow(    // <--- No deferral to orginal flow.
-			this.sdkWrapper.getDefaultFlows().get("SignFlow"),
-			this.buildFlowSignToken()
 		);
 		this.fleetCosign = this.impl.buildApiFlow(  // _or: ['setSigners'],
 			this.sdkWrapper.getDefaultFlows().get("CosignFlow"),
@@ -175,7 +171,7 @@ public class FleetSigner extends TdiPluginBase {
 							future.complete(msgObj);
 						} else {
 							future.completeExceptionally(new FrameworkRuntimeException(
-									"setSigners() failed to find a signing key for either F_C or F_S."));
+									"setSigners() failed to find a Fleet Signing key"));
 						}
 						return future;
 					}).thenCompose(arg -> {
@@ -194,7 +190,6 @@ public class FleetSigner extends TdiPluginBase {
 		flow.addOverrideSteps(Arrays.asList("setSigners"));
 		flow.addMethod("setSigners", (data) -> {
 			TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
-			msgObj.setSignatureType("compact");
 			return this.impl.getPlatform().getKeystore()
 					.getKeyByRole(TdiKeyFlagsEnum.ROLE_F_S.getNumber(), msgObj.getCurrentProject())
 					.thenApply((TdiKeyStructureShape key) -> {
@@ -204,7 +199,7 @@ public class FleetSigner extends TdiPluginBase {
 							future.complete(msgObj);
 						} else {
 							future.completeExceptionally(new FrameworkRuntimeException(
-									"setSigners() failed to find a signing key for either F_C or F_S."));
+									"setSigners() failed to find a Fleet Signing key"));
 						}
 						return future;
 					}).thenCompose(arg -> {
@@ -302,9 +297,8 @@ public class FleetSigner extends TdiPluginBase {
 			return this.impl.getPlatform().getKeystore().getSelfKey().thenApply((TdiKeyStructureShape self) -> {
 				CompletableFuture<String> future = new CompletableFuture<>();
 				String fleet = self.getFleetId();
-				String kid = self.getKeyId();
 				try {
-					future.complete(this.httpPostToCosigner("cosign_for_server", fleet, kid, jwsPayload));
+					future.complete(this.httpPostToCosigner(fleet, jwsPayload));
 				} catch (Exception e) {
 					future.completeExceptionally(new FrameworkRuntimeException(e.toString()));
 				}
@@ -347,7 +341,7 @@ public class FleetSigner extends TdiPluginBase {
 				String fleet = self.getFleetId();
 				try {
 					String kid = this.fetchIssFromJwsString(outboundJWS);
-					future.complete(this.httpPostToCosigner("cosign_for_edge_device", fleet, kid, outboundJWS));
+					future.complete(this.httpPostToCosigner(fleet, outboundJWS));
 				} catch (IOException e) {
 					future.completeExceptionally(new FrameworkRuntimeException(e.toString()));
 				} catch (Exception e) {
@@ -391,7 +385,7 @@ public class FleetSigner extends TdiPluginBase {
 				String fleet = self.getFleetId();
 				try {
 					String kid = this.fetchIssFromJwsString(outboundJWS);
-					future.complete(this.httpPostToCosigner("cosign_for_edge_device", fleet, kid, outboundJWS));
+					future.complete(this.httpPostToCosigner( fleet, outboundJWS));
 				} catch (IOException e) {
 					future.completeExceptionally(new FrameworkRuntimeException(e.toString()));
 				} catch (Exception e) {
@@ -426,47 +420,16 @@ public class FleetSigner extends TdiPluginBase {
 		return flow;
 	}
 
-	/**
-	 * Signs a token if a ROLE_EXTERN key is found in the keystore relevent to the
-	 * project
-	 */
-	private TdiFlowArguments buildFlowSignToken() {
-		TdiFlowArguments flow = new TdiFlowArguments();
-		flow.addOverrideSteps(Arrays.asList("setSigners"));
-		flow.addMethod("setSigners", (data) -> {
-			TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
-			msgObj.setSignatureType("compact");
-			return this.impl.getPlatform().getKeystore()
-					.getKeyByRole(TdiKeyFlagsEnum.ROLE_EXTERN.getNumber(), msgObj.getCurrentProject())
-					.thenCompose((TdiKeyStructureShape key) -> {
-						CompletableFuture<TdiCanonicalMessageShape> future = new CompletableFuture<>();
-						if ((null != key) && key.canSign()) {
-							msgObj.addSigner(key);
-							future.complete(msgObj);
-						} else {
-							future.completeExceptionally(new FrameworkRuntimeException(
-									"setSigners() failed to find a signing key for either F_C or F_S."));
-						}
-						return future;
-					}).exceptionally(throwable -> {
-						String errMsg = "setSigners() failed.";
-						LOG.error(errMsg + ": " + throwable.getMessage());
-						throw new FrameworkRuntimeException(errMsg);
-					});
-		});
-		return flow;
-	}
-
 	/*
 	 * Blocks until a response is received.
 	 */
-	private String httpPostToCosigner(String method, String fleet, String kid, String payload) {
+	private String httpPostToCosigner(String fleet, String payload) {
 		HttpURLConnection con = null;
 		StringBuffer resp = new StringBuffer();
 		int payload_len = payload.getBytes().length;
 		LOG.trace("Sending a " + payload_len + " byte payload for cosigning.");
 		try {
-			URL url = new URL(this.baseURI + "/projects/" + fleet + "/" + method + "/" + kid);
+			URL url = new URL(this.baseURI + "/projects/" + fleet + "/cosign");
 			LOG.debug("Calling out to cosigner: " + url.toString());
 			con = (HttpURLConnection) url.openConnection();
 			con.setRequestMethod("POST");
@@ -489,6 +452,12 @@ public class FleetSigner extends TdiPluginBase {
 				resp.append('\r');
 			}
 			rx.close();
+
+      if (con.getResponseCode() != 200) {
+        LOG.warn("co-signer error, code={}", con.getResponseCode());
+        throw new FrameworkRuntimeException("Core refused to co-sign");
+      }
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
