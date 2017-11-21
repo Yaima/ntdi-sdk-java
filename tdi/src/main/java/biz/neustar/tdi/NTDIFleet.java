@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import biz.neustar.tdi.plugins.FleetSigner;
 import biz.neustar.tdi.fw.utils.Utils;
 import biz.neustar.tdi.fw.exception.InvalidFormatException;
+import biz.neustar.tdi.fw.platform.TdiPlatformShapeFactory;
 
 
 public class NTDIFleet extends BaseNTDI {
@@ -26,6 +27,10 @@ public class NTDIFleet extends BaseNTDI {
 
     public NTDIFleet(Config config) throws ExecutionException, InterruptedException, IOException {
         super(Arrays.asList(FleetSigner::new), config);
+    }
+
+    public NTDIFleet(TdiPlatformShapeFactory platform, Config config) throws ExecutionException, InterruptedException, IOException {
+        super(platform, Arrays.asList(FleetSigner::new), config);
     }
 
     public String signForFleet(Map<String, Object> data) throws ExecutionException, InterruptedException, InvalidFormatException {
