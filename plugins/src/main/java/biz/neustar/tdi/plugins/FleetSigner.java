@@ -363,7 +363,7 @@ public class FleetSigner extends TdiPluginBase {
   /*
    * Blocks until a response is received.
    */
-  private String httpPostToCosigner(String method, String fleet, String kid, String payload) {
+  private String httpPostToCosigner(String fleet, String payload) {
     HttpURLConnection con = null;
     StringBuffer resp = new StringBuffer();
     int payload_len = payload.getBytes().length;
