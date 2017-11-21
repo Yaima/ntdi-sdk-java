@@ -160,7 +160,6 @@ public class FleetSigner extends TdiPluginBase {
     flow.addOverrideSteps(Arrays.asList("setSigners"));
     flow.addMethod("setSigners", (data) -> {
       TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
-      msgObj.setSignatureType("compact");
       return this.impl.getPlatform().getKeystore()
         .getKeyByRole(TdiKeyFlagsEnum.ROLE_F_S.getNumber(), msgObj.getCurrentProject())
         .thenCompose((TdiKeyStructureShape key) -> {
@@ -188,7 +187,6 @@ public class FleetSigner extends TdiPluginBase {
     flow.addOverrideSteps(Arrays.asList("setSigners"));
     flow.addMethod("setSigners", (data) -> {
       TdiCanonicalMessageShape msgObj = (TdiCanonicalMessageShape) data;
-      msgObj.setSignatureType("compact");
       return this.impl.getPlatform().getKeystore()
         .getKeyByRole(TdiKeyFlagsEnum.ROLE_F_S.getNumber(), msgObj.getCurrentProject())
         .thenCompose((TdiKeyStructureShape key) -> {
