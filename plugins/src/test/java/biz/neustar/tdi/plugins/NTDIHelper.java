@@ -54,6 +54,7 @@ class NTDIHelper {
   }
 
 	public String fleetFromDevice(String msg) throws ExecutionException, InterruptedException {
+    // TODO: This API presently returns a string. But it will soon return a TdiCanonicalMessageShape.
 		return ((FleetSigner) sdkWrapper.plugin("FleetSigner")).fleetFromDevice.apply(msg).get();
 	}
 

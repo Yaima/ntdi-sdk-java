@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import biz.neustar.tdi.fw.canonicalmessage.TdiCanonicalMessageShape;
 import biz.neustar.tdi.fw.wrapper.TdiSdkWrapperShape;
+import biz.neustar.tdi.fw.platform.TdiPlatformShapeFactory;
 import biz.neustar.tdi.fw.plugin.TdiPluginBaseFactory;
 import biz.neustar.tdi.fw.utils.Utils;
 import biz.neustar.tdi.fw.exception.InvalidFormatException;
@@ -23,6 +24,22 @@ public class NTDIGateway extends NTDIDevice {
 
     public NTDIGateway() throws ExecutionException, InterruptedException, IOException {
         super();
+    }
+
+    public NTDIGateway(Config config) throws ExecutionException, InterruptedException, IOException {
+        super(config);
+    }
+
+    public NTDIGateway(String configPath) throws ExecutionException, InterruptedException, IOException {
+        super(configPath);
+    }
+
+    public NTDIGateway(List<TdiPluginBaseFactory> plugins, Config config) throws ExecutionException, InterruptedException, IOException {
+        super(plugins, config);
+    }
+
+    public NTDIGateway(TdiPlatformShapeFactory platform, List<TdiPluginBaseFactory> plugins, Config config) throws ExecutionException, InterruptedException, IOException {
+        super(platform, plugins, config);
     }
 
     public String cosign(String msg) throws ExecutionException, InterruptedException {
