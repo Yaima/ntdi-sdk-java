@@ -100,7 +100,7 @@ This is Neustar's Trusted Device Identity (TDI) implementation in Java 8.
 
 ### Build:
 ```bash
-mvn clean package
+mvn clean install
 ```
 
 ### Documentation:
