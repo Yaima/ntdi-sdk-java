@@ -4,21 +4,21 @@
 
 	<parent>
 		<groupId>biz.neustar.tdi</groupId>
-		<artifactId>java-ntdi</artifactId>
-		<version>1.0</version>
+		<artifactId>ntdi-sdk-java</artifactId>
+		<version>1.0.1</version>
 	</parent>
 
 	<artifactId>sdk</artifactId>
 	<packaging>jar</packaging>
 
 	<name>sdk</name>
-	<url>https://github.com/Neustar-TDI/java-ntdi/sdk</url>
+	<url>https://github.com/Neustar-TDI/ntdi-sdk-java/sdk</url>
 
 	<dependencies>
 		<dependency>
 			<groupId>biz.neustar.tdi</groupId>
 			<artifactId>framework</artifactId>
-			<version>1.0</version>
+			<version>1.0.1</version>
 		</dependency>
 	</dependencies>
 </project>

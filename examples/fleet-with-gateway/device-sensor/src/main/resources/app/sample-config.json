@@ -1,0 +1,22 @@
+{
+    "fleet": {
+        "id": "<fleetID>"
+    },
+    "gateway": {
+        "id": "<gatewayID>"
+    },
+    "device": {
+        "name": "My Motion/Temperature Sensor",
+        "id": "<deviceID>"
+    },
+    "reporting": {
+        "interval": 1000
+    },
+    "mqtt": {
+        "broker": "tcp://iot.eclipse.org:1883",
+        "qos": {
+            "publish": 2,
+            "subscribe": 1
+        }
+    }
+}

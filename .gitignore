@@ -1,0 +1,26 @@
+.directory
+*.dat
+
+# Test artifacts
+framework/testClaimsJsonFile.json
+keystore.json
+
+# Build artifacts
+target/
+doc/
+
+# Eclipse
+.classpath
+.project
+.settings
+
+# Intellij
+.idea/
+*.iml
+*.iws
+
+# Mac
+.DS_Store
+
+# Maven
+log/

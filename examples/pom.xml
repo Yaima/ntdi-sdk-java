@@ -4,17 +4,18 @@
 
 	<parent>
 		<groupId>biz.neustar.tdi</groupId>
-		<artifactId>java-ntdi</artifactId>
-		<version>1.0</version>
+		<artifactId>ntdi-sdk-java</artifactId>
+		<version>1.0.1</version>
 	</parent>
 
 	<artifactId>examples</artifactId>
 	<packaging>pom</packaging>
 
 	<name>examples</name>
-	<url>https://github.com/Neustar-TDI/java-ntdi/examples</url>
+	<url>https://github.com/Neustar-TDI/ntdi-sdk-java/examples</url>
 
 	<modules>
 		<module>platform</module>
+		<module>fleet-with-gateway</module>
 	</modules>
 </project>

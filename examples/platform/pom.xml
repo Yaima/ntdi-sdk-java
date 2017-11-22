@@ -5,14 +5,14 @@
 	<parent>
 		<groupId>biz.neustar.tdi</groupId>
 		<artifactId>examples</artifactId>
-		<version>1.0</version>
+		<version>1.0.1</version>
 	</parent>
 
 	<artifactId>platform</artifactId>
 	<packaging>jar</packaging>
 
 	<name>platform</name>
-	<url>https://github.com/Neustar-TDI/java-ntdi/examples/platform</url>
+	<url>https://github.com/Neustar-TDI/ntdi-sdk-java/examples/platform</url>
 
 	<properties>
 		<bouncycastle.version>1.57</bouncycastle.version>
@@ -22,7 +22,7 @@
 		<dependency>
 			<groupId>biz.neustar.tdi</groupId>
 			<artifactId>framework</artifactId>
-			<version>1.0</version>
+			<version>1.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
@@ -35,4 +35,27 @@
 			<version>${bouncycastle.version}</version>
 		</dependency>
 	</dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.coderplus.maven.plugins</groupId>
+        <artifactId>copy-rename-maven-plugin</artifactId>
+        <version>1.0</version>
+        <executions>
+          <execution>
+            <id>copy-file</id>
+            <phase>process-test-resources</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <sourceFile>src/test/resources/keystore-test.json</sourceFile>
+              <destinationFile>src/test/resources/keystore.json</destinationFile>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>

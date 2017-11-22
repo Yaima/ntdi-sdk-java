@@ -1,17 +1,17 @@
 /*
  * Copyright 2017 Neustar, Inc
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  */
 
 package biz.neustar.tdi.fw.implementation;
@@ -52,13 +52,13 @@ public class TdiImplementation implements TdiImplementationShape {
 
   /**
    * Canonical message iterator.
-   * 
+   *
    */
   private int canonicalTracker = 0;
 
   /**
    * TdiComponent reference key/value store.
-   * 
+   *
    */
   private Map<String, TdiComponentShape> modules;
 
@@ -74,7 +74,7 @@ public class TdiImplementation implements TdiImplementationShape {
 
   /**
    * Instantiates an object.
-   * 
+   *
    * @param conf
    *          the configuration
    * @param pfFactory
@@ -86,18 +86,22 @@ public class TdiImplementation implements TdiImplementationShape {
     modules = new HashMap<>();
   }
 
+  public void dumpDebug() {
+  }
+
+
   /**
    * Sets up the global datastore.
-   * 
+   *
    * @param storeMap
    *          : Store map.
-   * 
+   *
    * @return {@link CompletableFuture} with either of the following states: <br>
    *         <b>Completed Successfully</b>: {@link Boolean} with true on
    *         success. false otherwise. <br>
    *         <b>Completed Exceptionally</b>: {@link Exception} in case of
    *         failure.
-   * 
+   *
    */
   public CompletableFuture<Boolean> setupTdiStore(Map<String, Object> storeMap) {
 
@@ -121,7 +125,7 @@ public class TdiImplementation implements TdiImplementationShape {
 
   /**
    * Pass-through to platform for special-case key access.
-   * 
+   *
    * @return {@link CompletableFuture} with either of the following states: <br>
    *         <b>Completed Successfully</b>: {@link TdiKeyStructureShape} with
    *         SELF Key details. <br>
@@ -155,9 +159,8 @@ public class TdiImplementation implements TdiImplementationShape {
   }
 
   @Override
-  public CompletableFuture<TdiSdkWrapperShape> loadPlugins(TdiSdkWrapperShape sdkWrapper,
-      List<TdiPluginBaseFactory> plugins) {
-
+  public CompletableFuture<TdiSdkWrapperShape> loadPlugins(TdiSdkWrapperShape sdkWrapper, List<TdiPluginBaseFactory> plugins) {
+    LOG.trace("Loading plugins...");
     List<CompletableFuture<?>> queue = new ArrayList<>();
 
     @SuppressWarnings("unchecked")
@@ -270,14 +273,14 @@ public class TdiImplementation implements TdiImplementationShape {
 
       /**
        * Build the api flows.
-       * 
+       *
        * @param data
        *          : the data to be passed to built api flows
        * @param originalFlow
        *          : the predefined api flows
        * @param otherFlow
        *          : the overriding and additional api flows
-       * 
+       *
        * @return the built api flow as a {@link CompletableFuture}
        */
       private CompletableFuture<? extends Object> buildFlows(T data, TdiFlowArguments originalFlow,
@@ -293,7 +296,7 @@ public class TdiImplementation implements TdiImplementationShape {
 
         CompletableFuture<? extends Object> currentFuture = CompletableFuture.completedFuture(data);
 
-        for (Entry<String, Function<Object, CompletableFuture<? extends Object>>> entry : 
+        for (Entry<String, Function<Object, CompletableFuture<? extends Object>>> entry :
             originalFlow.getFlowMap().entrySet()) {
 
           if (newFlow.getFlowMap().containsKey(entry.getKey())

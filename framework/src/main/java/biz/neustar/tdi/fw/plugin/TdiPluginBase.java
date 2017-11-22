@@ -1,17 +1,17 @@
 /*
  * Copyright 2017 Neustar, Inc
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  */
 
 package biz.neustar.tdi.fw.plugin;
@@ -47,18 +47,17 @@ public abstract class TdiPluginBase implements TdiPluginBaseFactory {
   /**
    * Default constructor requiring {@link TdiImplementationShape} and
    * {@link TdiSdkWrapperShape} to be associated with it.
-   * 
+   *
    * @param impl
    *          : Implementation to be associated with.
    * @param sdkWrapper
    *          : {@link TdiSdkWrapperShape} reference of the sdkWrapper.
-   * 
+   *
    * @throws ImplementationRequiredException
    *           if the implementation is invalid or if is null.
-   * 
+   *
    */
-  public TdiPluginBase(String pluginName, TdiImplementationShape impl,
-      TdiSdkWrapperShape sdkWrapper) {
+  public TdiPluginBase(String pluginName, TdiImplementationShape impl, TdiSdkWrapperShape sdkWrapper) {
     if (StringUtils.isEmpty(pluginName)) {
       throw new FrameworkRuntimeException("TdiPluginBase name cannot be null");
     }
@@ -80,7 +79,7 @@ public abstract class TdiPluginBase implements TdiPluginBaseFactory {
 
   /**
    * Method to return the delegate instance of the datastore.
-   * 
+   *
    * @return {@link DatastoreDelegate}
    */
   public DatastoreDelegate getDataStore() {
@@ -91,7 +90,7 @@ public abstract class TdiPluginBase implements TdiPluginBaseFactory {
    * Method to be overridden in implementation to provide the initialization of
    * the plugin and complete the {@link CompletableFuture} upon successfull
    * initialization.
-   * 
+   *
    * @return {@link CompletableFuture} with either of the following states: <br>
    *         <b>Completed Successfully</b>: {@link Boolean} with true on
    *         success. false otherwise. <br>
@@ -102,7 +101,7 @@ public abstract class TdiPluginBase implements TdiPluginBaseFactory {
 
   /**
    * Method to return the plugin name.
-   * 
+   *
    * @return TdiPluginBase name.
    */
   public String getName() {
@@ -111,11 +110,11 @@ public abstract class TdiPluginBase implements TdiPluginBaseFactory {
 
   /**
    * Method to validate the data store.
-   * 
+   *
    * @param checks
    *          : List of String objects to check if available in the
    *          configurations.
-   * 
+   *
    * @return {@link CompletableFuture} with either of the following states: <br>
    *         <b>Completed Successfully</b>: {@link Boolean} with true on
    *         successful validation. false otherwise. <br>
@@ -129,7 +128,7 @@ public abstract class TdiPluginBase implements TdiPluginBaseFactory {
   /**
    * Returns the instance of {@link TdiSdkWrapperShape} associated with this
    * plugin.
-   * 
+   *
    * @return {@link TdiSdkWrapperShape}
    */
   public TdiSdkWrapperShape getSdkWrapper() {

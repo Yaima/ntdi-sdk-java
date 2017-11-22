@@ -1,17 +1,17 @@
 /*
  * Copyright 2017 Neustar, Inc
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  */
 
 package biz.neustar.tdi.fw.canonicalmessage;
@@ -29,7 +29,7 @@ import java.util.Map;
 public interface TdiCanonicalMessageShape {
   /**
    * Returns the ID associated with this message.
-   * 
+   *
    * @return Integer id of the message.
    */
   public Integer getId();
@@ -37,7 +37,7 @@ public interface TdiCanonicalMessageShape {
   /**
    * Claims holding the source data and additional details required for
    * validating the message.
-   * 
+   *
    * @return {@link TdiClaims}
    */
   public TdiClaims getClaims();
@@ -45,7 +45,7 @@ public interface TdiCanonicalMessageShape {
   /**
    * Returns the list of {@link TdiKeyStructureShape} objects that would be
    * required to sign an out-bound message.
-   * 
+   *
    * @return List&lt;{@link TdiKeyStructureShape}&gt;
    */
   public List<TdiKeyStructureShape> getSigners();
@@ -53,7 +53,7 @@ public interface TdiCanonicalMessageShape {
   /**
    * Adds a {@link TdiKeyStructureShape} signer to the message object that would
    * be required to sign.
-   * 
+   *
    * @param signer
    *          : {@link TdiKeyStructureShape}
    */
@@ -62,15 +62,20 @@ public interface TdiCanonicalMessageShape {
   /**
    * Returns the list of {@link TdiKeyStructureShape} objects that would be
    * required to verify an in-bound message.
-   * 
+   *
    * @return List&lt;{@link TdiKeyStructureShape}&gt;
    */
   public List<TdiKeyStructureShape> getVerifiers();
 
   /**
+   * Wipes the list of verifiers.
+   */
+  public void clearVerifiers();
+
+  /**
    * Adds the {@link TdiKeyStructureShape} verifier to the message object that
    * would be required to verify.
-   * 
+   *
    * @param verifier
    *          : {@link TdiKeyStructureShape}
    */
@@ -78,22 +83,22 @@ public interface TdiCanonicalMessageShape {
 
   /**
    * Return the fleet ID to which this message belongs.
-   * 
+   *
    * @return String ID of the fleet/project.
    */
   public String getCurrentProject();
 
   /**
    * Sets the current project
-   * 
+   *
    * @param currentProject
    *          : ID of the project this message is associated with.
    */
   public void setCurrentProject(String currentProject);
-  
+
   /**
    * Method to add the claim to the claims list.
-   * 
+   *
    * @param key
    *          : Claim key
    * @param value
@@ -104,7 +109,7 @@ public interface TdiCanonicalMessageShape {
   /**
    * Method to add all the claims in the input to the claims list of this
    * message object.
-   * 
+   *
    * @param claims
    *          : Claims
    */
@@ -112,7 +117,7 @@ public interface TdiCanonicalMessageShape {
 
   /**
    * Method to override/set {@link TdiClaims}.
-   * 
+   *
    * @param claims
    *          : {@link TdiClaims}
    */
@@ -120,14 +125,14 @@ public interface TdiCanonicalMessageShape {
 
   /**
    * Returns the type of signature.
-   * 
+   *
    * @return {@link String}
    */
   public String getSignatureType();
 
   /**
    * Sets the type of the signature.
-   * 
+   *
    * @param signatureType
    *          {@link String}
    */
@@ -135,14 +140,14 @@ public interface TdiCanonicalMessageShape {
 
   /**
    * The full signed message or token to be returned to the application.
-   * 
+   *
    * @return {@link String}
    */
   public String getBuiltMessage();
 
   /**
    * The full signed message or token to be returned to the application.
-   * 
+   *
    * @param builtMessage
    *          {@link String}
    */
@@ -150,14 +155,14 @@ public interface TdiCanonicalMessageShape {
 
   /**
    * The raw received message or token from the application.
-   * 
+   *
    * @return {@link String}
    */
   public String getReceivedMessage();
 
   /**
    * Stores the raw received message or token from the application.
-   * 
+   *
    * @param message
    *          : {@link String} message
    */
@@ -165,7 +170,7 @@ public interface TdiCanonicalMessageShape {
 
   /**
    * Signatures present on a message that are to be retained after signing.
-   * 
+   *
    * @return {@link List} of Signature Object
    */
   public List<Object> getHeldSignatures();
@@ -173,7 +178,7 @@ public interface TdiCanonicalMessageShape {
   /**
    * Adds siganture to the internal list for access through
    * {@link #getHeldSignatures()}.
-   * 
+   *
    * @param signature
    *          : Signature Object.
    */
@@ -182,7 +187,7 @@ public interface TdiCanonicalMessageShape {
   /**
    * Adds signatures to the internal list for access through
    * {@link #getHeldSignatures()}.
-   * 
+   *
    * @param heldSignatures
    *          : {@link List} of Signature object
    */
@@ -190,7 +195,7 @@ public interface TdiCanonicalMessageShape {
 
   /**
    * Signatures present on a message that are to be verified.
-   * 
+   *
    * @return{@link List} of Object containing details of the signatures to
    *               verify. Application using the
    *               {@link TdiCanonicalMessageShape} has the freedom to store
@@ -201,7 +206,7 @@ public interface TdiCanonicalMessageShape {
   /**
    * Adds signature to the internal list for access through
    * {@link #getSignaturesToVerify()}.
-   * 
+   *
    * @param signature
    *          : Object containing details of the signatures to verify.
    *          Application using the {@link TdiCanonicalMessageShape} has the
@@ -213,7 +218,7 @@ public interface TdiCanonicalMessageShape {
   /**
    * Adds signatures to the internal list for access through
    * {@link #getSignaturesToVerify()}.
-   * 
+   *
    * @param signatures
    *          : {@link List} of Object
    */
@@ -221,14 +226,14 @@ public interface TdiCanonicalMessageShape {
 
   /**
    * The raw string the application requests to be signed (payload).
-   * 
+   *
    * @return {@link String}
    */
   public String getRawPayload();
 
   /**
    * The raw string the application requests to be signed (payload).
-   * 
+   *
    * @param rawPayload
    *          : {@link String}
    */

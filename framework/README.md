@@ -1,42 +1,35 @@
-[![CircleCI](https://circleci.com/gh/Neustar-TDI/java-ntdi.svg?style=svg&circle-token=8df38531e4dfff635375fd651a9bda1a8948362c)](https://circleci.com/gh/Neustar-TDI/java-ntdi)
-
 # Java TDI Framework
 
-This is Neustar's Trusted Device Identity (TDI) framework implemented in Java. It forms the definition and glue layer between....
+This is Neustar's Trusted Device Identity (TDI) framework implemented in Java. It forms the definition and glue layer between the following...
 
-| Repository | Purpose |
+| Namespace | Purpose |
 | --- | :-- |
-[TDI](https://github.com/Neustar-TDI/java-ntdi/sdk) | The application-facing SDK
-[Plugins](https://github.com/Neustar-TDI/java-ntdi/plugins) | Plugins for TDI
-[Platform](https://github.com/Neustar-TDI/java-ntdi/examples/platform) | The boundary between the framework and the hardware
-[app-examples](https://github.com/Neustar-TDI/java-ntdi/examples/app) | The application itself. The project gives some possible example applications.
+User application | The software that is importing and leveraging the library.
+[SDK](https://github.com/Neustar-TDI/ntdi-sdk-java/sdk) | The application-facing SDK that represents the API to the library.
+[Plugins](https://github.com/Neustar-TDI/ntdi-sdk-java/plugins) | Augments functionality of TDI. Generally to add message handlers and work-flows such that they need not be re-written for every discrete usage in a given network application.
+[Platform](https://github.com/Neustar-TDI/ntdi-sdk-java/examples/platform) | The boundary between TDI and the hardware.
 
+Types and interfaces are contained in the framework, as well as a handful of library constants.
 
-This repo is pulled in by these other components in the course of their installation. Application code _may_ use definitions from this repo, but should never otherwise know of it. All application usage of TDI should be done via the [sdk package](https://github.com/Neustar-TDI/java-ntdi/sdk). See that documentation for the TDI API.
+## Important application-facing classes
 
-<br>
-Javadoc would be during build process.
-<br>
-Alternatively Javadoc can also be generated using following commands:
-<br> 
+Despite SDK being the application API, application code will probably need one or more of the classes in the framework namespace. The following are classes that serve common needs...
 
-*Maven*
-```bash 
-mvn javadoc:javadoc
-```
+All given class names are under the common namespace `biz.neustar.tdi.fw`. This is omitted for brevity.
 
-### Build:
-```bash
-mvn clean package
-```
+##### canonicalmessage.TdiCanonicalMessageShape
+*Canonical: (adjective) In linguistics, of a form or pattern. Characteristic. General or basic.*
 
-### Add dependency to other projects
-```XML
-<dependency>
-    <groupId>biz.neustar.tdi</groupId>
-    <artifactId>framework</artifactId>
-    <version>1.0</version>
-</dependency>
+This is TDI's normalized representation of a network message. It is invariant with respect to wire format and transport, and represents the authenticated envelope for user payloads.
 
-```
+##### keystructure.TdiKeyStructureShape
+TDI's platform normalizes various implementations of cryptographic keys into this interface. TDI metadata about keys, and the keys themselves are made available by this interface.
 
+##### plugin.TdiPluginBase
+The default framework is rather bare. Typically, a user application will want to write one or more plugins to handle its workflows. To the extent that commonly-needed features of a network application have been anticipated, Neustar has bundled a set of default plugins for applications to use (none of which are required to use the library).
+
+##### platform.TdiPlatformShape
+All support flows from hardware. This interface allows the hardware implementations to change independently of the software that relies on it. The library relies on this abstraction, but user application code need not.
+
+##### platform.facet.TdiPlatformFacetShape
+If you are needing to implement specific cryptographic hardware, clocks, or data persistence strategies, this is the interface that will allow for it. More details can be found in [Platform](https://github.com/Neustar-TDI/ntdi-sdk-java/examples/platform).

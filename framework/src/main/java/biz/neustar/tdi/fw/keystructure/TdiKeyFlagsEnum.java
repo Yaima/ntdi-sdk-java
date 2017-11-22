@@ -1,22 +1,25 @@
 /*
  * Copyright 2017 Neustar, Inc
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  */
 
 package biz.neustar.tdi.fw.keystructure;
 
 public enum TdiKeyFlagsEnum {
+  // TODO: Audit these for correctness. The commentary doesn't line up, and I
+  //   forsee unexplained enum convergence. Possibly in the Typescript as well.
+  //   Possible inappropriate use of ROLE_EXTERN. Conflated with network exchange flags?
   ROLE_UNDEF(0x0000), ROLE_EXTERN(0x0001),
   /** General use for non-standard keys. */
   ROLE_F_S(0x0002),
@@ -58,17 +61,17 @@ public enum TdiKeyFlagsEnum {
   ORIGIN_PKI(0x8000), /** Imparted by a PKI. */
 
   /** These are the key origin flags. */
-  ORIGIN_MASK(ORIGIN_PERSIST.flagNumber 
-      | ORIGIN_FLASH.flagNumber 
-      | ORIGIN_GEN.flagNumber 
-      | ORIGIN_EXTERN.flagNumber 
-      | ORIGIN_HSM.flagNumber 
+  ORIGIN_MASK(ORIGIN_PERSIST.flagNumber
+      | ORIGIN_FLASH.flagNumber
+      | ORIGIN_GEN.flagNumber
+      | ORIGIN_EXTERN.flagNumber
+      | ORIGIN_HSM.flagNumber
       | ORIGIN_PKI.flagNumber),
 
   /** These flags are meaningless to another system. */
-  EXPORT_MASK(~(CAN_SIGN.flagNumber 
-      | ORIGIN_GEN.flagNumber 
-      | ORIGIN_PERSIST.flagNumber 
+  EXPORT_MASK(~(CAN_SIGN.flagNumber
+      | ORIGIN_GEN.flagNumber
+      | ORIGIN_PERSIST.flagNumber
       | OUR_OWN.flagNumber));
 
   private Integer flagNumber;
@@ -79,9 +82,9 @@ public enum TdiKeyFlagsEnum {
 
   /**
    * Returns the {@link TdiKeyFlagsEnum} enum agains the flagNumber.
-   * 
+   *
    * @param flagNumber : Flag number
-   * 
+   *
    * @return {@link TdiKeyFlagsEnum}
    */
   public static TdiKeyFlagsEnum getKeyFlag(int flagNumber) {
@@ -95,10 +98,10 @@ public enum TdiKeyFlagsEnum {
   }
 
   /**
-   * Returns the {@link TdiKeyFlagsEnum} based on the flag name. 
-   * 
+   * Returns the {@link TdiKeyFlagsEnum} based on the flag name.
+   *
    * @param flagName : Flag Name
-   * 
+   *
    * @return {@link TdiKeyFlagsEnum}
    */
   public static TdiKeyFlagsEnum getKeyFlag(String flagName) {

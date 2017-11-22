@@ -4,13 +4,13 @@
 
 	<parent>
 		<groupId>biz.neustar.tdi</groupId>
-		<artifactId>java-ntdi</artifactId>
-		<version>1.0</version>
+		<artifactId>ntdi-sdk-java</artifactId>
+		<version>1.0.1</version>
 	</parent>
 
 	<artifactId>framework</artifactId>
 	<packaging>jar</packaging>
 
 	<name>framework</name>
-	<url>https://github.com/Neustar-TDI/java-ntdi/framework</url>
+	<url>https://github.com/Neustar-TDI/ntdi-sdk-java/framework</url>
 </project>
