@@ -66,10 +66,8 @@ public class CoSign extends BaseApi {
    *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
    */
   public CompletableFuture<TdiCanonicalMessageShape> handleInit(Object clientJwsString) {
-
     LOG.trace("Invoking CoSign:handleInit");
-
-    return impl.generateMsg(null).thenApply((TdiCanonicalMessageShape msg) -> {
+    return impl.generateMsg(null).thenCompose((TdiCanonicalMessageShape msg) -> {
       TdiCanonicalMessage tdiMsg = (TdiCanonicalMessage) msg;
       CompletableFuture<TdiCanonicalMessageShape> future = new CompletableFuture<>();
       try {
@@ -81,12 +79,11 @@ public class CoSign extends BaseApi {
         }
 
         future.complete(tdiMsg);
-      } catch (Exception e) {
+      }
+      catch (Exception e) {
         future.completeExceptionally(new ApiException("Error parsing jws string"));
       }
       return future;
-    }).thenCompose(arg -> {
-      return arg;
     });
   }
 

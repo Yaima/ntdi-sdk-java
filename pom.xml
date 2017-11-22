@@ -69,6 +69,48 @@
                       </includes>
                       <followSymlinks>false</followSymlinks>
                   </fileset>
+                  <fileset>
+                      <directory>plugins/src/test/resources/device</directory>
+                      <includes>
+                          <include>*.dat</include>
+                      </includes>
+                      <followSymlinks>false</followSymlinks>
+                  </fileset>
+                  <fileset>
+                      <directory>plugins/src/test/resources/device</directory>
+                      <includes>
+                          <include>keystore.json</include>
+                      </includes>
+                      <followSymlinks>false</followSymlinks>
+                  </fileset>
+                  <fileset>
+                      <directory>plugins/src/test/resources/exception</directory>
+                      <includes>
+                          <include>*.dat</include>
+                      </includes>
+                      <followSymlinks>false</followSymlinks>
+                  </fileset>
+                  <fileset>
+                      <directory>plugins/src/test/resources/exception</directory>
+                      <includes>
+                          <include>keystore.json</include>
+                      </includes>
+                      <followSymlinks>false</followSymlinks>
+                  </fileset>
+                  <fileset>
+                      <directory>plugins/src/test/resources/server</directory>
+                      <includes>
+                          <include>*.dat</include>
+                      </includes>
+                      <followSymlinks>false</followSymlinks>
+                  </fileset>
+                  <fileset>
+                      <directory>plugins/src/test/resources/server</directory>
+                      <includes>
+                          <include>keystore.json</include>
+                      </includes>
+                      <followSymlinks>false</followSymlinks>
+                  </fileset>
               </filesets>
           </configuration>
       </plugin>
