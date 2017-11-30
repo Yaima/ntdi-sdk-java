@@ -1,6 +1,7 @@
 package biz.neustar.tdi;
 
-import java.io.InputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Collections;
@@ -48,8 +49,9 @@ public class Config {
 
     public Config(String configPath) throws IOException {
         log.debug("loading config {}", configPath);
-
-        InputStream inStream = getClass().getClassLoader().getResourceAsStream(configPath);
+        
+        File file = new File(configPath);
+        FileInputStream inStream = new FileInputStream(file);
         this.map = new ObjectMapper().readValue(inStream, new TypeReference<Map<String, Object>>() {
         });
     }
