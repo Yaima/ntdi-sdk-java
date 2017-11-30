@@ -43,14 +43,16 @@ public class GatewayChannel implements IMqttMessageListener {
     private int pubqos;
     private int subqos;
     private boolean retained;
+    private boolean fromFleet;
 
     private NTDIGateway ntdi;
 
     private IMqttAsyncClient inBroker;
     private IMqttAsyncClient outBroker;
 
-    public GatewayChannel(Config config, String clientID, String inZone, String outZone, String topicTemplate)
+    public GatewayChannel(Config config, String clientID, String inZone, String outZone, String topicTemplate, boolean fromFleet)
             throws ExecutionException, InterruptedException, IOException {
+        this.fromFleet = fromFleet;
         this.config = config;
         this.clientID = clientID;
         this.inZone = inZone;
@@ -109,9 +111,15 @@ public class GatewayChannel implements IMqttMessageListener {
     public void messageArrived(java.lang.String topic, MqttMessage inMsg) {
         log.info("IN  <- {}", topic);
         log.debug("incoming message: {}", inMsg);
-
+        String verifyResult;
         try {
-            if (this.ntdi.verifyFromDevice(inMsg.toString()) == null) {
+            if (fromFleet){
+                verifyResult = this.ntdi.verify(inMsg.toString());
+            }
+            else {
+                verifyResult = this.ntdi.verifyFromDevice(inMsg.toString());
+            }
+            if (verifyResult == null) {
                 // shouldn't get here, exception should be thrown
                 log.warn("message from device failed to validate");
             }
