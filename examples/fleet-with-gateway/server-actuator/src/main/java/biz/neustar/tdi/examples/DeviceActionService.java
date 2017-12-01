@@ -65,12 +65,12 @@ public class DeviceActionService {
     }
 
     public DeviceActionService(String configPath) throws ExecutionException, InterruptedException, IOException {
-        this(new Config(configPath));
+        this(new Config(configPath, true));
     }
 
     public DeviceActionService(Config config) throws ExecutionException, InterruptedException, IOException {
         this.config = config;
-        this.ntdi = new NTDIFleet();
+        this.ntdi = new NTDIFleet(new Config("tdi/config.json", true));
     }
 
     public void start() throws IOException, MqttException {
@@ -120,7 +120,7 @@ public class DeviceActionService {
     }
 
     public static void main(String[] args) throws Exception {
-        Config config = new Config(DeviceActionService.DEFAULT_CONFIG_PATH);
+        Config config = new Config(DeviceActionService.DEFAULT_CONFIG_PATH, true);
         Map<String, List<String>> gateways = config.<Map<String, List<String>>>get("gateways");
 
         if (gateways == null || gateways.size() == 0) {

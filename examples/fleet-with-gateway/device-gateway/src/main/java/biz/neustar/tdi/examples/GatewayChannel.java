@@ -64,7 +64,7 @@ public class GatewayChannel implements IMqttMessageListener {
         this.pubqos = config.<Integer>get(String.format("mqtt.%s.qos.publish", outZone), DEFAULT_PUBLISH_QOS);
         this.retained = config.<Boolean>get(String.format("mqtt.%s.retained", outZone), DEFAULT_RETAIN_DATA_MESSAGES);
 
-        this.ntdi = new NTDIGateway();
+        this.ntdi = new NTDIGateway(new Config("tdi/config.json", true));
     }
 
     public void start(List<String> devices) {

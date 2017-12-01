@@ -60,16 +60,16 @@ public class DataCollectionService implements IMqttMessageListener {
     }
 
     public DataCollectionService(String configPath) throws ExecutionException, InterruptedException, IOException {
-        this(new Config(configPath));
+        this(new Config(configPath, true));
     }
 
     public DataCollectionService(Config config) throws ExecutionException, InterruptedException, IOException {
         this.config = config;
-        this.ntdi = new NTDIFleet();
+        this.ntdi = new NTDIFleet(new Config("tdi/config.json", true));
     }
 
     public int run() throws IOException, MqttException {
-        Config config = new Config("app/config.json");
+        Config config = new Config("app/config.json", true);
         IMqttAsyncClient mqtt = null;
 
         String broker = config.<String>get("mqtt.broker");

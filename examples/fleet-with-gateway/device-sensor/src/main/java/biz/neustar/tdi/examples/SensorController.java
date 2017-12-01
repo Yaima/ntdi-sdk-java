@@ -60,7 +60,7 @@ public class SensorController implements IMqttMessageListener {
     public SensorController(Config config, Sensor sensor) throws ExecutionException, InterruptedException, IOException {
         this.sensor = sensor;
         this.config = config;
-        this.ntdi = new NTDIDevice();
+        this.ntdi = new NTDIDevice(new Config("tdi/config.json", true));
 
         Map<String, String> map = new HashMap<String, String>();
 
@@ -163,7 +163,7 @@ public class SensorController implements IMqttMessageListener {
     }
 
     public static void main(String[] args) throws Exception {
-        Config config = new Config("app/config.json");
+        Config config = new Config("app/config.json", true);
         Sensor sensor = new Sensor(config.<String>get("device.name", DEFAULT_SENSOR_NAME));
         SensorController sensorController = new SensorController(config, sensor);
 
