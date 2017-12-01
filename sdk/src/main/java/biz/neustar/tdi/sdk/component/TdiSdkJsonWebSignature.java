@@ -1,17 +1,17 @@
 /*
  * Copyright 2017 Neustar, Inc
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  */
 
 package biz.neustar.tdi.sdk.component;
@@ -47,7 +47,7 @@ public class TdiSdkJsonWebSignature extends TdiComponent {
 
   /**
    * Constructor.
-   * 
+   *
    * @param componentName
    *          : Component name.
    * @param impl
@@ -59,7 +59,7 @@ public class TdiSdkJsonWebSignature extends TdiComponent {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see biz.neustar.tdi.fw.interfaces.TdiComponentShape#init()
    */
   @Override
@@ -70,11 +70,11 @@ public class TdiSdkJsonWebSignature extends TdiComponent {
   /**
    * Calls the cryptography layer to sign a serialized payload and places the
    * resulting signatures in the JWS envelope.
-   * 
+   *
    * @param message
    *          : The {@link TdiCanonicalMessage} containing the payload to
    *          verify.
-   * 
+   *
    * @return {@link CompletableFuture} with either of the following states: <br>
    *         <b>Completed Successfully</b>: {@link TdiCanonicalMessageShape}. <br>
    *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
@@ -131,21 +131,22 @@ public class TdiSdkJsonWebSignature extends TdiComponent {
 
   /**
    * Unpacks a protected payload from the JWS envelope.
-   * 
+   *
    * @param message
    *          : The {@link TdiCanonicalMessage} containing the payload to
    *          deserialize.
-   * 
+   *
    * @return {@link CompletableFuture} with either of the following states: <br>
    *         <b>Completed Successfully</b>: {@link TdiCanonicalMessageShape}. <br>
    *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
-   * 
+   *
    * @throws FrameworkRuntimeException
    *           if the message is either empty or is not in the required format.
    */
   public CompletableFuture<TdiCanonicalMessageShape> unpack(TdiCanonicalMessageShape message) {
     String receivedMessage = message.getReceivedMessage();
     CompletableFuture<TdiCanonicalMessageShape> result = new CompletableFuture<>();
+    LOG.error("Received message: " + receivedMessage);
 
     if (StringUtils.isEmpty(receivedMessage)) {
       LOG.error("Empty received message");
@@ -191,10 +192,10 @@ public class TdiSdkJsonWebSignature extends TdiComponent {
 
   /**
    * Calls the cryptography layer to verify that the JWS is authentic.
-   * 
+   *
    * @param message
    *          : The TdiCanonicalMessage containing the payload to verify.
-   * 
+   *
    * @return {@link CompletableFuture} with either of the following states: <br>
    *         <b>Completed Successfully</b>: {@link TdiCanonicalMessageShape}. <br>
    *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.
@@ -205,8 +206,9 @@ public class TdiSdkJsonWebSignature extends TdiComponent {
       TdiJwsSignature signature = (TdiJwsSignature) message.getSignaturesToVerify().get(loopIndex);
       queue.add(this.getPlatform().getKeystore().getKey(signature.parsedHeader.kid)
           .thenCompose((TdiKeyStructureShape key) -> {
-            String toVerifyPayload = (signature.protectedHeader).concat(".")
-                .concat(message.getRawPayload());
+            String toVerifyPayload = (signature.protectedHeader)
+              .concat(".")
+              .concat(message.getRawPayload());
             return this.getPlatform().getCrypto().verify(key, toVerifyPayload, signature.signature);
           }));
     }

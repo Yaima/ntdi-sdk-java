@@ -1,17 +1,17 @@
 /*
  * Copyright 2017 Neustar, Inc
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  */
 
 package biz.neustar.tdi.platform.facet;
@@ -59,7 +59,7 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * Implementation of KeystoreFacet class.
- * 
+ *
  */
 public class KeystoreFacet implements TdiPlatformKeysShape {
 
@@ -78,7 +78,7 @@ public class KeystoreFacet implements TdiPlatformKeysShape {
 
   /**
    * Constructor for class KeystoreFacet.
-   * 
+   *
    * @param pf
    *          : Object of {@link TdiPlatformShape}
    */
@@ -86,7 +86,7 @@ public class KeystoreFacet implements TdiPlatformKeysShape {
     this.pf = pf;
     this.kstore = new HashMap<>();
     this.rstore = new HashMap<>();
-    
+
     // Get the base path for json file
     Map<String, Object> platformConfigMap = pf.getConfig();
 
@@ -98,12 +98,12 @@ public class KeystoreFacet implements TdiPlatformKeysShape {
     if (StringUtils.isEmpty(dataBasePath)) {
       dataBasePath = Constants.PLATFORM_DEFAULT_BASE_PATH;
     }
-    keystoreFilePath = dataBasePath + Constants.KEY_CONFIG_FILE;    
+    keystoreFilePath = dataBasePath + Constants.KEY_CONFIG_FILE;
   }
 
   /**
    * Method to get {@link TdiPlatformShape} class object.
-   * 
+   *
    * @return {@link TdiPlatformShape} class object
    */
   @Override
@@ -113,7 +113,7 @@ public class KeystoreFacet implements TdiPlatformKeysShape {
 
   /**
    * Init method for KeystoreFacet class.
-   * 
+   *
    * @return {@link CompletableFuture} with either of the following states: <br>
    *         <b>Completed Successfully</b>: Void after successful initialization
    *         of {@link KeystoreFacet}. <br>
@@ -122,7 +122,7 @@ public class KeystoreFacet implements TdiPlatformKeysShape {
    */
   @Override
   public CompletableFuture<Void> init() {
-    return storeFileCreate(null).thenApply((keysObj) -> {
+    return storeFileCreate(null).thenCompose((keysObj) -> {
       List<CompletableFuture<?>> queue = new ArrayList<>();
       if (keysObj != null) {
         for (Key keyObj : keysObj.keys) {
@@ -132,8 +132,6 @@ public class KeystoreFacet implements TdiPlatformKeysShape {
       }
       // Wait till all tasks are done
       return CompletableFuture.allOf(queue.toArray(new CompletableFuture<?>[0]));
-    }).thenCompose((arg) -> {
-      return arg;
     });
   }
 
@@ -142,10 +140,10 @@ public class KeystoreFacet implements TdiPlatformKeysShape {
    * is particular to a file-based keystore. If data is provided, any
    * already-extant store by that name will be clobbered. Otherwise, tries to
    * load an existing keystore and the given path.
-   * 
+   *
    * @param value
    *          : Object of class Keys or null
-   * 
+   *
    * @return {@link CompletableFuture} with either of the following states: <br>
    *         <b>Completed Successfully</b>: {@link Keys} object with all the
    *         keys loaded from keystore.json. <br>
@@ -173,10 +171,10 @@ public class KeystoreFacet implements TdiPlatformKeysShape {
   /**
    * Takes a buffer and clobbers data at keystore.dat This is a helper fxn that
    * is particular to a file-based keystore.
-   * 
+   *
    * @param data
    *          : Object of Keys class
-   * 
+   *
    * @return {@link CompletableFuture} with either of the following states: <br>
    *         <b>Completed Successfully</b>: Void. <br>
    *         <b>Completed Exceptionally</b>: {@link PlatformRuntimeException} if
@@ -195,18 +193,19 @@ public class KeystoreFacet implements TdiPlatformKeysShape {
 
   /**
    * Method to add key to local key-value map.
-   * 
+   *
    * @param kstruct
    *          : Object of Key class to save.
-   * 
+   *
    * @return Completed
    *         {@link CompletableFuture}&lt;{@link TdiKeyStructureShape}&gt;
    *         future with {@link TdiKeyStructureShape} instance initialized with
    *         kstruct data.
    */
   private CompletableFuture<TdiKeyStructureShape> addKey(Key kstruct) {
-    TdiKeyStructureShape newKeyStruct = new TdiKeyStructure(kstruct.kid, kstruct.fleet, kstruct.ref,
-        kstruct.flags);
+    TdiKeyStructureShape newKeyStruct = new TdiKeyStructure(
+      kstruct.kid, kstruct.fleet, kstruct.ref, kstruct.flags
+    );
     kstore.put(kstruct.kid, newKeyStruct);
 
     // Check if it is our own key, if it is then add as SELF
@@ -224,10 +223,10 @@ public class KeystoreFacet implements TdiPlatformKeysShape {
 
   /**
    * Method to add key to local key-value map and dump map to to file.
-   * 
+   *
    * @param kstruct
    *          : Object of Key class to save.
-   * 
+   *
    * @return {@link CompletableFuture} with either of the following states: <br>
    *         <b>Completed Successfully</b>: {@link TdiKeyStructureShape}
    *         instance. <br>
@@ -235,29 +234,24 @@ public class KeystoreFacet implements TdiPlatformKeysShape {
    *         error encountered while saving to keystore.json.
    */
   private CompletableFuture<TdiKeyStructureShape> addKeyAndSaveToFile(Key kstruct) {
-    CompletableFuture<TdiKeyStructureShape> future = new CompletableFuture<>();
-    CompletableFuture.supplyAsync(() -> {
-      addKey(kstruct).thenApply((argTdiKeyStructure) -> {
-        saveStore().thenApply((fileArg) -> {
-          future.complete(argTdiKeyStructure);
-          return null;
-        }).exceptionally(err -> {
-          future.completeExceptionally(new PlatformRuntimeException(err.getMessage()));
-          return null;
-        });
-        return true;
+    return addKey(kstruct)
+      .thenCompose((argTdiKeyStructure) -> {
+        return saveStore()
+          .thenCompose((fileArg) -> {
+            return CompletableFuture.completedFuture(argTdiKeyStructure);
+          });
+      })
+      .exceptionally(err -> {
+        throw new PlatformRuntimeException(err.getMessage());
       });
-      return null;
-    });
-    return future;
   }
 
   /**
    * Method to get {@link TdiKeyStructureShape} based on KeyId.
-   * 
+   *
    * @param kid
    *          : String KeyId of the key to get.
-   * 
+   *
    * @return {@link CompletableFuture} with either of the following states: <br>
    *         <b>Completed Successfully</b>: {@link TdiKeyStructureShape}
    *         instance with key details. <br>
@@ -266,22 +260,22 @@ public class KeystoreFacet implements TdiPlatformKeysShape {
    */
   @Override
   public CompletableFuture<TdiKeyStructureShape> getKey(String kid) {
-    return CompletableFuture.supplyAsync(() -> {
-      if (StringUtils.isEmpty(kid)) {
-        throw new PlatformRuntimeException("Invalid input, kid is null");
-      } else {
-        if (kstore.containsKey(kid)) {
-          return kstore.get(kid);
-        } else {
-          throw new PlatformRuntimeException("kid: " + kid + " - not found in keystore");
-        }
-      }
-    });
+    CompletableFuture<TdiKeyStructureShape> future = new CompletableFuture<>();
+    if (StringUtils.isEmpty(kid)) {
+      future.completeExceptionally(new PlatformRuntimeException("Invalid input, kid is null"));
+    }
+    else if (kstore.containsKey(kid)) {
+      future.complete(kstore.get(kid));
+    }
+    else {
+      future.completeExceptionally(new PlatformRuntimeException("kid: " + kid + " - not found in keystore"));
+    }
+    return future;
   }
 
   /**
    * Method to retrieve all key metadata.
-   * 
+   *
    * @return Completed
    *         {@link CompletableFuture}&lt;{@link List}&lt;{@link TdiKeyStructureShape}&gt;&gt;
    *         future containing all the metadata currently in the local map.
@@ -297,7 +291,7 @@ public class KeystoreFacet implements TdiPlatformKeysShape {
 
   /**
    * Returns our SELF key.
-   * 
+   *
    * @return {@link CompletableFuture} with either of the following states: <br>
    *         <b>Completed Successfully</b>: {@link TdiKeyStructureShape} with
    *         SELF key details. <br>
@@ -306,25 +300,26 @@ public class KeystoreFacet implements TdiPlatformKeysShape {
    */
   @Override
   public CompletableFuture<TdiKeyStructureShape> getSelfKey() {
-    return CompletableFuture.supplyAsync(() -> {
-      TdiKeyStructureShape temp = rstore.get(SELF);
-      if (temp == null) {
-        throw new PlatformRuntimeException("No SELF defined.");
-      } else {
-        return temp;
-      }
-    });
+    TdiKeyStructureShape temp = rstore.get(SELF);
+    if (temp == null) {
+      CompletableFuture<TdiKeyStructureShape> future = new CompletableFuture<>();
+      future.completeExceptionally(new PlatformRuntimeException("No SELF defined."));
+      return future;
+    }
+    else {
+      return CompletableFuture.completedFuture(temp);
+    }
   }
 
   /**
    * Find a key that has metadata matching the given role and (optionally) the
    * given fleet.
-   * 
+   *
    * @param role
    *          : Integer
    * @param fleetId
    *          : String
-   * 
+   *
    * @return {@link CompletableFuture} with either of the following states: <br>
    *         <b>Completed Successfully</b>: {@link TdiKeyStructureShape}
    *         instance with key details. <br>
@@ -333,24 +328,25 @@ public class KeystoreFacet implements TdiPlatformKeysShape {
    */
   @Override
   public CompletableFuture<TdiKeyStructureShape> getKeyByRole(Integer role, String fleetId) {
-    return CompletableFuture.supplyAsync(() -> {
-      TdiKeyStructureShape temp = rstore.get((fleetId + role));
-      if (temp == null) {
-        String error = "Failed to find key in fleet " + fleetId + " with role " + role;
-        throw new PlatformRuntimeException(error);
-      } else {
-        return temp;
-      }
-    });
+    TdiKeyStructureShape temp = rstore.get((fleetId + role));
+    if (null != temp) {
+      return CompletableFuture.completedFuture(temp);
+    }
+    else {
+      String error = "Failed to find key in fleet " + fleetId + " with role " + role;
+      CompletableFuture<TdiKeyStructureShape> future = new CompletableFuture<>();
+      future.completeExceptionally(new PlatformRuntimeException(error));
+      return future;
+    }
   }
 
   /**
    * Given a kid value, lookup the key and export the public half as a PEM
    * string.
-   * 
+   *
    * @param inputKey
    *          : String JSON object. Mapped to KeyRef class.
-   * 
+   *
    * @return Object : Public pem string
    */
   @Override
@@ -360,7 +356,8 @@ public class KeystoreFacet implements TdiPlatformKeysShape {
       try {
         KeyRef ref = biz.neustar.tdi.fw.utils.Utils.jsonToObject(key, KeyRef.class);
         return Utils.toStringData(getPemBytes(UtilKeyGeneration.generateEcpublicKey(ref)));
-      } catch (Exception err) {
+      }
+      catch (Exception err) {
         LOG.error("getPublicPem: Exception: " + err.getMessage());
       }
     }
@@ -369,10 +366,10 @@ public class KeystoreFacet implements TdiPlatformKeysShape {
 
   /**
    * Method to convert ECPublicKey to byte array.
-   * 
+   *
    * @param pk
    *          : public key to be converted
-   * 
+   *
    * @return returns byte array of Public Key
    */
   public byte[] getPemBytes(PublicKey pk) {
@@ -390,14 +387,14 @@ public class KeystoreFacet implements TdiPlatformKeysShape {
 
   /**
    * Method to generate key.
-   * 
+   *
    * @param flags
    *          : Flags Integer
    * @param kid
    *          : Key ID String
    * @param fleetId
    *          : Fleet ID String
-   * 
+   *
    * @return {@link CompletableFuture} with either of the following states: <br>
    *         <b>Completed Successfully</b>: {@link TdiKeyStructureShape} with
    *         generated key details. <br>
@@ -405,39 +402,39 @@ public class KeystoreFacet implements TdiPlatformKeysShape {
    *         error encountered while generation.
    */
   @Override
-  public CompletableFuture<TdiKeyStructureShape> generateKey(Integer flags, String kid,
+  public CompletableFuture<TdiKeyStructureShape> generateKey(
+      Integer flags,
+      String kid,
       String fleetId) {
-    return CompletableFuture.supplyAsync(() -> {
-      try {
+    try {
+      KeyPair kp = UtilKeyGeneration.generateEcKeyPair();
+      ECPrivateKey privateKey = (ECPrivateKey) kp.getPrivate();
+      ECPublicKey publicKey = (ECPublicKey) kp.getPublic();
 
-        KeyPair kp = UtilKeyGeneration.generateEcKeyPair();
-        ECPrivateKey privateKey = (ECPrivateKey) kp.getPrivate();
-        ECPublicKey publicKey = (ECPublicKey) kp.getPublic();
-
-        String keyId = kid;
-        if (StringUtils.isEmpty(kid)) {
-          keyId = pf.getUtils().makeUuid();
-        }
-        KeyRef keyRef = getJwk(publicKey, privateKey, keyId);
-
-        Key kstruct = new Key();
-        kstruct.flags = flags | TdiKeyFlagsEnum.CAN_SIGN.getNumber()
-            | TdiKeyFlagsEnum.ORIGIN_GEN.getNumber();
-        kstruct.ref = keyRef;
-        kstruct.kid = keyId;
-        kstruct.fleet = fleetId;
-        return addKeyAndSaveToFile(kstruct);
-      } catch (Exception err) {
-        throw new PlatformRuntimeException(err.getMessage());
+      String keyId = kid;
+      if (StringUtils.isEmpty(kid)) {
+        keyId = pf.getUtils().makeUuid();
       }
-    }).thenCompose((arg) -> {
-      return arg;
-    });
+      KeyRef keyRef = getJwk(publicKey, privateKey, keyId);
+
+      Key kstruct = new Key();
+      kstruct.flags = flags | TdiKeyFlagsEnum.CAN_SIGN.getNumber()
+          | TdiKeyFlagsEnum.ORIGIN_GEN.getNumber();
+      kstruct.ref = keyRef;
+      kstruct.kid = keyId;
+      kstruct.fleet = fleetId;
+      return addKeyAndSaveToFile(kstruct);
+    }
+    catch (Exception err) {
+      CompletableFuture<TdiKeyStructureShape> future = new CompletableFuture<>();
+      future.completeExceptionally(new PlatformRuntimeException(err.getMessage()));
+      return future;
+    }
   }
 
   /**
    * Method to get JWK map from public private key.
-   * 
+   *
    * @param publicKey
    *          : ECPublicKey Public key
    * @param privateKey
@@ -445,10 +442,9 @@ public class KeystoreFacet implements TdiPlatformKeysShape {
    * @param kid
    *          : Key Id
    * @return {@link KeyRef} Object with JWK structure.
-   * 
+   *
    */
   public KeyRef getJwk(ECPublicKey publicKey, ECPrivateKey privateKey, String kid) {
-
     KeyRef ref = new KeyRef();
     ref.use = JwkParams.SIG;
     ref.alg = JwkParams.ES256;
@@ -458,10 +454,8 @@ public class KeystoreFacet implements TdiPlatformKeysShape {
 
     BigInteger xbi = publicKey.getW().getAffineX();
     BigInteger ybi = publicKey.getW().getAffineY();
-
     byte[] bytesX = BigIntegers.asUnsignedByteArray(xbi);
     byte[] bytesY = BigIntegers.asUnsignedByteArray(ybi);
-
     ref.cordX = Utils.toStringData(Utils.base64UrlEncode(bytesX));
     ref.cordY = Utils.toStringData(Utils.base64UrlEncode(bytesY));
 
@@ -474,14 +468,14 @@ public class KeystoreFacet implements TdiPlatformKeysShape {
 
   /**
    * Method to store key.
-   * 
+   *
    * @param key
    *          : Object of class Key or JSON mappable using Key class.
    * @param flags
    *          : Integer flags
    * @param fleetId
    *          : String fleet ID
-   * 
+   *
    * @return {@link CompletableFuture} with either of the following states: <br>
    *         <b>Completed Successfully</b>: {@link TdiKeyStructureShape}. <br>
    *         <b>Completed Exceptionally</b>: {@link PlatformRuntimeException} if
@@ -489,35 +483,35 @@ public class KeystoreFacet implements TdiPlatformKeysShape {
    */
   @Override
   public CompletableFuture<TdiKeyStructureShape> setKey(Object key, Integer flags, String fleetId) {
-    return CompletableFuture.supplyAsync(() -> {
-      try {
-        Key kstruct = null;
-        if (key instanceof Key) {
-          kstruct = (Key) key;
-        } else {
-          KeyRef keyRefObj = biz.neustar.tdi.fw.utils.Utils.jsonToObject((String) key,
-              KeyRef.class);
-          kstruct = new Key();
-          kstruct.flags = flags;
-          kstruct.ref = keyRefObj;
-          kstruct.fleet = fleetId;
-          kstruct.kid = keyRefObj.kid;
-        }
-        return addKeyAndSaveToFile(kstruct);
-      } catch (Exception err) {
-        throw new PlatformRuntimeException(err.getMessage());
+    try {
+      Key kstruct = null;
+      if (key instanceof Key) {
+        kstruct = (Key) key;
       }
-    }).thenCompose((arg) -> {
-      return arg;
-    });
+      else {
+        KeyRef keyRefObj = biz.neustar.tdi.fw.utils.Utils.jsonToObject((String) key,
+            KeyRef.class);
+        kstruct = new Key();
+        kstruct.flags = flags;
+        kstruct.ref = keyRefObj;
+        kstruct.fleet = fleetId;
+        kstruct.kid = keyRefObj.kid;
+      }
+      return addKeyAndSaveToFile(kstruct);
+    }
+    catch (Exception err) {
+      CompletableFuture<TdiKeyStructureShape> future = new CompletableFuture<>();
+      future.completeExceptionally(new PlatformRuntimeException(err.getMessage()));
+      return future;
+    }
   }
 
   /**
    * Method to store key from provision.
-   * 
+   *
    * @param key
    *          : of type Object. JSON string or Object of Key class.
-   * 
+   *
    * @return {@link CompletableFuture} with either of the following states: <br>
    *         <b>Completed Successfully</b>: {@link TdiKeyStructureShape}. <br>
    *         <b>Completed Exceptionally</b>: {@link PlatformRuntimeException} if
@@ -525,45 +519,48 @@ public class KeystoreFacet implements TdiPlatformKeysShape {
    */
   @Override
   public CompletableFuture<TdiKeyStructureShape> setKeyFromProvision(Object key) {
-    return CompletableFuture.supplyAsync(() -> {
-      if (key == null) {
-        throw new PlatformRuntimeException("setKeyFromProvision: Key is NULL");
-      } else {
-        if (!(key instanceof String)) {
-          throw new PlatformRuntimeException("setKeyFromProvision: Key is not type of String");
-        } else {
-          try {
-            Key keyObj = biz.neustar.tdi.fw.utils.Utils.jsonToObject((String) key, Key.class);
-            if (!StringUtils.isEmpty(keyObj.pem)) {
-              // To ECPublicKey from pem string
-              byte[] pemByte = Utils.toBytes(keyObj.pem);
-              ECPublicKey pubKey = fromPublicPem(pemByte);
-
-              KeyRef keyRefObj = getJwk(pubKey, null, keyObj.kid);
-              keyObj.ref = keyRefObj;
-              return addKeyAndSaveToFile(keyObj);
-            } else {
-              throw new PlatformRuntimeException("Failed: Invalid or Empty Pem String");
-            }
-          } catch (Exception err) {
-            throw new PlatformRuntimeException("Failed to parse key");
+    String error_msg = "";
+    if (null != key) {
+      if (key instanceof String) {
+        try {
+          Key keyObj = biz.neustar.tdi.fw.utils.Utils.jsonToObject((String) key, Key.class);
+          if (!StringUtils.isEmpty(keyObj.pem)) {
+            // To ECPublicKey from pem string
+            byte[] pemByte = Utils.toBytes(keyObj.pem);
+            ECPublicKey pubKey = fromPublicPem(pemByte);
+            KeyRef keyRefObj = getJwk(pubKey, null, keyObj.kid);
+            keyObj.ref = keyRefObj;
+            return addKeyAndSaveToFile(keyObj);
+          }
+          else {
+            error_msg = "Failed: Invalid or Empty Pem String";
           }
         }
+        catch (Exception err) {
+          error_msg = "Failed to parse key";
+        }
       }
-    }).thenCompose((arg) -> {
-      return arg;
-    });
+      else {
+        error_msg = "setKeyFromProvision: Key is not type of String";
+      }
+    }
+    else {
+      error_msg = "setKeyFromProvision: Key is NULL";
+    }
+    CompletableFuture<TdiKeyStructureShape> future = new CompletableFuture<>();
+    future.completeExceptionally(new PlatformRuntimeException(error_msg));
+    return future;
   }
 
   /**
    * Creates an object of KeyPair using a PEM-formatted public ECDSA key. Note
    * that this keypair will not be capable of signing, only verifying.
-   * 
+   *
    * @param keyPemBytes
    *          : public key bytes
-   * 
+   *
    * @return {@link ECPublicKey} object initialized only with public key
-   * 
+   *
    * @throws IOException
    *           from ECPublicKey.
    */
@@ -583,32 +580,36 @@ public class KeystoreFacet implements TdiPlatformKeysShape {
 
   /**
    * Method to forget key based on key ID.
-   * 
+   * TODO: Does not appear to be saving the KeyStore. Ensure this is correct.
+   *
    * @param kid
    *          : Key ID String
-   * 
+   *
    * @return Completed {@link CompletableFuture}&lt;Void&gt; object.
    */
   @Override
   public CompletableFuture<Void> forgetKey(String kid) {
-    return CompletableFuture.supplyAsync(() -> {
-      if (StringUtils.isEmpty(kid)) {
-        LOG.error("forgetKey: kid is NULL");
-      } else {
-        if (kstore.containsKey(kid)) {
-          kstore.remove(kid);
-          LOG.debug("forgetKey: Done");
-        } else {
-          LOG.error("forgetKey: No key present to forget");
-        }
-      }
-      return null;
-    });
+    CompletableFuture<Void> future = new CompletableFuture<>();
+    if (StringUtils.isEmpty(kid)) {
+      //future.completeExceptionally(new PlatformRuntimeException("forgetKey: kid is NULL or empty"));
+      LOG.error("forgetKey: kid is NULL or empty");
+    }
+    else if (kstore.containsKey(kid)) {
+      kstore.remove(kid);
+      LOG.debug("forgetKey: Done");
+    }
+    else {
+      //future.completeExceptionally(new PlatformRuntimeException("forgetKey: No key present to forget"));
+      LOG.error("forgetKey: No key present to forget");
+    }
+    future.complete(null);   // No return.
+    return future;
   }
+
 
   /**
    * Method to save all the metadata of kstore map to file.
-   * 
+   *
    * @return {@link CompletableFuture} with either of the following states: <br>
    *         <b>Completed Successfully</b>: Void. <br>
    *         <b>Completed Exceptionally</b>: {@link PlatformRuntimeException} if
@@ -616,24 +617,18 @@ public class KeystoreFacet implements TdiPlatformKeysShape {
    */
   @Override
   public CompletableFuture<Void> saveStore() {
-    return CompletableFuture.supplyAsync(() -> {
-      Keys keysObj = new Keys();
-      keysObj.keys = new ArrayList<>();
-      for (Map.Entry<String, TdiKeyStructureShape> entry : kstore.entrySet()) {
-        TdiKeyStructureShape keyStruct = entry.getValue();
-        Key key = new Key();
-        key.kid = keyStruct.getKeyId();
-        key.fleet = keyStruct.getFleetId();
-        key.flags = keyStruct.getFlags();
-
-        KeyRef keyRef = (KeyRef) keyStruct.getKeyData();
-        key.ref = keyRef;
-        keysObj.keys.add(key);
-      }
-
-      return storeFileSave(keysObj);
-    }).thenCompose((arg) -> {
-      return arg;
-    });
+    Keys keysObj = new Keys();
+    keysObj.keys = new ArrayList<>();
+    for (Map.Entry<String, TdiKeyStructureShape> entry : kstore.entrySet()) {
+      TdiKeyStructureShape keyStruct = entry.getValue();
+      Key key = new Key();
+      key.kid = keyStruct.getKeyId();
+      key.fleet = keyStruct.getFleetId();
+      key.flags = keyStruct.getFlags();
+      KeyRef keyRef = (KeyRef) keyStruct.getKeyData();
+      key.ref = keyRef;
+      keysObj.keys.add(key);
+    }
+    return storeFileSave(keysObj);
   }
 }

@@ -4,7 +4,7 @@
 
   <groupId>biz.neustar.tdi</groupId>
   <artifactId>ntdi-sdk-java</artifactId>
-  <version>1.0.1</version>
+  <version>1.1.0</version>
   <packaging>pom</packaging>
 
   <name>ntdi-sdk-java</name>
@@ -66,6 +66,48 @@
                       <directory>examples/platform/src/test/resources</directory>
                       <includes>
                           <include>*.dat</include>
+                      </includes>
+                      <followSymlinks>false</followSymlinks>
+                  </fileset>
+                  <fileset>
+                      <directory>plugins/src/test/resources/device</directory>
+                      <includes>
+                          <include>*.dat</include>
+                      </includes>
+                      <followSymlinks>false</followSymlinks>
+                  </fileset>
+                  <fileset>
+                      <directory>plugins/src/test/resources/device</directory>
+                      <includes>
+                          <include>keystore.json</include>
+                      </includes>
+                      <followSymlinks>false</followSymlinks>
+                  </fileset>
+                  <fileset>
+                      <directory>plugins/src/test/resources/exception</directory>
+                      <includes>
+                          <include>*.dat</include>
+                      </includes>
+                      <followSymlinks>false</followSymlinks>
+                  </fileset>
+                  <fileset>
+                      <directory>plugins/src/test/resources/exception</directory>
+                      <includes>
+                          <include>keystore.json</include>
+                      </includes>
+                      <followSymlinks>false</followSymlinks>
+                  </fileset>
+                  <fileset>
+                      <directory>plugins/src/test/resources/server</directory>
+                      <includes>
+                          <include>*.dat</include>
+                      </includes>
+                      <followSymlinks>false</followSymlinks>
+                  </fileset>
+                  <fileset>
+                      <directory>plugins/src/test/resources/server</directory>
+                      <includes>
+                          <include>keystore.json</include>
                       </includes>
                       <followSymlinks>false</followSymlinks>
                   </fileset>

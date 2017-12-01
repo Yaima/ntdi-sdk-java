@@ -1,17 +1,17 @@
 /*
  * Copyright 2017 Neustar, Inc
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  */
 
 package biz.neustar.tdi.sdk.component;
@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
 /**
  * This class is for version2 message nonces. This component is required to
  * prevent replay attacks.
- * 
+ *
  * <p>The usage of the datastore in this class is somewhat non-standard. It is
  * structured like this: { 'burnt': { '&lt;ISO String&gt;': epochtimestamp },
  * 'nbfMinimum': 0, 'expDuration': 0 }
@@ -53,7 +53,7 @@ public class TdiSdkNonceComponent extends TdiComponent {
 
   /**
    * Constructor.
-   * 
+   *
    * @param componentName
    *          : Component Name.
    * @param impl
@@ -66,7 +66,7 @@ public class TdiSdkNonceComponent extends TdiComponent {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see biz.neustar.tdi.fw.interfaces.TdiComponentShape#init()
    */
   @SuppressWarnings("unchecked")
@@ -108,19 +108,18 @@ public class TdiSdkNonceComponent extends TdiComponent {
 
   /**
    * Creates a new nonce string for inclusion in an outbound claim.
-   * 
+   *
    * @return String
    */
   public String create() {
     StringBuilder randomString = new StringBuilder();
-
     randomString.append(NonceConfig.VERSION);
     randomString.append(this.getPlatform().getTime().isoDate(localExpDuration));
     for (int loopIndex = 0; loopIndex < randomLength; loopIndex++) {
-      randomString
-          .append(validCharacters.charAt(new Random().nextInt(validCharacters.length() - 1)));
+      randomString.append(
+        validCharacters.charAt(new Random().nextInt(validCharacters.length()-1))
+      );
     }
-
     return randomString.toString();
   }
 
@@ -129,10 +128,10 @@ public class TdiSdkNonceComponent extends TdiComponent {
    * 0) ...represents a time greater than nfbMinimum... 1) ...is version 002...
    * 2) ...represents a time that does not lie in the future... 3) ...has not
    * been seen before.
-   * 
+   *
    * @param nonceStr
    *          : The JTI claim from an incoming message.
-   * 
+   *
    * @return {@link CompletableFuture} with either of the following states: <br>
    *         <b>Completed Successfully</b>: {@link Boolean} with true if valid.
    *         false otherwise. <br>
@@ -174,10 +173,10 @@ public class TdiSdkNonceComponent extends TdiComponent {
   /**
    * Will add the given nonce string to a list of burned nonces. Updates
    * nbfMinimum as a side-effect.
-   * 
+   *
    * @param nonceStr
    *          : nonce that we are marking as received.
-   * 
+   *
    * @return {@link CompletableFuture} with either of the following states: <br>
    *         <b>Completed Successfully</b>: Void. <br>
    *         <b>Completed Exceptionally</b>: {@link Exception} in case of failure.

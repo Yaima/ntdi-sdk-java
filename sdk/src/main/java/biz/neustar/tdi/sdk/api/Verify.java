@@ -141,7 +141,8 @@ public class Verify extends BaseApi {
       return future;
     }
     return ((TdiSdkNonceComponent) impl.getModule(Components.NONCE))
-      .check((String) tdiMsg.getClaims().jti).thenApply((Boolean check) -> {
+      .check((String) tdiMsg.getClaims().jti)
+      .thenCompose((Boolean check) -> {
         if (check) {
           future.complete(tdiMsg);
         }
@@ -149,9 +150,6 @@ public class Verify extends BaseApi {
           future.completeExceptionally(new ApiException("Bad Nonce"));
         }
         return future;
-      })
-      .thenCompose(arg -> {
-        return arg;
       });
   }
 
@@ -190,42 +188,41 @@ public class Verify extends BaseApi {
       }
     }
 
-    return CompletableFuture.allOf(keys.toArray(new CompletableFuture<?>[0])).thenApply((arg) -> {
-      Object[] fcfs = new Object[2];
-      for (Entry<Object, CompletableFuture<TdiKeyStructureShape>> entry : keysWithKid.entrySet()) {
-        try {
-          TdiKeyStructureShape keyVal = entry.getValue().get();
-          if ((null != keyVal) && (null != keyVal.getRoleFlag())) {
-            if (TdiKeyFlagsEnum.ROLE_F_C.getNumber().equals(keyVal.getRoleFlag())) {
-              fcfs[0] = entry.getKey();
+    return CompletableFuture.allOf(keys.toArray(new CompletableFuture<?>[0]))
+      .thenCompose((arg) -> {
+        Object[] fcfs = new Object[2];
+        for (Entry<Object, CompletableFuture<TdiKeyStructureShape>> entry : keysWithKid.entrySet()) {
+          try {
+            TdiKeyStructureShape keyVal = entry.getValue().get();
+            if ((null != keyVal) && (null != keyVal.getRoleFlag())) {
+              if (TdiKeyFlagsEnum.ROLE_F_C.getNumber()
+                  .equals(keyVal.getRoleFlag())) {
+                fcfs[0] = entry.getKey();
+              }
+              else if (TdiKeyFlagsEnum.ROLE_F_S.getNumber()
+                  .equals(keyVal.getRoleFlag())) {
+                fcfs[1] = entry.getKey();
+              }
             }
-            else if (TdiKeyFlagsEnum.ROLE_F_S.getNumber()
-                .equals(keyVal.getRoleFlag())) {
-              fcfs[1] = entry.getKey();
-            }
+          } catch (CancellationException | InterruptedException | ExecutionException e) {
+            LOG.error(e.getMessage());
           }
-        } catch (CancellationException | InterruptedException | ExecutionException e) {
-          LOG.error(e.getMessage());
         }
-      }
 
-      if ((fcfs[0] != null) && (fcfs[1] != null)) {
-        tdiMsg.getSignaturesToVerify().clear();
-        tdiMsg.addSignatureToVerify(fcfs[0]);
-        tdiMsg.addSignatureToVerify(fcfs[1]);
-        finalFuture.complete(tdiMsg);
-      }
-      else {
-        String errMsg = "Signatures do not have roles: F_C:"
-            + ((fcfs[0] != null) ? " found" : "missing") + " F_S:"
-            + ((fcfs[1] != null) ? " found" : "missing");
-        finalFuture.completeExceptionally(new ApiException(errMsg));
-      }
-      return finalFuture;
-    })
-    .thenCompose(arg -> {
-      return arg;
-    });
+        if ((fcfs[0] != null) && (fcfs[1] != null)) {
+          tdiMsg.getSignaturesToVerify().clear();
+          tdiMsg.addSignatureToVerify(fcfs[0]);
+          tdiMsg.addSignatureToVerify(fcfs[1]);
+          finalFuture.complete(tdiMsg);
+        }
+        else {
+          String errMsg = "Signatures do not have roles: F_C:"
+              + ((fcfs[0] != null) ? " found" : "missing") + " F_S:"
+              + ((fcfs[1] != null) ? " found" : "missing");
+          finalFuture.completeExceptionally(new ApiException(errMsg));
+        }
+        return finalFuture;
+      });
   }
 
   /**

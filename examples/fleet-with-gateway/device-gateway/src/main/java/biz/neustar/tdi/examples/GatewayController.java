@@ -31,10 +31,10 @@ public class GatewayController {
         List<String> devices = config.<List<String>>get("sensors");
 
         try {
-            dataChannel = new GatewayChannel(config, DATA_CLIENT_ID, LOCAL_ZONE, CLOUD_ZONE, SENSOR_DATA_TOPIC_TEMPLATE);
+            dataChannel = new GatewayChannel(config, DATA_CLIENT_ID, LOCAL_ZONE, CLOUD_ZONE, SENSOR_DATA_TOPIC_TEMPLATE, false);
             dataChannel.start(devices);
 
-            actionChannel = new GatewayChannel(config, ACTION_CLIENT_ID, CLOUD_ZONE, LOCAL_ZONE, SENSOR_ACTION_TOPIC_TEMPLATE);
+            actionChannel = new GatewayChannel(config, ACTION_CLIENT_ID, CLOUD_ZONE, LOCAL_ZONE, SENSOR_ACTION_TOPIC_TEMPLATE, true);
             actionChannel.start(devices);
 
             // TODO: something better
