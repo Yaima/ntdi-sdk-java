@@ -17,5 +17,6 @@
 	<modules>
 		<module>platform</module>
 		<module>fleet-with-gateway</module>
+        <module>simple-flow</module>
 	</modules>
 </project>
