@@ -113,7 +113,7 @@ mvn javadoc:javadoc
 <dependency>
     <groupId>biz.neustar.tdi</groupId>
     <artifactId>framework</artifactId>
-    <version>1.0.1</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
