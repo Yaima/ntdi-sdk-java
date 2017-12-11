@@ -1,0 +1,13 @@
+{
+  "platform": {
+    "data": {
+      "basepath": "data/gateway/"
+    },
+    "keys": {
+      "basepath": "data/gateway/"
+    }
+  },
+  "nonce002": {
+    "expDuration": 3600
+  }
+}

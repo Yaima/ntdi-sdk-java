@@ -1,0 +1,59 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>biz.neustar.tdi</groupId>
+  <artifactId>simple-flow</artifactId>
+  <version>1.0</version>
+  <packaging>jar</packaging>
+
+  <name>simple-flow</name>
+  <url>https://github.com/Neustar-TDI/ntdi-sdk-java/examples/simple-flow</url>
+
+	<!--
+		Local dev JAR can be installed like this...
+		mvn install:install-file -Dfile=/home/ian/working-copies/Neustar/ntdi-sdk-java/sdk/target/sdk-1.0.jar -DgroupId=biz.neustar.tdi -DartifactId=plugins -Dversion=1.0 -Dpackaging=jar -DgeneratePom=true
+	-->
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+  </properties>
+
+  <dependencies>
+      <dependency>
+          <groupId>biz.neustar.tdi</groupId>
+          <artifactId>tdi</artifactId>
+          <version>1.1.0</version>
+      </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.6.0</version>
+        <executions>
+        <execution>
+          <goals>
+          <goal>java</goal>
+          </goals>
+        </execution>
+        </executions>
+        <configuration>
+        <mainClass>biz.neustar.tdi.demo</mainClass>
+          <cleanupDaemonThreads>false</cleanupDaemonThreads>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-install-plugin</artifactId>
+        <version>2.4</version>
+        <executions>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

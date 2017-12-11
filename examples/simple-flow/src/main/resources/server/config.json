@@ -1,0 +1,19 @@
+{
+  "platform": {
+    "data": {
+      "basepath": "target/classes/server/"
+    },
+    "keys": {
+      "basepath": "target/classes/server/"
+    }
+  },
+  "nonce002": {
+    "expDuration": 3600
+  },
+  "FleetSigner": {
+    "acceptDevices": false,
+    "cosigner": {
+      "baseURI":  "https://api-dev.oneid.com"
+    }
+  }
+}
