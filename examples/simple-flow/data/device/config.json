@@ -1,0 +1,13 @@
+{
+  "platform": {
+    "data": {
+      "basepath": "data/device/"
+    },
+    "keys": {
+      "basepath": "data/device/"
+    }
+  },
+  "nonce002": {
+    "expDuration": 3600
+  }
+}

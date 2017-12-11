@@ -1,0 +1,13 @@
+{
+  "platform": {
+    "data": {
+      "basepath": "target/classes/device/"
+    },
+    "keys": {
+      "basepath": "target/classes/device/"
+    }
+  },
+  "nonce002": {
+    "expDuration": 3600
+  }
+}
