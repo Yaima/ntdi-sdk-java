@@ -146,7 +146,7 @@ public class TdiSdkJsonWebSignature extends TdiComponent {
   public CompletableFuture<TdiCanonicalMessageShape> unpack(TdiCanonicalMessageShape message) {
     String receivedMessage = message.getReceivedMessage();
     CompletableFuture<TdiCanonicalMessageShape> result = new CompletableFuture<>();
-    LOG.error("Received message: " + receivedMessage);
+    LOG.info("Received message: " + receivedMessage);
 
     if (StringUtils.isEmpty(receivedMessage)) {
       LOG.error("Empty received message");
