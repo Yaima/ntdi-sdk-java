@@ -344,7 +344,7 @@ public class FleetSigner extends TdiPluginBase {
   /*
    * Blocks until a response is received.
    */
-  private String httpPostToCosigner(String fleet, String payload) {
+  private String httpPostToCosigner(String fleet, String payload) throws Exception {
     HttpURLConnection con = null;
     StringBuffer resp = new StringBuffer();
     int payload_len = payload.getBytes().length;
@@ -373,17 +373,20 @@ public class FleetSigner extends TdiPluginBase {
         resp.append('\r');
       }
       rx.close();
-      if (con.getResponseCode() != 200) {  // TODO: This will be dead code soon.
-        LOG.warn("co-signer error, code={}", con.getResponseCode());
+      if (con.getResponseCode() != 200) {
+        LOG.debug("co-signer error, code={}", con.getResponseCode());
         throw new FrameworkRuntimeException("Core refused to co-sign");
       }
+      return resp.toString();
     }
     catch (Exception e) {
-      e.printStackTrace();
+      LOG.warn("co-signer error: {}", e.getMessage());
+      throw e;
     }
-    if (null != con) {
-      con.disconnect();
+    finally {
+      if (null != con) {
+        con.disconnect();
+      }
     }
-    return resp.toString();
   }
 }

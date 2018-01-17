@@ -13,7 +13,7 @@
   "FleetSigner": {
     "acceptDevices": false,
     "cosigner": {
-      "baseURI":  "https://api-dev.oneid.com"
+      "baseURI":  "https://mocked.example.com"
     }
   }
 }

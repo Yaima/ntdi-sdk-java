@@ -1,0 +1,13 @@
+{
+  "platform": {
+    "data": {
+      "basepath": "src/test/resources/cosigner/"
+    },
+    "keys": {
+      "basepath": "src/test/resources/cosigner/"
+    }
+  },
+  "nonce002": {
+    "expDuration": 3600
+  }
+}
