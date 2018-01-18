@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
 public class DeviceActionService {
     private static final Logger log = LoggerFactory.getLogger(DeviceActionService.class);
 
-    public static final String DEFAULT_CONFIG_PATH = "app/config.json";
+    public static final String DEFAULT_CONFIG_PATH = "config/app/config.json";
 
     private static final String BASE_CLIENT_ID = "action-";
     private static final String ACTION_TOPIC_TEMPLATE = "${gateway.id}/action/${device.id}";

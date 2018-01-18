@@ -24,7 +24,7 @@ public class GatewayController {
     private static final String SENSOR_ACTION_TOPIC_TEMPLATE = "${gateway.id}/action/${device.id}";
 
     public static void main(String[] args) throws Exception {
-        Config config = new Config("app/config.json");
+        Config config = new Config("config/app/config.json");
         GatewayChannel dataChannel = null;
         GatewayChannel actionChannel = null;
 

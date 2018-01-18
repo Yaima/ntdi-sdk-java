@@ -23,7 +23,7 @@ import biz.neustar.tdi.Config;
 class BaseNTDI {
     private static Logger log = LoggerFactory.getLogger(BaseNTDI.class);
 
-    public static final String DEFAULT_CONFIG_PATH = "tdi/config.json";
+    public static final String DEFAULT_CONFIG_PATH = "config/tdi/config.json";
 
     protected TdiSdkWrapperShape sdk;
 

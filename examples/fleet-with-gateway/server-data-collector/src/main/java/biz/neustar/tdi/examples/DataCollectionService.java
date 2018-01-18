@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 public class DataCollectionService implements IMqttMessageListener {
     private static final Logger log = LoggerFactory.getLogger(DataCollectionService.class);
 
-    public static final String DEFAULT_CONFIG_PATH = "app/config.json";
+    public static final String DEFAULT_CONFIG_PATH = "config/app/config.json";
 
     private static final String BASE_CLIENT_ID = "data-";
     private static final String SENSOR_DATA_TOPIC_TEMPLATE = "${gateway.id}/report/${device.id}";

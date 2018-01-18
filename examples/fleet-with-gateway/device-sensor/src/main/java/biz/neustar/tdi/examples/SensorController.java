@@ -163,7 +163,7 @@ public class SensorController implements IMqttMessageListener {
     }
 
     public static void main(String[] args) throws Exception {
-        Config config = new Config("app/config.json");
+        Config config = new Config("config/app/config.json");
         Sensor sensor = new Sensor(config.<String>get("device.name", DEFAULT_SENSOR_NAME));
         SensorController sensorController = new SensorController(config, sensor);
 
