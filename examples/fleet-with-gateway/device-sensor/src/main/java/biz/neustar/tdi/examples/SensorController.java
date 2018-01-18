@@ -116,7 +116,7 @@ public class SensorController implements IMqttMessageListener {
 
     public void run() throws InterruptedException, InvalidFormatException, MqttException {
         String broker = this.config.<String>get("mqtt.broker");
-	    MqttDefaultFilePersistence dataStore = new MqttDefaultFilePersistence(System.getProperty("java.io.tmpdir"));
+        MqttDefaultFilePersistence dataStore = new MqttDefaultFilePersistence(System.getProperty("java.io.tmpdir"));
         this.mqtt = new MqttAsyncClient(broker, this.config.<String>get("device.id"), dataStore);
 
         MqttConnectOptions opts = new MqttConnectOptions();

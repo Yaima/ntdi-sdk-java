@@ -53,10 +53,10 @@ class NTDIHelper {
         .getBuiltMessage();
   }
 
-	public String fleetFromDevice(String msg) throws ExecutionException, InterruptedException {
+  public String fleetFromDevice(String msg) throws ExecutionException, InterruptedException {
     // TODO: This API presently returns a string. But it will soon return a TdiCanonicalMessageShape.
-		return ((FleetSigner) sdkWrapper.plugin("FleetSigner")).fleetFromDevice.apply(msg).get();
-	}
+    return ((FleetSigner) sdkWrapper.plugin("FleetSigner")).fleetFromDevice.apply(msg).get();
+  }
 
   public String verify(String msg) throws ExecutionException, InterruptedException {
     return ((String) sdkWrapper.api("VerifyFlow").apply(msg).get());

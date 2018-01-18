@@ -74,7 +74,7 @@ public class DataCollectionService implements IMqttMessageListener {
 
         String broker = config.<String>get("mqtt.broker");
         final int subqos = config.<Integer>get("mqtt.qos.subscribe", DEFAULT_SUBSCRIBE_QOS);
-    	MqttDefaultFilePersistence dataStore = new MqttDefaultFilePersistence(System.getProperty("java.io.tmpdir"));
+        MqttDefaultFilePersistence dataStore = new MqttDefaultFilePersistence(System.getProperty("java.io.tmpdir"));
         mqtt = new MqttAsyncClient(broker, BASE_CLIENT_ID + config.<String>get("server.id"), dataStore);
 
         MqttConnectOptions opts = new MqttConnectOptions();

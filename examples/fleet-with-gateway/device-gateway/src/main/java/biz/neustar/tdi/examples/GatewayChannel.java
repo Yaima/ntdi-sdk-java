@@ -154,7 +154,7 @@ public class GatewayChannel implements IMqttMessageListener {
 
     private IMqttAsyncClient connect(String zone) throws MqttException {
         String broker = this.config.<String>get(String.format("mqtt.%s.broker", zone));
-    	MqttDefaultFilePersistence dataStore = new MqttDefaultFilePersistence(System.getProperty("java.io.tmpdir"));
+      MqttDefaultFilePersistence dataStore = new MqttDefaultFilePersistence(System.getProperty("java.io.tmpdir"));
 
         IMqttAsyncClient ret = new MqttAsyncClient(broker, this.clientID + "-" + this.config.<String>get("device.id"), dataStore);
 

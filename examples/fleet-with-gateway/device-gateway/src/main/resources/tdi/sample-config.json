@@ -1,13 +1,13 @@
 {
-	"platform": {
-		"data": {
-			"basepath": "src/main/resources/tdi/"
-		},
-		"keys": {
-			"basepath": "src/main/resources/tdi/"
-		}
-	},
-	"nonce002": {
-		"expDuration": 10
-	}
+  "platform": {
+    "data": {
+      "basepath": "src/main/resources/tdi/"
+    },
+    "keys": {
+      "basepath": "src/main/resources/tdi/"
+    }
+  },
+  "nonce002": {
+    "expDuration": 10
+  }
 }

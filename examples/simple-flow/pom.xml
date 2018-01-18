@@ -10,10 +10,10 @@
   <name>simple-flow</name>
   <url>https://github.com/Neustar-TDI/ntdi-sdk-java/examples/simple-flow</url>
 
-	<!--
-		Local dev JAR can be installed like this...
-		mvn install:install-file -Dfile=/home/ian/working-copies/Neustar/ntdi-sdk-java/sdk/target/sdk-1.0.jar -DgroupId=biz.neustar.tdi -DartifactId=plugins -Dversion=1.0 -Dpackaging=jar -DgeneratePom=true
-	-->
+  <!--
+    Local dev JAR can be installed like this...
+    mvn install:install-file -Dfile=/home/ian/working-copies/Neustar/ntdi-sdk-java/sdk/target/sdk-1.0.jar -DgroupId=biz.neustar.tdi -DartifactId=plugins -Dversion=1.0 -Dpackaging=jar -DgeneratePom=true
+  -->
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>

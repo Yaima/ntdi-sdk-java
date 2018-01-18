@@ -76,7 +76,7 @@ public class DeviceActionService {
     public void start() throws IOException, MqttException {
         String broker = config.<String>get("mqtt.broker");
         final int pubqos = config.<Integer>get("mqtt.qos.publish", DEFAULT_PUBLISH_QOS);
-    	MqttDefaultFilePersistence dataStore = new MqttDefaultFilePersistence(System.getProperty("java.io.tmpdir"));
+        MqttDefaultFilePersistence dataStore = new MqttDefaultFilePersistence(System.getProperty("java.io.tmpdir"));
         this.mqtt = new MqttAsyncClient(broker, BASE_CLIENT_ID + config.<String>get("server.id"), dataStore);
 
         MqttConnectOptions opts = new MqttConnectOptions();

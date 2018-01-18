@@ -52,7 +52,7 @@ import biz.neustar.tdi.sdk.component.jws.TdiJwsSignature;
  *
  */
 public class FleetSigner extends TdiPluginBase {
-	private static final Logger LOG = LoggerFactory.getLogger(FleetSigner.class);
+  private static final Logger LOG = LoggerFactory.getLogger(FleetSigner.class);
 
   /**
    * This is populated by config and is the network location for our preferred
