@@ -69,13 +69,12 @@ public class DataCollectionService implements IMqttMessageListener {
     }
 
     public int run() throws IOException, MqttException {
-        Config config = new Config("app/config.json");
         IMqttAsyncClient mqtt = null;
 
-        String broker = config.<String>get("mqtt.broker");
-        final int subqos = config.<Integer>get("mqtt.qos.subscribe", DEFAULT_SUBSCRIBE_QOS);
+        String broker = this.config.<String>get("mqtt.broker");
+        final int subqos = this.config.<Integer>get("mqtt.qos.subscribe", DEFAULT_SUBSCRIBE_QOS);
         MqttDefaultFilePersistence dataStore = new MqttDefaultFilePersistence(System.getProperty("java.io.tmpdir"));
-        mqtt = new MqttAsyncClient(broker, BASE_CLIENT_ID + config.<String>get("server.id"), dataStore);
+        mqtt = new MqttAsyncClient(broker, BASE_CLIENT_ID + this.config.<String>get("server.id"), dataStore);
 
         MqttConnectOptions opts = new MqttConnectOptions();
         opts.setAutomaticReconnect(true);
@@ -85,10 +84,10 @@ public class DataCollectionService implements IMqttMessageListener {
         mqtt.connect(opts).waitForCompletion();
         log.debug("Connected");
 
-        Map<String, List<String>> gateways = config.<Map<String, List<String>>>get("gateways");
+        Map<String, List<String>> gateways = this.config.<Map<String, List<String>>>get("gateways");
 
         if (gateways == null || gateways.size() == 0) {
-            log.debug("no gateways found in config: {}", config.map);
+            log.debug("no gateways found in config: {}", this.config.map);
             return 1;
         }
         Map<String, String> substitionValues = new HashMap<String, String>();

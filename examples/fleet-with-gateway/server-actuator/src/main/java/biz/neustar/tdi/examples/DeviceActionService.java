@@ -150,16 +150,12 @@ public class DeviceActionService {
                 log.info("turning switch *{}* for device {} on gateway {}", actionState, sensorID, gatewayID);
 
                 svc.action(gatewayID, sensorID, "switch", actionState);
-
-                Thread.sleep(4000);
-            }
-            catch (InterruptedException ie) {
-                log.info("interrupted");
             }
             catch (Exception e) {
                 log.warn("unexpected error, ignoring");
                 log.debug("exception was:", e);
             }
+            Thread.sleep(4000);
         }
     }
 }
