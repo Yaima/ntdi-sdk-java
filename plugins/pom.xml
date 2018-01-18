@@ -52,6 +52,24 @@
 			<artifactId>jackson-databind</artifactId>
 			<version>2.7.4</version>
 		</dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-inline</artifactId>
+      <version>2.13.0</version>
+      <scope>test</scope>
+    </dependency>
+   <dependency>
+      <groupId>org.powermock</groupId>
+      <artifactId>powermock-module-junit4</artifactId>
+      <version>2.0.0-beta.5</version>
+      <scope>test</scope>
+   </dependency>
+   <dependency>
+      <groupId>org.powermock</groupId>
+      <artifactId>powermock-api-mockito2</artifactId>
+      <version>2.0.0-beta.5</version>
+      <scope>test</scope>
+   </dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -75,6 +93,10 @@
 								<fileSet>
 									<sourceFile>src/test/resources/server/keystore-test.json</sourceFile>
 									<destinationFile>src/test/resources/server/keystore.json</destinationFile>
+								</fileSet>
+								<fileSet>
+									<sourceFile>src/test/resources/cosigner/keystore-test.json</sourceFile>
+									<destinationFile>src/test/resources/cosigner/keystore.json</destinationFile>
 								</fileSet>
 								<fileSet>
 									<sourceFile>src/test/resources/exception/keystore-test.json</sourceFile>

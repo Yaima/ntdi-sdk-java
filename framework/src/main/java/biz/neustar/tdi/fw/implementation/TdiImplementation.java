@@ -216,10 +216,12 @@ public class TdiImplementation implements TdiImplementationShape {
               if (storeInConfig != null && storeInConfig.containsKey(check)) {
                 return platform.getDataStore().set(storeName, check, storeInConfig.get(check));
               }
+              String err = "No config for " + storeName + "::" + check + ", nor is there a default value.";
+              LOG.warn(err);
 
-              LOG.info(
-                  "No config for " + storeName + "::" + check + ", nor is there a default value.");
-              return CompletableFuture.completedFuture(null);
+              CompletableFuture<?> ret = new CompletableFuture<>();
+              ret.completeExceptionally(new FrameworkRuntimeException(err));
+              return(ret);
             }
           }).thenCompose((finalresult) -> {
             return finalresult;

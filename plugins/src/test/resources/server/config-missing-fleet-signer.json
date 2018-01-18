@@ -9,11 +9,5 @@
   },
   "nonce002": {
     "expDuration": 3600
-  },
-  "FleetSigner": {
-    "acceptDevices": false,
-    "cosigner": {
-      "baseURI":  "https://mocked.example.com"
-    }
   }
 }
