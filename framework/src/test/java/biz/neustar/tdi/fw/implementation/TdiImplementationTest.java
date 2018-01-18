@@ -58,6 +58,7 @@ public class TdiImplementationTest {
     testStoreConfig.put("key1", "value1");
     testStoreConfig.put("key2", "value2");
     testStoreConfig.put("key3", "value3");
+    testStoreConfig.put("key4", "value4");
     
     config.put("testStore", testStoreConfig);
 
