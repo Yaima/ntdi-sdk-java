@@ -152,9 +152,14 @@ public class FleetSigner extends TdiPluginBase {
             });
         }
         else {
-          LOG.error("FleetSigner requires a cosigner configuration.");
-          return CompletableFuture.supplyAsync(() -> false);
+          LOG.error("should never get this");
+          return CompletableFuture.completedFuture(false);
         }
+      })
+      .exceptionally(throwable -> {
+        String err = "FleetSigner requires a cosigner configuration.";
+        LOG.error(err);
+        throw new FrameworkRuntimeException(err);
       });
   }
 
@@ -274,6 +279,7 @@ public class FleetSigner extends TdiPluginBase {
             future.complete(this.httpPostToCosigner(fleet, jwsPayload));
           }
           catch (Exception e) {
+            LOG.error("httpPostToCosigner() failed.");
             future.completeExceptionally(new FrameworkRuntimeException(e.toString()));
           }
           return future;
@@ -351,7 +357,7 @@ public class FleetSigner extends TdiPluginBase {
     LOG.trace("Sending a " + payload_len + " byte payload for cosigning.");
     try {
       URL url = new URL(this.baseURI + "/projects/" + fleet + "/cosign");
-      LOG.debug("Calling out to cosigner: " + url.toString());
+      LOG.debug("Calling out to cosigner: " + url);
       con = (HttpURLConnection) url.openConnection();
       con.setRequestMethod("POST");
       con.setRequestProperty("Content-Type", "application/JOSE+JSON");

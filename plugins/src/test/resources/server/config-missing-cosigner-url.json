@@ -1,0 +1,18 @@
+{
+  "platform": {
+    "data": {
+      "basepath": "src/test/resources/server/"
+    },
+    "keys": {
+      "basepath": "src/test/resources/server/"
+    }
+  },
+  "nonce002": {
+    "expDuration": 3600
+  },
+  "FleetSigner": {
+    "acceptDevices": false,
+    "cosigner": {
+    }
+  }
+}

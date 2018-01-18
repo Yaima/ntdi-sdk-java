@@ -10,10 +10,14 @@ import java.net.URL;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.file.Paths;
+import java.nio.file.Files;
 
+import biz.neustar.tdi.fw.exception.FrameworkRuntimeException;
 import org.junit.runner.RunWith;
 import org.junit.BeforeClass;
 import org.junit.Before;
+import org.junit.After;
 import org.junit.Test;
 
 import static org.mockito.Mockito.*;
@@ -81,6 +85,18 @@ public class FleetSignerTest {
     deviceSdk = new NTDIHelper(null, "device/config.json");
     serverSdk = new NTDIHelper(Arrays.asList(FleetSigner::new), "server/config.json");
     serverSdkException = new NTDIHelper(Arrays.asList(FleetSigner::new), "exception/config.json");
+  }
+
+  @After
+  public void teardown() throws Exception {
+    Arrays.asList("server", "device", "exception").forEach((f) -> {
+      try {
+        Files.deleteIfExists(Paths.get("src", "test", "resources", f, "FleetSigner.dat"));
+      }
+      catch (IOException e) {
+        log.debug("error deleting " + f + "/FleetSigner.dat, ignoring");
+      }
+    });
   }
 
   @Test
@@ -165,5 +181,29 @@ public class FleetSignerTest {
   public void testFleetToDeviceSendToCosigner403Response() throws Exception {
     mockCosigner(HttpURLConnection.HTTP_FORBIDDEN);
     serverSdk.fleetToDevice("message to device");
+  }
+
+  @Test
+  public void testMissingFleetSignerConfig() throws Exception {
+    mockCosigner();
+    Files.deleteIfExists(Paths.get("src", "test", "resources", "server", "FleetSigner.dat"));
+    NTDIHelper sdk = new NTDIHelper(Arrays.asList(FleetSigner::new), "server/config-missing-fleet-signer.json");
+    // String signedMsg = sdk.fleetToDevice("message to device");
+  }
+
+  @Test
+  public void testMissingCosignerConfig() throws Exception {
+    mockCosigner();
+    Files.deleteIfExists(Paths.get("src", "test", "resources", "server", "FleetSigner.dat"));
+    NTDIHelper sdk = new NTDIHelper(Arrays.asList(FleetSigner::new), "server/config-missing-cosigner.json");
+    // String signedMsg = sdk.fleetToDevice("message to device");
+  }
+
+  @Test
+  public void testMissingCosignerURL() throws Exception {
+    mockCosigner();
+    Files.deleteIfExists(Paths.get("src", "test", "resources", "server", "FleetSigner.dat"));
+    NTDIHelper sdk = new NTDIHelper(Arrays.asList(FleetSigner::new), "server/config-missing-cosigner-url.json");
+    // String signedMsg = sdk.fleetToDevice("message to device");
   }
 }
